@@ -52,6 +52,7 @@ RUN chown -R www-data:www-data storage bootstrap/cache \
 # Behind Cloudflare Tunnel the origin is HTTP; make PHP see HTTPS, and rewrite any
 # .htaccess HTTPS-force (%{HTTPS} !=on) to check X-Forwarded-Proto so it never 301-loops.
 RUN printf '\nSetEnvIf X-Forwarded-Proto "https" HTTPS=on\n' >> /etc/apache2/apache2.conf \
- && find /var/www/html -name .htaccess -exec sed -i 's/%{HTTPS} !=on/%{HTTP:X-Forwarded-Proto} !=https/g' {} \;
+ && find /var/www/html -name .htaccess -exec sed -i 's/%{HTTPS} !=on/%{HTTP:X-Forwarded-Proto} !=https/g' {} \; \
+ && find /var/www/html -name .htaccess -exec sed -i '/RewriteEngine On/a RewriteRule ^public/(.*)$ /$1 [L]' {} \;
 
 EXPOSE 80

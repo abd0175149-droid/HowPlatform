@@ -13,6 +13,7 @@
 **/public/downloads/
 **/public/files/
 **/public/qr/
+**/storage/app/public/
 **/storage/logs/*
 **/storage/framework/cache/*
 **/storage/framework/sessions/*

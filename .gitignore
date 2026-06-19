@@ -27,6 +27,7 @@
 **/bootstrap/cache/*.php
 
 # ---- Laravel runtime ----
+**/storage/app/public/
 **/storage/logs/*
 **/storage/framework/cache/*
 **/storage/framework/sessions/*
