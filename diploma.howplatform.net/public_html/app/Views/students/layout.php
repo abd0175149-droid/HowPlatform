@@ -842,7 +842,7 @@
   <!-- ✅ سكربت المودال بصيغة UMD (classic) ليعرّف window.openServiceRequestModal -->
 
   <!-- مودالات HTML -->
-  <?= $this->include('student/partials/modals/task_view_modal') ?>
+  <?= $this->include('students/partials/modals/task_view_modal') ?>
   <?= $this->include('students/partials/modals/service_request_modal') ?>
   <?= $this->include('students/partials/modals/terms_consent_modal') ?>
 
