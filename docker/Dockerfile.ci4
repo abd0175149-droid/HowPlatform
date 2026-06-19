@@ -1,0 +1,41 @@
+# syntax=docker/dockerfile:1
+# ------------------------------------------------------------------
+# Image for the diploma app (CodeIgniter 4).
+# Framework is vendored in committed system/; composer restores the
+# extra libs (phpword / php-jwt / google-api / guzzle).
+# Apache serves public/ ; .env + writable + uploads mounted at runtime.
+# ------------------------------------------------------------------
+FROM php:8.3-apache
+ARG APP_PATH
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        git curl unzip zip \
+        libpng-dev libonig-dev libxml2-dev libzip-dev libicu-dev \
+        libxslt1-dev libgmp-dev \
+    && docker-php-ext-configure intl \
+    && docker-php-ext-install pdo pdo_mysql mysqli mbstring exif pcntl bcmath gd zip intl xsl gmp opcache \
+    && a2enmod rewrite headers expires \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# DocumentRoot -> CI4 public/
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
+    && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
+    && printf '<Directory /var/www/html/public>\n\tAllowOverride All\n\tRequire all granted\n</Directory>\n' >> /etc/apache2/apache2.conf \
+    && printf 'ServerName localhost\n' >> /etc/apache2/apache2.conf
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+WORKDIR /var/www/html
+
+COPY ${APP_PATH}/composer.json ${APP_PATH}/composer.lock* ./
+RUN composer install --no-interaction --no-dev --optimize-autoloader --no-scripts || \
+    composer update --no-interaction --no-dev --optimize-autoloader --no-scripts
+
+COPY ${APP_PATH}/ ./
+
+RUN mkdir -p writable/cache writable/logs writable/session writable/uploads \
+        writable/debugbar writable/previews writable/previews_tmp writable/temp_docx_check \
+    && chown -R www-data:www-data writable \
+    && chmod -R 775 writable
+
+EXPOSE 80

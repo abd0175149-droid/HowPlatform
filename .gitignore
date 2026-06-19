@@ -1,0 +1,89 @@
+# ============================================================
+# HowPlatform monorepo — root .gitignore
+# PUBLIC repository: nothing secret or heavy may be committed.
+# Per-app Laravel .gitignore files still apply to their subtrees;
+# these ** rules are belt-and-suspenders + cover diploma (CI4).
+# ============================================================
+
+# ---- Secrets / environment ----
+**/.env
+**/.env.*
+!**/.env.example
+**/secure-keys/
+**/*firebase-adminsdk*.json
+**/*adminsdk*.json
+**/vertex-service-account*.json
+**/*service-account*.json
+**/storage/*.key
+**/*.pem
+
+# ---- Dependencies / build artifacts (built on server) ----
+**/vendor/
+**/node_modules/
+**/public/build/
+**/public/hot/
+**/public/storage/
+**/bootstrap/cache/*.php
+
+# ---- Laravel runtime ----
+**/storage/logs/*
+**/storage/framework/cache/*
+**/storage/framework/sessions/*
+**/storage/framework/views/*
+!**/storage/**/.gitignore
+
+# ---- CodeIgniter 4 (diploma) runtime ----
+**/writable/logs/*
+**/writable/cache/*
+**/writable/session/*
+**/writable/debugbar/*
+**/writable/uploads/*
+**/writable/previews/*
+**/writable/previews_tmp/*
+**/writable/temp_docx_check/*
+!**/writable/**/.gitignore
+
+# ---- Database dumps / large data (transferred out-of-band, not via git) ----
+**/*.sql
+**/*.sql.gz
+**/embeddings_*.sql
+
+# ---- User-uploaded / generated content (LIVE DATA: ~1.7GB; rsync to server volume, NOT git) ----
+**/public/uploads/
+**/public/downloads/
+**/public/files/
+**/public/qr/
+
+# ---- Composer installers / stray binaries ----
+**/composer.phar
+**/composer2
+**/composer2.phar
+**/composer-setup.php
+**/curl.exe
+
+# ---- One-off scripts / scratch / backups not part of the app ----
+**/application_backups/
+**/temp_FB/
+**/temp_R/
+**/test_*.php
+**/setup.php
+**/setup_mysqli.php
+**/setup_pdo.php
+**/dump_tools.php
+**/extract_docx_vars.php
+**/default.php
+
+# ---- Local analysis notes (Arabic .md reports) kept locally, not published ----
+/diploma.howplatform.net/*.md
+/*.md
+!README.md
+
+# ---- Editor / OS ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.fleet/
+.nova/
+.zed/
+*.log

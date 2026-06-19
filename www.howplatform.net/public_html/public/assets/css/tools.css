@@ -1,0 +1,827 @@
+/* ===== متغيرات CSS المحسنة ===== */
+:root{
+  --primary:#219ebc; --accent:#fd9e02;
+  --bg:#F8F9FB; --surface:#fff; --text:#0a3247;
+  --radius:16px; --shadow:0 6px 16px rgba(0,0,0,.08);
+  --transition: all 0.3s ease;
+  --success: #4caf50;
+  --warning: #ff9800;
+  --error: #f44336;
+}
+
+/* ===== تحسينات عامة ===== */
+* {
+  box-sizing: border-box;
+}
+
+body{
+  direction:rtl;
+  font-family:"Almarai", sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  margin:0;
+  line-height:1.6;
+}
+
+img {height: 40px;}
+
+.tools-wrapper{
+  max-width:1100px;
+  margin:auto;
+  padding:2rem 5%;
+}
+
+.page-title{
+  text-align:center;
+  color:var(--primary);
+  margin-bottom:1.8rem;
+  font-weight:900;
+  position: relative;
+  padding-bottom: 15px;
+}
+
+.page-title:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 50%;
+  transform: translateX(50%);
+  width: 80px;
+  height: 4px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* ===== تحسينات البطاقات ===== */
+.card-grid{
+  display:grid;
+  gap:1.2rem;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  margin-bottom: 2rem;
+}
+
+.card{
+  background:var(--surface);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:1.5rem;
+  text-align:center;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  border-top: 4px solid var(--primary);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 20px rgba(0,0,0,0.15);
+}
+
+.card-icon {
+  font-size: 2.5rem;
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+/* ===== تحسينات الأزرار ===== */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:.8rem 1.1rem;
+  border-radius:14px;
+  border:0;
+  cursor:pointer;
+  font-weight:800;
+  transition:var(--transition);
+  font-family: "Almarai", sans-serif;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+.btn:focus:not(:active)::after {
+  animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 1;
+  }
+  20% {
+    transform: scale(25, 25);
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(40, 40);
+  }
+}
+
+.btn-primary{
+  background:var(--primary);
+  color:#fff;
+}
+
+.btn-primary:hover{
+  transform:translateY(-2px);
+  box-shadow:var(--shadow);
+  background:#1b81a0;
+}
+
+.btn-ghost{
+  background:transparent;
+  border:2px solid var(--primary);
+  color:var(--primary);
+}
+
+.btn-ghost:hover{
+  background:#e8f5fb;
+  transform: translateY(-2px);
+}
+
+.btn-accent{
+  background:var(--accent);
+  color:#fff;
+}
+
+.btn-accent:hover{
+  background:#e38c00;
+  transform: translateY(-2px);
+}
+
+.btn-sm {
+  padding: 0.5rem 0.9rem;
+  font-size: 0.9rem;
+}
+
+.btn-lg {
+  padding: 1rem 1.5rem;
+  font-size: 1.1rem;
+}
+
+.hint{
+  font-size:.9rem;
+  color:#555;
+  margin-top:.4rem;
+}
+
+/* ===== تحسينات النماذج ===== */
+.form-group{
+  margin-bottom:.9rem;
+  position: relative;
+}
+
+.form-group label{
+  display:block;
+  margin-bottom:.35rem;
+  font-weight:700;
+  color: var(--text);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width:100%;
+  padding:.75rem 1rem;
+  border:1px solid #ddd;
+  border-radius:12px;
+  font-family:"Almarai",sans-serif;
+  transition: var(--transition);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(33, 158, 188, 0.1);
+  outline: none;
+}
+
+.form-group.has-error input,
+.form-group.has-error select,
+.form-group.has-error textarea {
+  border-color: var(--error);
+}
+
+.form-error {
+  color: var(--error);
+  font-size: 0.85rem;
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ===== تحسينات Modals ===== */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.35);
+  backdrop-filter:blur(4px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal[aria-hidden="false"]{
+  display:flex;
+}
+
+.modal-content{
+  background:#fff;
+  border-radius:18px;
+  box-shadow:var(--shadow);
+  padding:1.5rem;
+  max-width:480px;
+  width:92%;
+  animation: slideUp 0.3s ease;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-content h3{
+  margin:.2rem 0 1rem;
+  color:var(--primary);
+  text-align:center;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.modal-content h3:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 50%;
+  transform: translateX(50%);
+  width: 50px;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.modal-actions{
+  display:flex;
+  gap:.6rem;
+  justify-content:flex-end;
+  margin-top:1.5rem;
+}
+
+/* ===== تحسينات Layout ===== */
+.tools-header{
+  background:var(--primary);
+  color:#fff;
+  box-shadow:0 2px 10px rgba(0,0,0,.1);
+  position:sticky;
+  top:0;
+  z-index:1000;
+}
+
+.tools-container{
+  max-width:1100px;
+  margin:auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:.8rem 1.5rem;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+}
+
+.brand .logo{
+  height:36px;
+  transition: var(--transition);
+}
+
+.brand:hover .logo {
+  transform: rotate(-5deg);
+}
+
+.brand h1 {
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.tools-nav{
+  display:flex;
+  gap:0.5rem;
+  flex-wrap:wrap;
+}
+
+.tools-nav a{
+  color:#fff;
+  text-decoration:none;
+  padding:.6rem 1rem;
+  border-radius:10px;
+  transition:.2s;
+  font-weight:700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tools-nav a:hover,
+.tools-nav a.active{
+  background:rgba(255,255,255,.15);
+  transform: translateY(-2px);
+}
+
+.mobile-menu-toggle {
+  display: none;
+  flex-direction: column;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  gap: 4px;
+}
+
+.mobile-menu-toggle span {
+  width: 25px;
+  height: 3px;
+  background: white;
+  border-radius: 2px;
+  transition: var(--transition);
+}
+
+.tools-main{
+  min-height:70vh;
+  padding:1rem 0;
+}
+
+.tools-footer{
+  background:var(--primary);
+  color:#fff;
+  text-align:center;
+  padding:1rem;
+  margin-top:2rem;
+  border-top:3px solid var(--accent);
+}
+
+.tools-footer .tools-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.footer-links a {
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: var(--transition);
+}
+
+.footer-links a:hover {
+  color: var(--accent);
+}
+
+/* ===== تحسينات الجداول ===== */
+.filters-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  align-items:end;
+  background: white;
+  padding: 1.2rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.filters-row .form-group{
+  flex:1;
+  min-width:220px;
+}
+
+.bulk-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.6rem;
+  margin-bottom:1rem;
+  align-items:center;
+  background: white;
+  padding: 1rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.tracking-table-wrapper{
+  overflow-x:auto;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.tracking-table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:800px;
+  background:#fff;
+  border-radius: var(--radius);
+  overflow:hidden;
+}
+
+.tracking-table th,
+.tracking-table td{
+  border:1px solid #eee;
+  padding:.75rem .8rem;
+  text-align:center;
+  font-size:.95rem;
+  transition: var(--transition);
+}
+
+.tracking-table th{
+  background:var(--primary);
+  color:#fff;
+  font-weight:800;
+  position: sticky;
+  top: 0;
+}
+
+.tracking-table tr:nth-child(even){
+  background:#f7fafc;
+}
+
+.tracking-table tr:hover {
+  background: #f0f8ff;
+}
+
+.tracking-table input[type="number"]{
+  width:70px;
+  padding:.4rem;
+  border:1px solid #ccc;
+  border-radius:8px;
+  text-align:center;
+  transition: var(--transition);
+}
+
+.tracking-table input[type="number"]:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(33, 158, 188, 0.2);
+}
+
+.tracking-table input[type="checkbox"]{
+  transform:scale(1.2);
+  cursor: pointer;
+}
+
+.status-on_time{
+  color:var(--primary);
+  font-weight:700;
+}
+
+.status-late{
+  color:#f57c00;
+  font-weight:700;
+}
+
+.status-not_submitted{
+  color:#777;
+  font-weight:600;
+}
+
+/* ===== تحسينات التقارير ===== */
+.report-actions{
+  display:flex;
+  gap:.8rem;
+  flex-wrap:wrap;
+  margin-bottom:1.2rem;
+  justify-content:flex-end;
+}
+
+.report-table-wrap{
+  overflow-x:auto;
+  margin-bottom:2rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.chart-container{
+  background:#fff;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:1.5rem;
+  text-align:center;
+  margin-bottom: 2rem;
+  transition: var(--transition);
+}
+
+.chart-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+}
+
+.chart-container h3{
+  margin-bottom:1rem;
+  color:var(--primary);
+  font-weight:800;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.chart-container h3:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 50%;
+  transform: translateX(50%);
+  width: 60px;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* ===== تحسينات المجموعات ===== */
+.add-group-section{
+  display:flex;
+  gap:.8rem;
+  margin-bottom:1rem;
+  align-items:center;
+  flex-wrap:wrap;
+  background: white;
+  padding: 1.2rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.group-input{
+  flex:1;
+  min-width:200px;
+  padding:.75rem 1rem;
+  border:1px solid #ccc;
+  border-radius:12px;
+  font-family:"Almarai",sans-serif;
+  transition: var(--transition);
+}
+
+.group-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(33, 158, 188, 0.1);
+}
+
+.groups-area{
+  display:flex;
+  flex-wrap:wrap;
+  gap:1.5rem;
+  margin-top:1rem;
+}
+
+.students-list,
+.group-card{
+  flex:1 1 280px;
+  background:#fff;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:1.2rem;
+  transition: var(--transition);
+  border-top: 4px solid var(--primary);
+}
+
+.students-list:hover,
+.group-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+}
+
+.students-list h3,
+.group-card h3{
+  margin-bottom:.6rem;
+  color:var(--primary);
+  text-align:center;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.students-list h3:after,
+.group-card h3:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 50%;
+  transform: translateX(50%);
+  width: 40px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.dropzone{
+  list-style:none;
+  padding:0;
+  margin:0;
+  min-height:200px;
+  border:2px dashed #ccc;
+  border-radius:12px;
+  padding:.8rem;
+  display:flex;
+  flex-direction:column;
+  gap:.4rem;
+  transition:.2s;
+}
+
+.dropzone.drag-over{
+  border-color:var(--primary);
+  background:#f0faff;
+}
+
+.dropzone li{
+  background:#f9f9f9;
+  padding:.6rem .8rem;
+  border-radius:10px;
+  cursor:grab;
+  text-align:center;
+  box-shadow:0 1px 3px rgba(0,0,0,.06);
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dropzone li:hover {
+  background: #f0f8ff;
+  transform: translateX(-5px);
+}
+
+.dropzone li.dragging{
+  opacity:.5;
+}
+
+.actions-row{
+  text-align:end;
+  margin-top:1.5rem;
+}
+
+/* ===== تحسينات للشاشات الصغيرة ===== */
+@media (max-width: 768px) {
+  .tools-container {
+    flex-wrap: wrap;
+  }
+  
+  .mobile-menu-toggle {
+    display: flex;
+  }
+  
+  .tools-nav {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    margin-top: 1rem;
+  }
+  
+  .tools-nav.active {
+    display: flex;
+  }
+  
+  .tools-nav a {
+    justify-content: center;
+    padding: 0.8rem;
+  }
+  
+  .tools-footer .tools-container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .filters-row {
+    flex-direction: column;
+  }
+  
+  .filters-row .form-group {
+    min-width: 100%;
+  }
+  
+  .bulk-actions {
+    justify-content: center;
+  }
+  
+  .report-actions {
+    justify-content: center;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+  }
+  
+  .modal-actions .btn {
+    width: 100%;
+  }
+  
+  .add-group-section {
+    flex-direction: column;
+  }
+  
+  .group-input {
+    min-width: 100%;
+  }
+  
+  .tracking-table th, 
+  .tracking-table td {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* ===== تحسينات إضافية ===== */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.badge-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.badge-accent {
+  background: var(--accent);
+  color: white;
+}
+
+.tooltip {
+  position: relative;
+}
+
+.tooltip:before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  right: 50%;
+  transform: translateX(50%);
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: var(--transition);
+  z-index: 10;
+}
+
+.tooltip:hover:before {
+  opacity: 1;
+  visibility: visible;
+  bottom: calc(100% + 5px);
+}

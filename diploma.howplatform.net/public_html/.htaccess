@@ -1,0 +1,25 @@
+RewriteEngine On
+RewriteBase /
+RewriteRule (.*) public/$1 [L]
+
+# لا تعِد الكتابة إذا كان الملف/المجلد موجودًا
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# تجنّب إعادة الكتابة لو كنا أصلاً داخل /public
+RewriteCond %{REQUEST_URI} !^/public/
+
+AddType text/xsl .xsl
+RewriteEngine On
+# HTTPS إجباري
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# www -> non-www (عدّل إن أردت العكس)
+RewriteCond %{HTTP_HOST} ^www\.diploma\.howplatform\.net$ [NC]
+RewriteRule ^ https://diploma.howplatform.net%{REQUEST_URI} [L,R=301]
+
+# CI4 front controller
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]

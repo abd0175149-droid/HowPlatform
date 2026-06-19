@@ -1,0 +1,183 @@
+/* ===== نطاق الصفحة فقط ===== */
+.voucher-page { isolation:isolate; }
+
+/* سِمة فاتحة داخل هذه الصفحة فقط */
+.voucher-light{
+  --primary-50:#e8f5fb; --primary-100:#d2ebf7; --primary-200:#bfe2f2;
+  --primary-300:#8ecae6; --primary-400:#5fb6e2; --primary-500:#219ebc;
+  --primary-600:#1b81a0; --primary-700:#156683; --primary-800:#104b65; --primary-900:#0a3247;
+
+  --accent-50:#fff3d6; --accent-100:#ffe6ad; --accent-200:#ffd985;
+  --accent-300:#ffcb5c; --accent-400:#ffbe34; --accent-500:#fd9e02;
+  --accent-600:#d38202; --accent-700:#a76602; --accent-800:#7b4a01; --accent-900:#503001;
+
+  --surface-0:#ffffff;
+  --surface-1:#f8fafc;
+  --border:#e6e6e6;
+
+  --text:#0d2a3a;
+  --text-sub:#22556d;
+
+  --radius:18px;
+  --shadow-sm:0 4px 18px rgba(0,0,0,.08);
+  --shadow-md:0 12px 28px rgba(0,0,0,.14);
+  --bs-modal-zindex: 5000;
+  --bs-backdrop-zindex: 4990;
+}
+
+/* العناوين والنصوص */
+.voucher-light h2{ color:var(--primary-800); display:flex; align-items:center; gap:.5rem; }
+.voucher-light .text-muted{ color:var(--primary-600)!important; }
+
+/* المراحل (Stepper) */
+.wizard-steps{ display:flex; align-items:center; gap:.75rem; }
+.wizard-steps .step{
+  background:var(--primary-50);
+  color:var(--primary-700);
+  border:1px solid var(--primary-200);
+  border-radius:999px; padding:.4rem .9rem; font-weight:700; font-size:.9rem;
+  transition:.2s;
+}
+.wizard-steps .step.is-active{
+  background:linear-gradient(135deg, var(--primary-500), var(--primary-700));
+  border-color:transparent; color:#fff;
+  box-shadow:0 6px 18px rgba(33,158,188,.35);
+}
+.wizard-steps .divider{ flex:1 1 auto; height:2px; background:var(--primary-100); border-radius:999px; }
+
+/* إظهار/إخفاء الأقسام كمراحل */
+.voucher-page section{ display:none; }
+.voucher-page section.active{ display:block!important; animation:fadeIn .35s ease; }
+@keyframes fadeIn{ from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none} }
+
+/* وعاء البطاقات */
+.cards-wrap{
+  display:flex; flex-wrap:wrap; gap:16px; justify-content:center; align-items:stretch;
+}
+
+/* بطاقات المنصات */
+.platform-card{
+  min-width:250px; max-width:300px; width:100%;
+  background:linear-gradient(135deg, var(--primary-50), var(--primary-100));
+  border:2px solid transparent; border-radius:var(--radius);
+  padding:1.25rem; text-align:center; box-shadow:var(--shadow-sm);
+  cursor:pointer; transition:transform .2s, box-shadow .2s, border-color .2s;
+}
+.platform-card:hover{ transform:translateY(-6px); box-shadow:var(--shadow-md); border-color:var(--primary-300); }
+.platform-card .card-icon{ font-size:24px; color:var(--primary-700); margin-bottom:.4rem; }
+.platform-card h5{ color:var(--primary-800); margin:0 0 .35rem; font-weight:800; }
+.platform-card .sub{ color:var(--primary-600); font-size:.92rem; }
+
+/* لوحة */
+.panel{
+  background:var(--surface-0); border:1px solid var(--border); border-radius:var(--radius);
+  box-shadow:var(--shadow-sm); overflow:hidden;
+}
+.panel-head{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:1rem 1.25rem;
+  background:linear-gradient(135deg, var(--primary-50), var(--primary-100));
+  border-bottom:1px solid var(--border);
+}
+.panel-head.between{ justify-content:space-between; }
+.panel-body{ padding:1.25rem; }
+
+/* بطاقات الخطط */
+.plan-card{
+  position:relative;
+  min-width:250px; max-width:300px; width:100%;
+  background:#fff; border:2px solid transparent; border-radius:var(--radius);
+  padding:1.1rem 1.1rem 3rem; box-shadow:var(--shadow-sm);
+  text-align:start; transition:transform .2s, box-shadow .2s, border-color .2s;
+}
+.plan-card:hover{ transform:translateY(-5px); box-shadow:var(--shadow-md); border-color:var(--primary-300); }
+.plan-card.is-selected{ border-color:var(--primary-500); box-shadow:0 12px 30px rgba(33,158,188,.25); }
+.plan-card .plan-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:.4rem; }
+.plan-card h5{ color:var(--primary-900); margin:0; font-weight:800; font-size:1.05rem; }
+.plan-card .price{ font-size:1.25rem; font-weight:900; color:var(--accent-700); }
+.plan-card .price .ccy{ font-size:.85rem; color:var(--primary-700); font-weight:700; }
+.plan-card .meta{ color:var(--primary-700); font-size:.9rem; margin-bottom:.6rem; }
+.plan-card .features{ list-style:none; margin:0; padding:0; }
+.plan-card .features li{
+  position:relative; padding:.32rem 1.4rem .32rem .25rem; color:var(--text-sub); font-size:.95rem;
+}
+.plan-card .features li:before{
+  content:"✓"; position:absolute; right:0; top:.25rem; color:#16a34a; font-weight:800;
+}
+.plan-card .pick{
+  position:absolute; inset-inline:1rem; bottom:.8rem;
+  display:inline-block; background:var(--primary-50); color:var(--primary-800);
+  border:1px solid var(--primary-200); border-radius:999px; padding:.35rem .8rem; font-weight:700; font-size:.85rem;
+}
+
+/* بطاقة معاينة الفاوتشر */
+.voucher-card{
+  background:linear-gradient(135deg, var(--primary-50), var(--primary-100));
+  border:1px solid var(--primary-200); border-radius:var(--radius);
+  padding:1.25rem; box-shadow:var(--shadow-sm); color:var(--text);
+}
+.voucher-card hr{ border-color:var(--primary-200); margin:1rem 0; }
+.voucher-card .kv{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.kv-label{ color:var(--primary-700); font-weight:800; margin-inline-end:.35rem; }
+.kv-value{ color:var(--primary-900); font-weight:800; }
+.note{ color:var(--primary-700); font-size:.9rem; }
+.qr-box{
+  display:flex; align-items:center; justify-content:center;
+  min-height:150px; background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+}
+
+/* شارة الخطة المختارة */
+.plan-chip{
+  background:var(--accent-100); color:var(--accent-800);
+  padding:.35rem .75rem; border-radius:999px; font-weight:800; font-size:.9rem;
+}
+
+/* حقول الإدخال */
+.voucher-light .form-label{ color:var(--primary-800); font-weight:700; }
+.voucher-light .form-control{
+  border:1px solid var(--primary-200); border-radius:12px; padding:.75rem 1rem;
+}
+.voucher-light .form-control:focus{
+  border-color:var(--primary-500);
+  box-shadow:0 0 0 3px rgba(33,158,188,.18);
+}
+.form-hint{ color:var(--primary-700); font-size:.85rem; margin-top:.6rem; }
+
+/* حالات فارغة/تحميل */
+.empty-state{
+  width:100%; text-align:center; background:var(--surface-1);
+  border:1px dashed var(--border); border-radius:var(--radius);
+  padding:1rem; color:var(--primary-700);
+}
+
+/* تجاوبية */
+@media (max-width: 768px){
+  .cards-wrap{ justify-content:stretch; }
+  .plan-card, .platform-card{ max-width:100%; }
+  .wizard-steps{ gap:.5rem; }
+}
+
+/* تحسين أزرار الأكشن */
+#btn-pdf{ background:var(--primary-600); border:none; border-radius:12px; }
+#btn-pdf:hover{ background:var(--primary-700); }
+#btn-print{ border-radius:12px; }
+
+
+.list-group-item{ border-color:var(--primary-100); }
+.list-group-item:nth-child(even){ background:var(--primary-50); }
+
+.voucher-page .empty-state{
+  width: 100%; text-align:center; padding: 1rem; background:#f7fbff; border:1px dashed #cfe4f1; border-radius: 12px; color:#19506b;
+}
+.modal-header .btn-close {margin:0 !important}
+/* ===== Modal z-index override (إذا كان لديك هيدر z-index عالي) ===== */
+.modal{ z-index: var(--bs-modal-zindex, 5000) !important; }
+.modal-backdrop{ z-index: var(--bs-backdrop-zindex, 4990) !important;}
+
+
+.text-primary {
+    color: var(--accent-500) !important;
+}
+.panel-head h5 {
+    color: var(--primary-600) !important;
+}

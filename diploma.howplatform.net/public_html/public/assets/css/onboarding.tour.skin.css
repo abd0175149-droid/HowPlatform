@@ -1,0 +1,274 @@
+/* =========================================================================
+ * Onboarding Tour — Smooth Skin (RTL + Light/Dark)
+ * - حركات انتقال لطيفة للتولتيب
+ * - وهج أنيق على الهدف
+ * - بدون أي تغييرات تخطيطية على الصفحة
+ * ========================================================================= */
+
+.introjs-custom-rtl {
+  direction: rtl;
+  text-align: right;
+  font-family: inherit;
+}
+
+/* Tooltip */
+.introjs-tooltip {
+  background: var(--surface-1);
+  color: var(--text);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  padding: 14px 16px;
+  max-width: min(440px, 86vw);
+
+  /* ✨ انتقالات ناعمة */
+  opacity: 0;
+  transform: translateY(4px) scale(.98);
+  transition: opacity .24s ease, transform .24s ease;
+}
+.introjs-showElement .introjs-tooltip {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.introjs-tooltip-title {
+  color: var(--text-strong);
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+.introjs-tooltiptext {
+  color: var(--text);
+  line-height: 1.7;
+  font-size: .98rem;
+}
+
+/* Bullets (إن ظهرت) */
+.introjs-bullets ul li a { background: var(--neutral-300); }
+.introjs-bullets ul li a.active,
+.introjs-bullets ul li a:hover { background: var(--primary-500); }
+
+/* Buttons */
+.introjs-button {
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-0);
+  color: var(--text);
+  padding: 8px 12px;
+  transition: var(--transition);
+}
+.introjs-button:hover { background: var(--btn-neutral-hover); }
+.introjs-button.introjs-nextbutton,
+.introjs-button.introjs-donebutton {
+  background: var(--btn-primary-bg);
+  color: var(--text-inverse);
+  border-color: transparent;
+}
+.introjs-button.introjs-nextbutton:hover,
+.introjs-button.introjs-donebutton:hover { background: var(--btn-primary-hover); }
+
+.introjs-disabled { opacity: .5; }
+
+/* Arrow */
+.introjs-tooltip .introjs-arrow { border: none; }
+.introjs-tooltip:before,
+.introjs-tooltip:after {
+  content: "";
+  position: absolute;
+  width: 12px; height: 12px;
+  background: var(--surface-1);
+  border-left: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
+  transform: rotate(45deg);
+}
+.introjs-tooltip.right:before, .introjs-tooltip.right:after { left: -6px; top: 20px; }
+.introjs-tooltip.left:before,  .introjs-tooltip.left:after  { right: -6px; top: 20px; }
+.introjs-tooltip.bottom:before,.introjs-tooltip.bottom:after{ top: -6px; right: 26px; }
+.introjs-tooltip.top:before,   .introjs-tooltip.top:after   { bottom: -6px; right: 26px; }
+
+/* Overlay */
+.introjs-overlay { background: rgba(2,3,4,.45); }
+
+/* HelperLayer: ظل ناعم + بدون اعتراض للنقرات */
+.introjs-helperLayer,
+.introjs-helperNumberLayer { border-radius: 12px !important; }
+.introjs-helperLayer {
+  box-shadow: 0 0 0 9999px rgba(0,0,0,.35),
+              0 0 0 2px var(--primary-300) !important;
+  pointer-events: none !important;
+}
+
+/* نبض بسيط حول الهدف */
+.onboarding-pulse { position: relative; }
+.onboarding-pulse:after {
+  content: "";
+  position: absolute; inset: -6px;
+  border-radius: 12px;
+  box-shadow: 0 0 0 0 rgba(33,158,188,.28);
+  animation: pulse 1.6s ease-out infinite;
+}
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(33,158,188,.28); }
+  70%  { box-shadow: 0 0 0 12px rgba(33,158,188,0); }
+  100% { box-shadow: 0 0 0 0 rgba(33,158,188,0); }
+}
+
+/* وهج أنيق للهدف نفسه (بدون تغيير أبعاد) */
+.onb-glow {
+  position: relative;
+  outline: 2px solid rgba(33,158,188,.32);
+  outline-offset: 2px;
+  transition: outline-color .25s ease;
+}
+
+/* نضمن بقاء التولتيب قابل للنقر */
+.introjs-tooltip, .introjs-tooltip * { pointer-events: auto; }
+/* =========================================================================
+ * Onboarding Tour — Smooth Skin (RTL + Light/Dark)
+ * - حركات انتقال لطيفة للتولتيب
+ * - وهج أنيق على الهدف
+ * - بدون أي تغييرات تخطيطية على الصفحة
+ * ========================================================================= */
+
+.introjs-custom-rtl {
+  direction: rtl;
+  text-align: right;
+  font-family: inherit;
+}
+
+/* Tooltip */
+.introjs-tooltip {
+  background: var(--surface-1);
+  color: var(--text);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  padding: 14px 16px;
+  max-width: min(440px, 86vw);
+
+  /* ✨ انتقالات ناعمة */
+  opacity: 0;
+  transform: translateY(4px) scale(.98);
+  transition: opacity .24s ease, transform .24s ease;
+}
+.introjs-showElement .introjs-tooltip {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.introjs-tooltip-title {
+  color: var(--text-strong);
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+.introjs-tooltiptext {
+  color: var(--text);
+  line-height: 1.7;
+  font-size: .98rem;
+}
+
+/* Bullets (إن ظهرت) */
+.introjs-bullets ul li a { background: var(--neutral-300); }
+.introjs-bullets ul li a.active,
+.introjs-bullets ul li a:hover { background: var(--primary-500); }
+
+/* Buttons */
+.introjs-button {
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-0);
+  color: var(--text);
+  padding: 8px 12px;
+  transition: var(--transition);
+}
+.introjs-button:hover { background: var(--btn-neutral-hover); }
+.introjs-button.introjs-nextbutton,
+.introjs-button.introjs-donebutton {
+  background: var(--btn-primary-bg);
+  color: var(--text-inverse);
+  border-color: transparent;
+}
+.introjs-button.introjs-nextbutton:hover,
+.introjs-button.introjs-donebutton:hover { background: var(--btn-primary-hover); }
+
+.introjs-disabled { opacity: .5; }
+
+/* Arrow */
+.introjs-tooltip .introjs-arrow { border: none; }
+.introjs-tooltip:before,
+.introjs-tooltip:after {
+  content: "";
+  position: absolute;
+  width: 12px; height: 12px;
+  background: var(--surface-1);
+  border-left: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
+  transform: rotate(45deg);
+}
+.introjs-tooltip.right:before, .introjs-tooltip.right:after { left: -6px; top: 20px; }
+.introjs-tooltip.left:before,  .introjs-tooltip.left:after  { right: -6px; top: 20px; }
+.introjs-tooltip.bottom:before,.introjs-tooltip.bottom:after{ top: -6px; right: 26px; }
+.introjs-tooltip.top:before,   .introjs-tooltip.top:after   { bottom: -6px; right: 26px; }
+
+/* Overlay */
+.introjs-overlay { background: rgba(2,3,4,.45); }
+
+/* HelperLayer: ظل ناعم + بدون اعتراض للنقرات */
+.introjs-helperLayer,
+.introjs-helperNumberLayer { border-radius: 12px !important; }
+.introjs-helperLayer {
+  box-shadow: 0 0 0 9999px rgba(0,0,0,.35),
+              0 0 0 2px var(--primary-300) !important;
+  pointer-events: none !important;
+}
+
+/* نبض بسيط حول الهدف */
+.onboarding-pulse { position: relative; }
+.onboarding-pulse:after {
+  content: "";
+  position: absolute; inset: -6px;
+  border-radius: 12px;
+  box-shadow: 0 0 0 0 rgba(33,158,188,.28);
+  animation: pulse 1.6s ease-out infinite;
+}
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(33,158,188,.28); }
+  70%  { box-shadow: 0 0 0 12px rgba(33,158,188,0); }
+  100% { box-shadow: 0 0 0 0 rgba(33,158,188,0); }
+}
+
+/* وهج أنيق للهدف نفسه (بدون تغيير أبعاد) */
+.onb-glow {
+  position: relative;
+  outline: 2px solid rgba(33,158,188,.32);
+  outline-offset: 2px;
+  transition: outline-color .25s ease;
+}
+
+/* نضمن بقاء التولتيب قابل للنقر */
+.introjs-tooltip, .introjs-tooltip * { pointer-events: auto; }
+
+/* عند إضافة onb-overlay-off إلى <html>، نعطّل التعتيم الافتراضي للـoverlay والـhelper */
+html.onb-overlay-off .introjs-overlay {
+  background: transparent !important;
+  pointer-events: none !important;
+}
+
+html.onb-overlay-off .introjs-helperLayer {
+  /* لا نُنشئ ثقب/ظل من Intro.js — نكتفي بالوهج الخاص بنا */
+  box-shadow: none !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+/* نُقوّي الوهج الخاص بنا لأننا أوقفنا ثقب Intro.js */
+.onb-glow {
+  position: relative;
+  outline: 2px solid rgba(33,158,188,.45);  /* primary-500 بتعتيم خفيف */
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgba(33,158,188,.10);
+}
+/* ===== Custom Quad Overlay (ثقب يطابق الهدف) ===== */
+.onb-dim, .onb-dim-piece { position: fixed; z-index: 999998; }
+.onb-dim { inset: 0; pointer-events: none; } /* لا يمنع التفاعل */
+.onb-dim-piece { background: rgba(2, 3, 4, .55); } /* نفس درجة تعتيمك */
+

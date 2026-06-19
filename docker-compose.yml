@@ -1,0 +1,131 @@
+# ============================================================
+# HowPlatform — single Docker stack (independent project).
+# 5 PHP app containers (Apache) + 1 MySQL, on one private network.
+# Each app is published on 127.0.0.1:<port>; Cloudflare Tunnel maps
+#   auth.howplatform.net     -> 127.0.0.1:4110
+#   www.howplatform.net      -> 127.0.0.1:4111
+#   library.howplatform.net  -> 127.0.0.1:4112
+#   tools.howplatform.net    -> 127.0.0.1:4113
+#   diploma.howplatform.net  -> 127.0.0.1:4114
+# Secrets live in each app's mounted .env (never in the image/git).
+# Compose-level vars (MYSQL_ROOT_PASSWORD, PMA_PORT) come from ./.env
+# ============================================================
+
+x-app-common: &app-common
+  restart: unless-stopped
+  depends_on:
+    db:
+      condition: service_healthy
+  networks: [howplatform_net]
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: howplatform_db
+    restart: unless-stopped
+    command: ["--max_allowed_packet=128M", "--mysql-native-password=ON"]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in ./.env}
+    ports:
+      - "127.0.0.1:3308:3306"
+    volumes:
+      - howplatform_db_data:/var/lib/mysql
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks: [howplatform_net]
+
+  auth:
+    <<: *app-common
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.laravel
+      args: { APP_PATH: auth.howplatform.net/public_html }
+    image: howplatform_auth:latest
+    container_name: howplatform_auth
+    ports: ["127.0.0.1:4110:80"]
+    volumes:
+      - ./auth.howplatform.net/public_html/.env:/var/www/html/.env:ro
+      - ./auth.howplatform.net/public_html/storage:/var/www/html/storage
+      - ./secure-keys:/var/www/secure-keys:ro
+
+  www:
+    <<: *app-common
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.laravel
+      args: { APP_PATH: www.howplatform.net/public_html }
+    image: howplatform_www:latest
+    container_name: howplatform_www
+    ports: ["127.0.0.1:4111:80"]
+    volumes:
+      - ./www.howplatform.net/public_html/.env:/var/www/html/.env:ro
+      - ./www.howplatform.net/public_html/storage:/var/www/html/storage
+
+  library:
+    <<: *app-common
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.laravel
+      args: { APP_PATH: library.howplatform.net/public_html }
+    image: howplatform_library:latest
+    container_name: howplatform_library
+    ports: ["127.0.0.1:4112:80"]
+    volumes:
+      - ./library.howplatform.net/public_html/.env:/var/www/html/.env:ro
+      - ./library.howplatform.net/public_html/storage:/var/www/html/storage
+
+  tools:
+    <<: *app-common
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.laravel
+      args: { APP_PATH: tools.howplatform.net/public_html }
+    image: howplatform_tools:latest
+    container_name: howplatform_tools
+    ports: ["127.0.0.1:4113:80"]
+    volumes:
+      - ./tools.howplatform.net/public_html/.env:/var/www/html/.env:ro
+      - ./tools.howplatform.net/public_html/storage:/var/www/html/storage
+
+  diploma:
+    <<: *app-common
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ci4
+      args: { APP_PATH: diploma.howplatform.net/public_html }
+    image: howplatform_diploma:latest
+    container_name: howplatform_diploma
+    ports: ["127.0.0.1:4114:80"]
+    volumes:
+      - ./diploma.howplatform.net/public_html/.env:/var/www/html/.env:ro
+      - ./diploma.howplatform.net/public_html/writable:/var/www/html/writable
+      - ./diploma.howplatform.net/public_html/public/uploads:/var/www/html/public/uploads
+      - ./diploma.howplatform.net/public_html/public/downloads:/var/www/html/public/downloads
+      - ./secure-keys:/var/www/secure-keys:ro
+
+  # Optional DB admin UI, bound to localhost only.
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: howplatform_pma
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      UPLOAD_LIMIT: 256M
+    ports: ["127.0.0.1:4115:80"]
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [howplatform_net]
+
+volumes:
+  howplatform_db_data:
+    name: howplatform_db_data
+
+networks:
+  howplatform_net:
+    name: howplatform_net
+    driver: bridge

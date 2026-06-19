@@ -1,0 +1,209 @@
+:root {
+  /* ألوان الهوية */
+  --primary-50:#e8f5fb; --primary-100:#d2ebf7; --primary-200:#bfe2f2;
+  --primary-300:#8ecae6; --primary-400:#5fb6e2; --primary-500:#219ebc;
+  --primary-600:#1b81a0; --primary-700:#156683; --primary-800:#104b65; --primary-900:#0a3247;
+  --accent-500:#fd9e02;
+
+  --shadow-1: 0 6px 16px rgba(0,0,0,.08);
+  --shadow-2: 0 12px 28px rgba(0,0,0,.12);
+  --radius-md: 12px; --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; margin:0; padding:0; }
+body {
+  font-family:'Almarai',system-ui;
+  background: var(--primary-50);
+  color: var(--primary-900);
+  line-height:1.7;
+}
+
+/* تقسيم الصفحة */
+.login-page {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+  min-width: 100vw;
+}
+
+/* القسم الأيسر */
+.login-left {
+  background: #212121; /* أفتح من الأسود الغامق */
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:2rem;
+}
+.login-left img {
+  max-width:200px;
+  margin-bottom:1.2rem;
+}
+.login-left h2 {
+  font-size:1.6rem;
+  font-weight:700;
+  margin-top:.5rem;
+  color:#fff;
+}
+
+/* القسم الأيمن */
+.login-right {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:2rem;
+  background:#fff;
+}
+.form-box {
+  width:100%;
+  max-width:400px;
+}
+.form-box h1 {
+  margin-bottom:.5rem;
+  color:var(--primary-800);
+}
+.form-box p {
+  margin-bottom:1.5rem;
+  color:var(--primary-600);
+}
+.form-box label {
+  font-weight:600;
+  display:block;
+  margin-top:1rem;
+  margin-bottom:.3rem;
+}
+.form-box input {
+  width:100%;
+  padding:.8rem 1rem;
+  border:1px solid var(--primary-200);
+  border-radius: var(--radius-sm);
+  margin-bottom: .8rem;
+  background: var(--primary-50);
+  color: var(--primary-900);
+  font-family:'Almarai',system-ui;
+}
+
+/* أزرار */
+.btn {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:.85rem 1rem;
+  border-radius:var(--radius-md);
+  font-weight:700;
+  font-family:'Almarai',system-ui;
+  cursor:pointer;
+  transition:.2s;
+  border: none;
+  margin-top: 10px;
+}
+.btn-primary {
+  background: var(--primary-500);
+  color:#fff;
+  width:100%;
+}
+.btn-primary:hover {
+  background: var(--primary-800);
+  box-shadow: var(--shadow-2);
+}
+.btn-ghost {
+  border:1px solid var(--primary-400);
+  color:var(--primary-600);
+  width:100%;
+  margin-top:.6rem;
+}
+
+/* زر جوجل */
+.google-btn {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.5rem;
+}
+.google-btn img {
+  height:18px;
+}
+
+/* روابط إضافية */
+.extra-links {
+  text-align:center;
+  margin-top:1.5rem;
+}
+.extra-links a {
+  color:var(--primary-600);
+  font-weight:600;
+}
+.form-check {
+  display: inline-flex;         /* جعلها أفقيّة */
+  gap: .5rem;                   /* مسافة بين المربع والنص */
+  margin: 1rem 0;
+}
+
+.form-check input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-500);
+  vertical-align: middle;       /* يضمن تمركز المربع */
+}
+
+.form-check label {
+  font-size: .95rem;
+  color: var(--primary-700);
+  margin: 0;
+  line-height: 1;               /* يقلل المسافة العمودية للنص */
+}
+
+/* الموبايل */
+@media (max-width:768px) {
+  .login-page {
+    grid-template-columns:1fr;
+  }
+  .login-left {
+    display:none;
+  }
+}
+
+/* الوضع الليلي */
+@media (prefers-color-scheme: dark) {
+  body { background: #111; color:#eee; }
+  .login-right { background:#1a1a1a; }
+  .form-box input { background:#222; color:#eee; border-color:#444; }
+  .btn-primary { background: var(--primary-600); }
+}
+.social-login {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+.btn-google {
+    position: relative;
+    background-color: #ffffff;
+    border: 2px solid #ddd;
+    color: #444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    overflow: hidden;
+    border-radius: 12px;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+    z-index: 1;
+    text-decoration: none;
+    gap:10px;
+}
+.btn-google:hover {
+    border: 2px solid transparent;
+    border-radius: 12px;
+    background-image: linear-gradient(#fff, #fff), linear-gradient(45deg, #4285F4, #EA4335, #FBBC05, #34A853);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    animation: none;
+    box-shadow: 0 0 4px rgba(66, 133, 244, 0.2), 0 0 8px rgba(234, 67, 53, 0.2), 0 0 12px rgba(251, 188, 5, 0.15), 0 0 16px rgba(52, 168, 83, 0.1);
+}
+.google-icon {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+}

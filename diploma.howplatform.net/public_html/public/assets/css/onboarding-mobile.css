@@ -1,0 +1,76 @@
+/* ===== Onboarding: mobile/touch polish ===== */
+
+/* زر السايدبار: قابل للنقر فوق القناع وبحجم مناسب للمس */
+#sidebarToggleBtn {
+  position: fixed;
+  top: 56px;              /* يبان تحت التولبار إن وُجد */
+  inset-inline-start: 8px;/* RTL-aware */
+  width: 48px; height: 48px; /* ≥44px للمس */
+  border-radius: 12px;
+  border: 0;
+  background: #111;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
+  z-index: 1000000;       /* أعلى من القناع (999996) والـ tooltip */
+  cursor: pointer;
+  display: none;          /* يُفعّل برمجياً */
+  align-items: center; justify-content: center;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+/* حالة الإظهار أثناء الجولة */
+#sidebarToggleBtn.onb-show {
+  display: inline-flex;
+}
+
+/* وميض إرشادي */
+#sidebarToggleBtn.onb-pulse::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 16px;
+  box-shadow: 0 0 0 0 rgba(80,160,255,.45);
+  animation: onbPulse 1.2s ease-out infinite;
+}
+@keyframes onbPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(80,160,255,.45); }
+  70%  { box-shadow: 0 0 0 14px rgba(80,160,255,0); }
+  100% { box-shadow: 0 0 0 0 rgba(80,160,255,0); }
+}
+#sidebarToggleBtn:focus-visible {
+  outline: 3px solid #50a0ff;
+}
+
+/* تخصيص Tooltip للهواتف */
+.introjs-tooltip.introjs-custom-rtl {
+  max-width: min(92vw, 360px);
+  font-size: 14.5px;
+  line-height: 1.45;
+  border-radius: 14px;
+}
+.introjs-tooltip.introjs-custom-rtl .introjs-tooltiptext {
+  padding: 12px 14px;
+}
+
+/* مسافة أزرار التحكم ولمس أسهل */
+.introjs-tooltip.introjs-custom-rtl .introjs-tooltipbuttons {
+  display: flex; gap: 8px;
+}
+.introjs-tooltip.introjs-custom-rtl .introjs-button {
+  min-height: 42px;       /* لمسي */
+  padding: 8px 14px;
+  border-radius: 10px;
+}
+
+/* الشاشات الصغيرة جدًا */
+@media (max-width: 420px) {
+  .introjs-tooltip.introjs-custom-rtl {
+    max-width: 94vw;
+    font-size: 15px;
+  }
+}
+
+/* أجهزة لمسية عامة */
+@media (pointer: coarse) {
+  #sidebarToggleBtn { width: 52px; height: 52px; }
+}

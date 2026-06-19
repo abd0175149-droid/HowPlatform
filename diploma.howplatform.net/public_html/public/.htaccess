@@ -1,0 +1,77 @@
+# ----------------------------------------------------
+# Disable directory browsing
+# ----------------------------------------------------
+Options -Indexes
+
+# ----------------------------------------------------
+# Disable server signature
+# ----------------------------------------------------
+ServerSignature Off
+
+# ----------------------------------------------------
+# Enable Rewrite Engine
+# ----------------------------------------------------
+<IfModule mod_rewrite.c>
+    Options +SymLinksIfOwnerMatch
+    RewriteEngine On
+
+    # ------------------------------------------------
+    # HTTPS / www redirects DISABLED on purpose:
+    # خلف Cloudflare Tunnel يصل الأصل عبر HTTP (الحافة HTTPS)، لذا فرض HTTPS
+    # هنا يسبّب حلقة 301 لا نهائية. التحويل إلى HTTPS يتم على حافة Cloudflare
+    # ("Always Use HTTPS"). و www. غير موجّه أصلاً عبر التنل.
+    # ------------------------------------------------
+
+    # ------------------------------------------------
+    # Redirect Trailing Slashes
+    # ------------------------------------------------
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # ------------------------------------------------
+    # CodeIgniter front controller
+    # ------------------------------------------------
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^([\s\S]*)$ index.php/$1 [L,NC,QSA]
+
+    # Pass Authorization header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
+
+# ----------------------------------------------------
+# Fallback if mod_rewrite not available
+# ----------------------------------------------------
+<IfModule !mod_rewrite.c>
+    ErrorDocument 404 index.php
+</IfModule>
+
+# ----------------------------------------------------
+# Long-term cache for CSS/JS/Fonts in production
+# ----------------------------------------------------
+<IfModule mod_headers.c>
+    <FilesMatch "\.(js|css|woff2|woff|ttf|otf|eot)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>
+
+# ----------------------------------------------------
+# Long-term cache for images
+# ----------------------------------------------------
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/avif      "access plus 1 year"
+    ExpiresByType image/webp      "access plus 1 year"
+    ExpiresByType image/jpeg      "access plus 1 year"
+    ExpiresByType image/png       "access plus 1 year"
+    ExpiresByType image/gif       "access plus 1 year"
+    ExpiresByType image/svg+xml   "access plus 1 year"
+</IfModule>
+
+<IfModule mod_headers.c>
+    <FilesMatch "\.(avif|webp|jpe?g|png|gif|svg)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>

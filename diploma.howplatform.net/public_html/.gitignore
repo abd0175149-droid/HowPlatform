@@ -1,0 +1,39 @@
+# CodeIgniter 4 (diploma) — local safety net (root .gitignore also covers these)
+
+# Secrets
+.env
+*firebase-adminsdk*.json
+secure-keys/
+vertex-service-account*.json
+
+# Dependencies (installed on server during Docker build)
+/vendor/
+
+# Writable runtime
+writable/cache/*
+writable/logs/*
+writable/session/*
+writable/debugbar/*
+writable/uploads/*
+writable/previews/*
+writable/previews_tmp/*
+writable/temp_docx_check/*
+!writable/**/index.html
+!writable/**/.gitkeep
+
+# Heavy data / dumps (out-of-band)
+*.sql
+embeddings_*.sql
+
+# Composer installers / scratch
+composer.phar
+composer2
+composer-setup.php
+test_*.php
+setup*.php
+dump_tools.php
+extract_docx_vars.php
+
+# Local analysis notes
+*.md
+!README.md

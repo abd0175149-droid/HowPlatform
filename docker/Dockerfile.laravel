@@ -1,0 +1,52 @@
+# syntax=docker/dockerfile:1
+# ------------------------------------------------------------------
+# Shared image for the 4 Laravel apps (auth / www / library / tools).
+# Build context = repo root; APP_PATH selects the subdomain dir.
+# Apache serves <app>/public ; .env is mounted at runtime (not baked).
+# ------------------------------------------------------------------
+
+# ---- Stage 1: build Vite assets ----
+FROM node:20-alpine AS assets
+ARG APP_PATH
+WORKDIR /app
+COPY ${APP_PATH}/ ./
+RUN if [ -f package.json ]; then \
+        npm install --no-audit --no-fund && npm run build ; \
+    else \
+        mkdir -p public/build ; \
+    fi
+
+# ---- Stage 2: PHP 8.3 + Apache runtime ----
+FROM php:8.3-apache
+ARG APP_PATH
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        git curl unzip zip \
+        libpng-dev libonig-dev libxml2-dev libzip-dev libicu-dev \
+    && docker-php-ext-configure intl \
+    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip intl opcache \
+    && a2enmod rewrite headers expires \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# DocumentRoot -> Laravel public/
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
+    && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
+    && printf '<Directory /var/www/html/public>\n\tAllowOverride All\n\tRequire all granted\n</Directory>\n' >> /etc/apache2/apache2.conf \
+    && printf 'ServerName localhost\n' >> /etc/apache2/apache2.conf
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+WORKDIR /var/www/html
+
+# Install PHP deps first (better layer caching). Scripts run at deploy, not build.
+COPY ${APP_PATH}/composer.json ${APP_PATH}/composer.lock* ./
+RUN composer install --no-interaction --no-dev --optimize-autoloader --no-scripts
+
+# App source + freshly built assets
+COPY ${APP_PATH}/ ./
+COPY --from=assets /app/public/build ./public/build
+
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
+EXPOSE 80

@@ -1,0 +1,169 @@
+/* site.css v3.0 — HOWPlatform | الصفحات الداخلية
+   يعتمد على tokens.css للمتغيرات | لا حركة، تغيير لون فقط */
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--font-primary);
+  background:var(--bg-base);
+  color:var(--text-primary);
+  line-height:var(--lh-relaxed);
+  transition:background var(--duration-slow),color var(--duration-slow);
+}
+
+a{color:var(--text-link);text-decoration:none}
+a:hover{color:var(--text-link-hover);text-decoration:underline}
+a:focus-visible{outline:2px solid var(--primary-500);outline-offset:2px;border-radius:4px}
+
+.container{max-width:var(--maxw);margin:0 auto;padding:0 5%}
+.section-title{margin:0 0 1.2rem;font-size:var(--text-display);font-family:var(--font-display);color:var(--text-primary)}
+
+/* ── Buttons ── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+  padding:.85rem 1.1rem;border-radius:var(--radius-md);border:2px solid transparent;
+  font-weight:var(--fw-extrabold);cursor:pointer;
+  transition:background var(--duration-base),border-color var(--duration-base),color var(--duration-base);
+  text-decoration:none;
+}
+.btn-primary{background:var(--primary-500);color:#fff;border-color:var(--primary-500)}
+.btn-primary:hover{background:var(--primary-700);border-color:var(--primary-700);color:#fff}
+.btn-ghost{border-color:var(--primary-400);color:var(--primary-700);background:transparent}
+.btn-ghost:hover{background:var(--primary-50);border-color:var(--primary-600);color:var(--primary-800)}
+
+/* ── Header (inherited from home.css, minimal overrides) ── */
+.site-header{
+  position:sticky;top:0;
+  background:var(--header-bg);
+  border-bottom:1px solid var(--header-brd);
+  z-index:100;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  transition:background var(--duration-slow);
+}
+.header-inner{display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 5%}
+.brand{display:flex;align-items:center;gap:.75rem;font-weight:var(--fw-extrabold);color:var(--text-primary);text-decoration:none}
+.brand img{height:44px;width:44px;object-fit:contain;transition:opacity var(--duration-base)}
+.main-nav{display:flex;align-items:center;gap:.5rem}
+.main-nav a{color:var(--nav-link);text-decoration:none;padding:.5rem .85rem;border-radius:var(--radius-md);transition:var(--transition)}
+.main-nav a:hover{background:var(--nav-hover-bg);color:var(--nav-link-hover)}
+.nav-toggle{display:none;background:none;border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:8px;cursor:pointer;color:var(--text-primary)}
+.nav-toggle .bar{display:block;width:22px;height:2px;background:currentColor;margin:4px 0}
+
+@media(max-width:860px){
+  .nav-toggle{display:block}
+  .main-nav{
+    position:fixed;inset-inline-start:0;top:64px;bottom:0;width:270px;
+    background:var(--surface-0);border:1px solid var(--border-color);
+    box-shadow:var(--shadow-lg);
+    opacity:0;visibility:hidden;pointer-events:none;
+    transition:opacity var(--duration-slow) var(--ease-default),
+               visibility 0s linear var(--duration-slow);
+    padding:1rem;display:flex;flex-direction:column;gap:.5rem;z-index:200;
+  }
+  .main-nav.open{
+    opacity:1;visibility:visible;pointer-events:auto;
+    transition:opacity var(--duration-slow) var(--ease-default);
+  }
+}
+
+/* ── Hero (صفحات داخلية) ── */
+.hero{
+  position:relative;padding:64px 0;
+  background:linear-gradient(135deg,var(--primary-50),var(--bg-elevated));
+  overflow:hidden;
+}
+[data-theme="dark"] .hero{background:linear-gradient(135deg,var(--surface-1),var(--surface-2))}
+.hero-grid{display:grid;gap:1.5rem;align-items:center}
+@media(min-width:900px){.hero-grid{grid-template-columns:1.15fr .85fr}}
+.hero-art .blob{
+  width:100%;height:260px;
+  background:linear-gradient(135deg,var(--primary-300),var(--primary-100));
+  border-radius:28px;filter:blur(2px);box-shadow:var(--shadow-md);
+}
+
+/* ── Cards ── */
+section{padding:56px 0}
+.card{
+  background:var(--card-bg);border-radius:var(--radius-lg);
+  padding:1.2rem;box-shadow:var(--shadow-sm);border:1px solid var(--card-brd);
+  transition:background var(--duration-base),border-color var(--duration-base);
+  color:var(--text-primary);
+}
+.card:hover{background:var(--surface-1);border-color:var(--primary-400)}
+.grid-3{display:grid;grid-template-columns:1fr;gap:1rem}
+@media(min-width:768px){.grid-3{grid-template-columns:repeat(3,1fr)}}
+
+/* ── Footer ── */
+.site-footer{
+  padding:48px 0;
+  background:linear-gradient(135deg,var(--footer-bg),color-mix(in srgb,var(--footer-bg) 80%,var(--primary-800) 20%));
+  margin-top:48px;color:var(--footer-text);
+}
+.footer-grid{display:grid;gap:1rem;grid-template-columns:1fr}
+@media(min-width:768px){.footer-grid{grid-template-columns:2fr 1fr 1fr}}
+.small{font-size:.9rem;color:rgba(255,255,255,.6);padding-top:1rem}
+
+/* ── Reveal animation (scroll — هذا طبيعي لـ page load) ── */
+.reveal-up{
+  opacity:0;
+  transition:opacity var(--duration-slow) var(--ease-default);
+}
+.reveal-up.visible{opacity:1}
+.delay-1{transition-delay:.08s}.delay-2{transition-delay:.16s}.delay-3{transition-delay:.24s}
+
+/* ── Content pages (privacy, terms, faq) ── */
+.content-page{padding:3rem 0 5rem}
+.content-page h1{font-family:var(--font-display);font-size:var(--text-4xl);color:var(--text-primary);margin-bottom:1.5rem}
+.content-page h2{font-family:var(--font-display);font-size:var(--text-2xl);color:var(--primary-500);margin:2rem 0 .75rem}
+.content-page h3{font-size:var(--text-xl);color:var(--text-primary);margin:1.5rem 0 .5rem}
+.content-page p,.content-page li{color:var(--text-secondary);line-height:var(--lh-relaxed);margin-bottom:.75rem}
+.content-page ul{padding-right:1.5rem}
+.content-page a{color:var(--text-link);font-weight:var(--fw-medium)}
+.content-page a:hover{color:var(--text-link-hover)}
+
+.theme-toggle-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:40px;height:40px;border-radius:var(--radius-md);
+  border:1px solid var(--border-color);
+  background:var(--nav-hover-bg);color:var(--nav-link);
+  cursor:pointer;
+  transition:background var(--duration-base),border-color var(--duration-base),color var(--duration-base);
+  flex-shrink:0;
+}
+.theme-toggle-btn:hover{
+  background:var(--primary-50);
+  border-color:var(--primary-500);
+  color:var(--primary-600);
+}
+.theme-toggle-btn:focus-visible{outline:2px solid var(--primary-500);outline-offset:2px}
+
+/* ── Login btn (inherited) ── */
+.btn-login{
+  display:inline-block;padding:6px 14px;font-size:.9rem;font-weight:var(--fw-semibold);
+  border:1px solid var(--btn-login-brd);border-radius:var(--radius-sm);
+  background:var(--btn-login-bg);color:var(--btn-login-text);text-decoration:none;
+  transition:var(--transition);
+}
+.btn-login:hover{background:var(--btn-login-hover-bg);color:var(--primary-800)}
+
+/* ── Dropdown ── */
+.user-dropdown{position:relative;display:inline-block}
+.user-name{
+  background:transparent;border:none;font-weight:var(--fw-bold);cursor:pointer;
+  color:var(--nav-link);display:inline-flex;align-items:center;gap:6px;
+  padding:.5rem .85rem;border-radius:var(--radius-md);transition:var(--transition);
+}
+.user-name:hover{background:var(--nav-hover-bg);color:var(--nav-link-hover)}
+.dropdown-menu{
+  display:none;position:absolute;top:calc(100% + 6px);left:0;
+  background:var(--dropdown-bg);border:1px solid var(--dropdown-brd);
+  border-radius:var(--radius-md);box-shadow:var(--shadow-lg);
+  min-width:200px;z-index:1200;overflow:hidden;text-align:right;
+}
+.dropdown-menu .dropdown-item{
+  display:block;padding:12px 16px;color:var(--dropdown-text);
+  text-decoration:none;font-size:.95rem;
+  transition:background var(--duration-base);
+}
+.dropdown-menu .dropdown-item:hover{background:var(--dropdown-item-hover)}
+.user-dropdown.open .dropdown-menu{display:block}

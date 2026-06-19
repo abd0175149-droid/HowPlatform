@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://tools.howplatform.net/sitemap.xml

@@ -1,0 +1,89 @@
+/* ===== Core tokens ===== */
+:root{
+  --primary-hover:#3b82f6;
+  --transition:all .2s ease-in-out;
+  --card-hover-shadow:0 5px 12px -3px rgba(0,0,0,.1);
+  /* يتوقع أن تكون هذه معرفة عالميًا في مشروعك */
+  /* --surface-card, --surface-base, --surface-weak, --border-color, --text-primary, --text-secondary,
+     --shadow-sm, --primary-50..900 */
+}
+
+/* ===== Layout ===== */
+.shell{display:flex;flex-direction:column;gap:1rem;max-width:1200px;margin:0 auto}
+.shell.narrow{max-width:980px} /* استخدم هذا المعدّل إذا أردت العرض الأضيق */
+.panel{background:var(--surface-card);border:1px solid var(--border-color);border-radius:12px;box-shadow:var(--shadow-sm);padding:1.1rem;transition:var(--transition)}
+.panel:hover{transform:translateY(-1px)}
+.panel-title{font-weight:700;margin-bottom:.6rem;color:var(--text-primary);display:flex;align-items:center;gap:.5rem;font-size:1.05rem;padding-bottom:.45rem;border-bottom:1px solid var(--border-color)}
+.muted{color:var(--text-secondary);font-size:.9rem}
+
+/* ===== Forms ===== */
+.label{font-weight:600;margin:.15rem 0 .25rem;display:block}
+.input,.select{width:100%;padding:.6rem .75rem;border:1px solid var(--border-color);border-radius:8px;background:var(--surface-base)}
+.form-grid,.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+@media(max-width:900px){.form-grid,.grid-2{grid-template-columns:1fr}}
+.hint{background:var(--surface-weak);border:1px dashed var(--border-color);border-radius:8px;padding:1rem}
+
+/* ===== Buttons ===== */
+.btn{display:inline-flex;align-items:center;gap:.4rem;border:1px solid var(--border-color);border-radius:8px;padding:.55rem .9rem;background:var(--surface-base);cursor:pointer;font-weight:500;transition:var(--transition);text-decoration:none;font-size:.9rem}
+.btn:hover{transform:translateY(-1px)}
+.btn[disabled]{opacity:.6;cursor:not-allowed;transform:none}
+.btn-primary{background:var(--primary-500);border-color:var(--primary-500);color:#fff}
+.btn-primary:hover{background:var(--primary-600);border-color:var(--primary-50);box-shadow:0 2px 4px -1px rgba(59,130,246,.3)}
+.btn-ghost{background:transparent;border-color:var(--border-color)}
+.btn-ghost:hover{background:var(--surface-weak)}
+.btn-danger{background:#dc2626;border-color:#dc2626;color:#fff}
+.btn-danger:hover{background:#b91c1c;border-color:#b91c1c;box-shadow:0 2px 4px -1px rgba(220,38,38,.3)}
+
+/* ===== Lists & Cards ===== */
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:.8rem}
+.card{border:1px solid var(--border-color);border-radius:10px;padding:.9rem;background:var(--surface-base);transition:var(--transition)}
+.card:hover{transform:translateY(-1px);box-shadow:var(--card-hover-shadow)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+
+/* ===== Badges / Chips ===== */
+.badges{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.4rem}
+.badge{display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--border-color);border-radius:999px;padding:.2rem .55rem;font-size:.8rem;background:var(--surface-card);color: var(--bs-body-color);}
+.badge-soft{background:var(--surface-weak)}
+.badge-blue{background:var(--primary-100);border-color:var(--primary-300);color:var(--primary-800)}
+.badge-green{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.25);color:#166534}
+.badge-yellow{background:rgba(250,204,21,.12);border-color:rgba(250,204,21,.25);color:#854d0e}
+
+.chip{border:1px solid var(--border-color);background:var(--surface-base);border-radius:999px;padding:.25rem .65rem;font-size:.9rem;cursor:pointer;transition:var(--transition)}
+.chip.is-selected{background:var(--primary-100);border-color:var(--primary-400)}
+
+/* ===== Groups / Members ===== */
+.groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.8rem}
+.group{border:1px solid var(--border-color);border-radius:10px;padding:.8rem;background:var(--surface-base)}
+.member{border:1px dashed var(--border-color);border-radius:999px;padding:.2rem .55rem;margin:.15rem;display:inline-block;font-size:.85rem}
+  .steps-bar{
+    display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;
+    background:var(--surface-card);border:1px solid var(--border-color);border-radius:12px;
+    padding:.5rem .75rem;margin-bottom:1rem
+  }
+  .steps-bar .step{
+    display:flex;align-items:center;gap:.5rem;padding:.4rem .6rem;border-radius:8px;
+    border:1px dashed var(--border-color);color:var(--text-secondary);font-size:.9rem
+  }
+  .steps-bar .step.active{border-style:solid;color:var(--text-primary);font-weight:700}
+  .steps-bar .spacer{flex:1}
+   .mode-picker{display:flex;flex-wrap:wrap;gap:.5rem}
+  .mode-picker label.option{
+    display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;
+    border:1px solid var(--border-color);border-radius:999px;padding:.5rem .8rem;
+    background:var(--surface-card);transition:all .15s ease; user-select:none;
+  }
+  .mode-picker label.option:hover{border-color:var(--primary-400);box-shadow:var(--shadow-sm)}
+  .mode-picker .chip{font-weight:700;color:var(--text-primary)}
+  .mode-picker .sub{font-size:.8rem;color:var(--text-secondary)}
+  .mode-picker label.option .icon{width:18px;height:18px;display:inline-grid;place-items:center}
+  /* إخفاء الراديو مع إبقاءه قابلًا للوصول */
+  .sr-radio{position:absolute;opacity:0;pointer-events:none;width:0;height:0;margin:0}
+  /* مظهر العنصر عند التفعيل */
+  .mode-picker label.option input:checked + .chip-wrap{
+    background:color-mix(in srgb, var(--primary-500), #fff 80%);
+    border-radius:999px;padding:.1rem .2rem
+  }
+  .mode-picker label.option input:checked + .chip-wrap .chip{color:var(--primary-900)}
+  .mode-picker label.option input:checked + .chip-wrap .icon{color:var(--primary-700)}
+/* ===== Sidebar ===== */
+.sidebar-link.active{background:var(--surface-weak);}
