@@ -18,7 +18,8 @@
 **/*.pem
 
 # ---- Dependencies / build artifacts (built on server) ----
-**/vendor/
+# Composer deps only (NOT resources/views/vendor — those are published view overrides)
+**/public_html/vendor/
 **/node_modules/
 **/public/build/
 **/public/hot/
