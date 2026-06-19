@@ -47,7 +47,8 @@ COPY ${APP_PATH}/ ./
 COPY --from=assets /app/public/build ./public/build
 
 RUN chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+    && chmod -R 775 storage bootstrap/cache \
+    && ln -sf /var/www/html/storage/app/public /var/www/html/public/storage
 
 # Behind Cloudflare Tunnel the origin is HTTP; make PHP see HTTPS, and rewrite any
 # .htaccess HTTPS-force (%{HTTPS} !=on) to check X-Forwarded-Proto so it never 301-loops.
