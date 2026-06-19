@@ -20,10 +20,10 @@ x-app-common: &app-common
 
 services:
   db:
-    image: mysql:8.0
+    image: mariadb:11.8
     container_name: howplatform_db
     restart: unless-stopped
-    command: ["--max_allowed_packet=128M", "--mysql-native-password=ON"]
+    command: ["--max_allowed_packet=128M"]
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in ./.env}
     ports:
@@ -32,7 +32,7 @@ services:
       - howplatform_db_data:/var/lib/mysql
       - ./docker/mysql-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
       timeout: 5s
       retries: 12

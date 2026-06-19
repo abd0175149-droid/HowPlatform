@@ -5,7 +5,8 @@
     RewriteEngine On
     RewriteBase /
 
-    # 1) اجبار HTTPS لهذا الساب-دومين فقط (بدون www)
+    # 1) اجبار HTTPS — لا يفعّل خلف Cloudflare Tunnel (الحافة HTTPS، الأصل HTTP)
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
     RewriteCond %{HTTPS} !=on
     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 

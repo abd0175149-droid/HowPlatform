@@ -2,7 +2,8 @@
     RewriteEngine On
     RewriteBase /
 
-    # ✅ إجبار HTTPS على الجذر (لا يمسّ الساب دومينات الأخرى)
+    # ✅ إجبار HTTPS على الجذر — لا يفعّل خلف Cloudflare Tunnel (الحافة HTTPS، الأصل HTTP)
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
     RewriteCond %{HTTPS} !=on
     RewriteCond %{HTTP_HOST} ^(www\.)?howplatform\.net$ [NC]
     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
