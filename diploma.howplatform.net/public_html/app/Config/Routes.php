@@ -10,6 +10,8 @@ $routes->get('sitemap.xml', 'Sitemap::index');
 $routes->get('ads.txt', 'AdsController::index');
 
 $routes->get('run-inquiry-tools-seeder-v2', function() {
+    $k = (string) (getenv('CRON_SECRET') ?: '');
+    if ($k === '' || ($_GET['key'] ?? '') !== $k) { return service('response')->setStatusCode(403)->setBody('Forbidden'); }
     $seeder = \Config\Database::seeder();
     $seeder->call('InquiryToolsSeeder');
     return 'تم تحديث أدوات البحث الاستقصائي (لتحميل كملفات وورد) بنجاح! يمكنك إزالة الرابط الآن.';
@@ -747,6 +749,8 @@ if (is_file(APPPATH . 'Config/AdminRoutes.php')) {
     require APPPATH . 'Config/AdminRoutes.php';
 }
 $routes->get('fix-ai-jobs-status', function() {
+    $k = (string) (getenv('CRON_SECRET') ?: '');
+    if ($k === '' || ($_GET['key'] ?? '') !== $k) { return service('response')->setStatusCode(403)->setBody('Forbidden'); }
     $db = \Config\Database::connect();
     $db->query("ALTER TABLE `ai_jobs` MODIFY COLUMN `status` ENUM('queued','processing','done','failed','review') NOT NULL DEFAULT 'queued'");
     $db->query("UPDATE `ai_jobs` SET `status` = 'queued' WHERE `status` = '' OR `status` = 'pending'");

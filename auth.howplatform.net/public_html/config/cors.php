@@ -2,12 +2,7 @@
 
 return [
   'supports_credentials' => true,
-  'allowed_origins' => [
-    'https://www.howplatform.net',
-    'https://library.howplatform.net',
-    'https://tools.howplatform.net',
-    'https://diploma.howplatform.net',
-  ],
+  'allowed_origins' => array_values(array_filter(array_map('trim', explode(',', (string) env('CORS_ALLOWED_ORIGINS', 'https://www.howplatform.net,https://library.howplatform.net,https://tools.howplatform.net,https://diploma.howplatform.net'))))),
   'paths' => ['logout','csrf-token','api/*'],
   'allowed_methods' => ['GET','POST','OPTIONS'],
   'allowed_headers' => [

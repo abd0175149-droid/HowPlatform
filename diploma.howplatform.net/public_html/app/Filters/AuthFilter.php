@@ -11,20 +11,32 @@ class AuthFilter implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
-        log_message('debug', '🚀 AuthFilter triggered');
+        $authBase = rtrim((string) (getenv('AUTH_URL') ?: 'https://auth.howplatform.net'), '/');
+        $loginUrl = $authBase . '/login?redirect=' . current_url();
 
         $token = $_COOKIE['howplatform_token'] ?? null;
-        log_message('debug', 'Token: ' . $token);
 
         if (!$token) {
-            return redirect()->to('https://auth.howplatform.net/login?redirect=' . current_url());
+            return redirect()->to($loginUrl);
         }
 
         $decoded = JwtHelper::decodeToken($token);
-        log_message('debug', 'Decoded: ' . print_r($decoded, true));
 
         if (!$decoded) {
-            return redirect()->to('https://auth.howplatform.net/login?redirect=' . current_url());
+            return redirect()->to($loginUrl);
+        }
+
+        // ✅ فرض الجلسة الواحدة عبر jti (best-effort؛ يفشل مفتوحاً عند تعذّر الاتصال بقاعدة auth)
+        if (getenv('JWT_ENFORCE_SINGLE_SESSION') === 'true' && !empty($decoded->jti)) {
+            try {
+                $rrow = \Config\Database::connect('remote')->table('users')
+                    ->select('current_jti')->where('id', $decoded->sub)->get()->getRowArray();
+                if ($rrow && !empty($rrow['current_jti']) && $rrow['current_jti'] !== $decoded->jti) {
+                    return redirect()->to($loginUrl);
+                }
+            } catch (\Throwable $e) {
+                // fail-open: لا نمنع الدخول عند تعذّر التحقق
+            }
         }
 
         // ✅ تحديد الرول من قاعدة البيانات

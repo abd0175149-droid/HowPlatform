@@ -32,11 +32,11 @@ class RewardsProcessor extends BaseController
      */
     public function process(?string $keyOverride = null)
     {
-        // 🔐 التحقق من المفتاح
-        $secretKey = env('CRON_SECRET_KEY', 'change-me-in-production');
+        // 🔐 التحقق من المفتاح (موحّد مع AiJobsRunner: CRON_SECRET)
+        $secretKey = (string) (getenv('CRON_SECRET') ?: '');
         $key = $keyOverride ?? $this->request->getGet('key');
-        
-        if ($key !== $secretKey) {
+
+        if ($secretKey === '' || $key !== $secretKey) {
             return $this->out([
                 'success' => false,
                 'message' => 'Unauthorized',

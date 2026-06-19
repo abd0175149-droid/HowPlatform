@@ -19,7 +19,19 @@ class JwtHelper
     {
         self::init();
         try {
-            return JWT::decode($token, new Key(self::$secret, self::$algo));
+            $decoded = JWT::decode($token, new Key(self::$secret, self::$algo));
+
+            // تحقّق اختياري من iss/aud عند ضبطهما في البيئة (يرفض فقط عند وجود مطالبة غير مطابقة)
+            $iss = getenv('JWT_ISS');
+            $aud = getenv('JWT_AUD');
+            if ($iss && isset($decoded->iss) && $decoded->iss !== $iss) {
+                return null;
+            }
+            if ($aud && isset($decoded->aud) && $decoded->aud !== $aud) {
+                return null;
+            }
+
+            return $decoded;
         } catch (\Exception $e) {
             log_message('error', 'JWT Decode error: ' . $e->getMessage());
             return null;

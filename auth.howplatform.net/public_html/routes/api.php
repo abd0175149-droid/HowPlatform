@@ -16,17 +16,36 @@ Route::get('/user', function (Request $request) {
 
     try {
         $decoded = JwtHelper::verifyToken($token);
-        return response()->json([
-            'id'        => $decoded->sub,
-            'name'      => $decoded->name,
-            'email'     => $decoded->email,
-            'avatar'    => $decoded->avatar,
-            'is_sales'   => $decoded->is_sales ?? 0,
-            'is_admin'   => $decoded->is_admin ?? 0,
-        ]);
     } catch (\Exception $e) {
         return response()->json(['error' => 'Invalid token'], 401);
     }
+
+    // فرض الجلسة الواحدة عبر jti: يرفض فقط عند وجود jti لا يطابق users.current_jti
+    if (filter_var(env('JWT_ENFORCE_SINGLE_SESSION', false), FILTER_VALIDATE_BOOLEAN)) {
+        $jti        = $decoded->jti ?? null;
+        $allowNoJti = filter_var(env('JWT_LEGACY_ALLOW_NO_JTI', true), FILTER_VALIDATE_BOOLEAN);
+        if ($jti === null) {
+            if (!$allowNoJti) {
+                return response()->json(['error' => 'Session invalidated'], 401);
+            }
+        } else {
+            $current = \Illuminate\Support\Facades\DB::table('users')
+                ->where('id', (int) ($decoded->sub ?? 0))
+                ->value('current_jti');
+            if ($current !== null && $current !== $jti) {
+                return response()->json(['error' => 'Session superseded'], 401);
+            }
+        }
+    }
+
+    return response()->json([
+        'id'        => $decoded->sub,
+        'name'      => $decoded->name,
+        'email'     => $decoded->email,
+        'avatar'    => $decoded->avatar,
+        'is_sales'  => $decoded->is_sales ?? 0,
+        'is_admin'  => $decoded->is_admin ?? 0,
+    ]);
 });
 
 Route::middleware('api')->group(function () {

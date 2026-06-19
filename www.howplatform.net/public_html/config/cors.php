@@ -3,12 +3,7 @@
 return [
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
     'allowed_methods' => ['*'],
-    'allowed_origins' => [
-        'https://howplatform.net',
-        'https://diploma.howplatform.net',
-        'https://tools.howplatform.net',
-        'https://library.howplatform.net',
-    ],
+    'allowed_origins' => array_values(array_filter(array_map('trim', explode(',', (string) env('CORS_ALLOWED_ORIGINS', 'https://howplatform.net,https://diploma.howplatform.net,https://tools.howplatform.net,https://library.howplatform.net'))))),
     'allowed_origins_patterns' => [
         // '#^https://([a-z0-9-]+\.)*howplatform\.net$#',
     ],

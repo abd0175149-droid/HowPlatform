@@ -104,10 +104,10 @@ class GoogleController extends Controller
                 ]);
             } catch (\Throwable $e) {}
 
-            // JWT + SSO Cookie (ساعة خمول)
-            $jwt = class_exists(JwtHelper::class) ? JwtHelper::generateToken($user) : null;
+            // JWT + SSO Cookie (التوكن يحمل jti المطابق لـ users.current_jti لتفعيل سياسة الجلسة الواحدة)
+            $jwt = class_exists(JwtHelper::class) ? JwtHelper::generateToken($user, ['jti' => $jti]) : null;
             if ($jwt) {
-                $this->setSsoCookie($jwt, time() + 2592000);
+                $this->setSsoCookie($jwt, time() + (int) env('JWT_TTL_SECONDS', 2592000));
             }
 
             // تحديث سنابشوت الجلسة (إن وُجد الكلاس)
