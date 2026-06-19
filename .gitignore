@@ -67,6 +67,9 @@
 **/temp_FB/
 **/temp_R/
 **/test_*.php
+**/public/debug_*.php
+**/public/check_user.php
+**/public/update_prompt.php
 **/setup.php
 **/setup_mysqli.php
 **/setup_pdo.php

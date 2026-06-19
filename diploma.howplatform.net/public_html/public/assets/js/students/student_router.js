@@ -9,7 +9,7 @@
   if (window.__STUDENT_ROUTER_LOADED__) return;
   window.__STUDENT_ROUTER_LOADED__ = true;
 
-  const VERSION = 'v=1.9.2';
+  const VERSION = 'v=2.0.1';
   // === Date-bounded full purge (Amman TZ) ===
   const CLEAR_ON_DATES = ['2025-11-09', '2025-11-10']; // ✅ اليوم وغدًا فقط
 
