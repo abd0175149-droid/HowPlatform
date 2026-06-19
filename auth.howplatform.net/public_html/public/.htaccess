@@ -5,6 +5,9 @@
 
     RewriteEngine On
 
+    # Legacy /public/ compatibility (docroot is now public/, was public_html on Hostinger)
+    RewriteRule ^public/(.*)$ /$1 [L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

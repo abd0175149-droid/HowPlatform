@@ -16,10 +16,16 @@ ServerSignature Off
     RewriteEngine On
 
     # ------------------------------------------------
+    # Legacy /public/ compatibility:
+    # على Hostinger كان docroot = public_html فكانت الروابط تبدأ بـ /public/.
+    # الآن docroot = public/ ، لذا نُحوّل /public/X → /X داخلياً (أصول، رفعات، مسارات).
+    # ------------------------------------------------
+    RewriteRule ^public/(.*)$ /$1 [L]
+
+    # ------------------------------------------------
     # HTTPS / www redirects DISABLED on purpose:
-    # خلف Cloudflare Tunnel يصل الأصل عبر HTTP (الحافة HTTPS)، لذا فرض HTTPS
-    # هنا يسبّب حلقة 301 لا نهائية. التحويل إلى HTTPS يتم على حافة Cloudflare
-    # ("Always Use HTTPS"). و www. غير موجّه أصلاً عبر التنل.
+    # خلف Cloudflare Tunnel الأصل HTTP (الحافة HTTPS) — فرض HTTPS هنا يسبّب حلقة 301.
+    # التحويل إلى HTTPS يتم على حافة Cloudflare. و www غير موجّه عبر التنل.
     # ------------------------------------------------
 
     # ------------------------------------------------
