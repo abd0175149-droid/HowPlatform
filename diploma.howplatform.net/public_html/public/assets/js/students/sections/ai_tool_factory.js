@@ -203,6 +203,11 @@ function ensureStyles() {
   [data-theme="dark"] .ai-result-field { background: var(--surface-2); border-color: var(--border-color); }
   [data-theme="dark"] .ai-matrix-table thead th { background: #000; color: #fff; }
   [data-theme="dark"] .ai-tool-modal-backdrop { background: rgba(0,0,0,0.7); }
+
+  /* قسم معلومات النقاط/الاشتراك — متوافق مع الثيم بدل الستايل المضمّن */
+  .ai-modal-info-section{padding:12px 16px;background:var(--surface-1);border-top:1px solid var(--border-color);border-bottom:1px solid var(--border-color);font-size:0.9rem;color:var(--text-strong);}
+  .ai-info-link-btn{background:none;border:none;color:var(--primary-500);text-decoration:none;font-size:0.85rem;cursor:pointer;padding:0;}
+  .ai-info-link-btn:hover{color:var(--primary-700);text-decoration:underline;}
   `;
   const style = document.createElement('style');
   style.id = STYLE_ID;
@@ -487,6 +492,10 @@ class FieldController {
       return this.dynamicListItems || [];
     }
     if (!this.inputEl) return '';
+    if (this.field.type === 'file') {
+      // إرجاع كائن File الحقيقي (لا مسار وهمي) كي يُرسَل عبر FormData
+      return (this.inputEl.files && this.inputEl.files.length) ? this.inputEl.files[0] : '';
+    }
     if (this.field.type === 'toggle') {
       return !!this.inputEl.checked;
     }
@@ -713,6 +722,7 @@ class AiToolInstance {
     this.timer = null;
     this.state = 'idle';
     this.jobsList = []; // قائمة جميع jobs
+    this._jobsListVisible = false; // هل سجل "النتائج السابقة" ظاهر؟ (لمنع تكرار الحالة/الأزرار)
     this.currentJobId = null; // job الحالي المعروض
     this.buildCard();
     this.buildModal();
@@ -744,10 +754,11 @@ class AiToolInstance {
     this.statusBadge.className = 'ai-tool-status';
 
     head.appendChild(titleWrap);
-    head.appendChild(this.statusBadge);
 
     const actions = document.createElement('div');
     actions.className = 'ai-tool-actions';
+    actions.appendChild(this.statusBadge); // ✅ الحالة في مكان واحد فقط (بجانب النتيجة)
+    this.actionsRow = actions; // مرجع لإخفاء/إظهار الشريط كاملاً
 
     this.openBtn = document.createElement('button');
     this.openBtn.type = 'button';
@@ -758,39 +769,44 @@ class AiToolInstance {
     this.openBtn.addEventListener('click', () => this.openModal());
 
     this.downloadBtn = document.createElement('a');
-    this.downloadBtn.className = 'btn btn-secondary';
+    this.downloadBtn.className = 'btn btn-secondary ait-icon-btn';
     this.downloadBtn.style.display = 'none';
-    this.downloadBtn.textContent = this.placement.panel?.download_label || 'تنزيل الملف';
+    this.downloadBtn.innerHTML = '<i class="fa-solid fa-download"></i>';
+    this.downloadBtn.title = this.placement.panel?.download_label || 'تنزيل';
     this.downloadBtn.target = '_blank';
     this.downloadBtn.rel = 'noopener';
 
     this.resultBtn = document.createElement('button');
     this.resultBtn.type = 'button';
-    this.resultBtn.className = 'btn btn-secondary ai-tool-result-btn';
+    this.resultBtn.className = 'btn btn-secondary ai-tool-result-btn ait-icon-btn';
     this.resultBtn.style.display = 'none';
-    this.resultBtn.textContent = 'عرض النتيجة';
+    this.resultBtn.innerHTML = '<i class="fa-regular fa-eye"></i>';
+    this.resultBtn.title = 'معاينة النتيجة';
     this.resultBtn.addEventListener('click', () => this.showResult());
 
     // زر الحذف (فقط للأدمن في وضع الاستعراض)
     this.deleteBtn = document.createElement('button');
     this.deleteBtn.type = 'button';
-    this.deleteBtn.className = 'ai-tool-delete-btn';
+    this.deleteBtn.className = 'ai-tool-delete-btn ait-icon-btn';
     this.deleteBtn.style.display = 'none';
-    this.deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i> حذف الطلب';
+    this.deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+    this.deleteBtn.title = 'حذف الطلب';
     this.deleteBtn.addEventListener('click', () => this.deleteJob());
 
     this.retryBtn = document.createElement('button');
     this.retryBtn.type = 'button';
-    this.retryBtn.className = 'btn btn-secondary ai-tool-retry-btn';
+    this.retryBtn.className = 'btn btn-secondary ai-tool-retry-btn ait-icon-btn';
     this.retryBtn.style.display = 'none';
-    this.retryBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> إعادة التوليد';
+    this.retryBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i>';
+    this.retryBtn.title = 'إعادة التوليد';
     this.retryBtn.addEventListener('click', () => this.rebuildJob());
 
     this.rebuildFileBtn = document.createElement('button');
     this.rebuildFileBtn.type = 'button';
-    this.rebuildFileBtn.className = 'btn btn-secondary ai-tool-rebuild-file-btn';
+    this.rebuildFileBtn.className = 'btn btn-secondary ai-tool-rebuild-file-btn ait-icon-btn';
     this.rebuildFileBtn.style.display = 'none';
-    this.rebuildFileBtn.innerHTML = '<i class="fa-solid fa-file-word"></i> إعادة بناء الملف';
+    this.rebuildFileBtn.innerHTML = '<i class="fa-solid fa-file-word"></i>';
+    this.rebuildFileBtn.title = 'إعادة بناء الملف';
     this.rebuildFileBtn.addEventListener('click', () => this.rebuildDocxJob());
 
 
@@ -810,7 +826,7 @@ class AiToolInstance {
     this.downloadsContainer.className = 'ai-tool-downloads-container';
     this.downloadsContainer.style.cssText = 'display: none; gap: 8px; flex-wrap: wrap; align-items: center;';
 
-    actions.appendChild(this.openBtn);
+    head.appendChild(this.openBtn); // ✅ زر التشغيل في الترويسة — متاح دائماً لإرسال أكثر من طلب
     actions.appendChild(this.downloadBtn);
     actions.appendChild(this.downloadsContainer);
     actions.appendChild(this.resultBtn);
@@ -829,7 +845,14 @@ class AiToolInstance {
 
     card.appendChild(head);
     card.appendChild(this.jobsListContainer);
-    card.appendChild(actions);
+
+    // ✅ حاوية عرض النتيجة (inline) — قبل شريط الحالة والإجراءات
+    this.resultInline = document.createElement('div');
+    this.resultInline.className = 'ai-tool-result-inline';
+    this.resultInline.style.display = 'none';
+    card.appendChild(this.resultInline);
+
+    card.appendChild(actions); // الحالة + أزرار أيقونية أسفل النتيجة
 
     // Badges للمعلومات
     const badgesContainer = document.createElement('div');
@@ -944,7 +967,6 @@ class AiToolInstance {
     // قسم معلومات النقاط والاشتراك
     this.infoSection = document.createElement('div');
     this.infoSection.className = 'ai-modal-info-section';
-    this.infoSection.style.cssText = 'padding: 12px 16px; background: #f7f9fc; border-top: 1px solid #e4e7ec; border-bottom: 1px solid #e4e7ec; font-size: 0.9rem;';
     this.updateInfoSection();
     form.appendChild(this.infoSection);
 
@@ -1350,9 +1372,9 @@ class AiToolInstance {
 
       // روابط سريعة (كأزرار للتنقل إلى sections)
       html += `<div style="display: flex; gap: 10px;">`;
-      html += `<button type="button" class="ai-info-link-btn" data-section="rewards" style="background: none; border: none; color: #219ebc; text-decoration: none; font-size: 0.85rem; cursor: pointer; padding: 0;">عرض رصيد النقاط</button>`;
+      html += `<button type="button" class="ai-info-link-btn" data-href="https://auth.howplatform.net/profile?active=points">عرض رصيد النقاط</button>`;
       if (!subscriptionStatus.active) {
-        html += `<button type="button" class="ai-info-link-btn" data-section="upgrade" style="background: none; border: none; color: #219ebc; text-decoration: none; font-size: 0.85rem; cursor: pointer; padding: 0;">الاشتراك الآن</button>`;
+        html += `<button type="button" class="ai-info-link-btn" data-href="https://auth.howplatform.net/profile?active=plans">الاشتراك الآن</button>`;
       }
       html += `</div>`;
       html += `</div>`;
@@ -1365,6 +1387,13 @@ class AiToolInstance {
       linkButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.preventDefault();
+          // النقاط/الاشتراكات صارت في الصفحة الموحّدة (بروفايل أوث) — رابط خارجي
+          const href = btn.getAttribute('data-href');
+          if (href) {
+            this.closeModal();
+            window.location.href = href;
+            return;
+          }
           const section = btn.getAttribute('data-section');
           if (section) {
             this.closeModal();
@@ -1919,6 +1948,36 @@ class AiToolInstance {
           this.refreshStatus({ withSpinner: false });
           return;
         }
+      } else if (this.typeKey === 'formative_essay_evaluator_v1' || this.typeKey === 'final_essay_evaluator_v1') {
+        // رفع ملف المقالة .docx (غير متزامن) → /request-file دائماً (مستقلّ عن كشف hasFiles)
+        // ثم متابعة كمسار accepted العادي. الخادم يتحقّق من صلاحية الملف.
+        const formData = new FormData();
+        formData.append('task_id', this.context.taskId);
+        formData.append('type_key', this.typeKey);
+        for (const [key, value] of Object.entries(payload)) {
+          if (key === 'type_key' || key === 'task_id') continue;
+          formData.append(key, value);
+        }
+        res = await fetch(`${API_BASE}/request-file`, {
+          method: 'POST',
+          credentials: 'include',
+          body: formData,
+        });
+        json = await res.json().catch(() => ({}));
+      } else if (this.typeKey === 'inquiry_poster_v1') {
+        // رفع البحث الاستقصائي (PDF/Word/صورة) → /request-poster (غير متزامن) ثم متابعة كمسار accepted.
+        const formData = new FormData();
+        formData.append('task_id', this.context.taskId);
+        for (const [key, value] of Object.entries(payload)) {
+          if (key === 'type_key' || key === 'task_id') continue;
+          formData.append(key, value);
+        }
+        res = await fetch(`${API_BASE}/request-poster`, {
+          method: 'POST',
+          credentials: 'include',
+          body: formData,
+        });
+        json = await res.json().catch(() => ({}));
       } else {
         // الطريقة العادية (JSON)
         res = await fetch(`${API_BASE}/request`, {
@@ -1955,9 +2014,10 @@ class AiToolInstance {
         return;
       }
 
-      if (res.status === 409 && json.status === 'already_active') {
+      if (json.status === 'already_active') {
         this.closeModal();
-        notifyUser('info', 'لديك طلب فعّال بالفعل لهذه المهمة.');
+        notifyUser('info', 'طلبك قيد المعالجة بالفعل لهذه المهمة.');
+        this.currentJobId = null;
         this.refreshStatus({ withSpinner: true });
         return;
       }
@@ -1976,7 +2036,7 @@ class AiToolInstance {
         return;
       }
 
-      notifyUser('error', json.message || 'تعذّر تنفيذ الطلب. حاول لاحقاً.');
+      notifyUser('error', json.message || (json && json.messages && json.messages.error) || 'تعذّر تنفيذ الطلب. حاول لاحقاً.');
     } catch (err) {
       console.error('[ai-tools] request error', err);
       notifyUser('error', 'حدث خطأ أثناء الاتصال بالخادم.');
@@ -2040,7 +2100,7 @@ class AiToolInstance {
       // تحديث currentJobId ليتناسب مع الطالب الحالي إذا كان موجوداً في القائمة
       if (studentId && this.jobsList.length > 0) {
         const matchedJob = this.jobsList.find(job => {
-          if (this.typeKey === 'inquiry_report_evaluator_v1') {
+          if (['inquiry_report_evaluator_v1', 'final_essay_evaluator_v1'].includes(this.typeKey)) {
             return String(job.student_id) === String(studentId);
           } else {
             return String(job.student_number) === String(studentId);
@@ -2149,10 +2209,29 @@ class AiToolInstance {
       }
     }
 
+    // ✅ منع تكرار الحالة/الأزرار: عند ظهور سجل "النتائج السابقة" (نتائج متعددة)
+    // تُعرض الحالة والأزرار داخل كل عنصر بالسجل، فنخفي شريط البطاقة الرئيسي ونتيجتها الداخلية.
+    const jobsListVisible = this._jobsListVisible === true;
+    if (this.actionsRow) this.actionsRow.style.display = jobsListVisible ? 'none' : 'flex';
+    if (jobsListVisible) {
+      if (this.resultInline) { this.resultInline.style.display = 'none'; this.resultInline.innerHTML = ''; this._inlineRenderedJob = null; }
+      this.openBtn.disabled = (state === 'processing' || state === 'pending');
+      document.body.classList.toggle('ai-tool-processing', state === 'processing' || state === 'pending');
+      if ((state === 'processing' || state === 'pending') && !this.timer) {
+        this.timer = setTimeout(() => this.refreshStatus({ silent: true }), 15000);
+      }
+      return;
+    }
+
     this.downloadBtn.style.display = 'none';
     if (this.downloadsContainer) {
       this.downloadsContainer.style.display = 'none';
       this.downloadsContainer.innerHTML = '';
+    }
+    if (this.resultInline && state !== 'done') {
+      this.resultInline.style.display = 'none';
+      this.resultInline.innerHTML = '';
+      this._inlineRenderedJob = null;
     }
     this.resultBtn.style.display = 'none';
     if (this.deleteBtn) {
@@ -2184,11 +2263,33 @@ class AiToolInstance {
           if (window.__IS_ADMIN_VIEWING_AS_STUDENT__ === true && this.deleteBtn) {
             this.deleteBtn.style.display = 'inline-flex';
           }
+        } else if (this.typeKey === 'inquiry_poster_v1' && downloadUrl) {
+          // بوستر البحث الاستقصائي: زر تنزيل الصورة + زر معاينة البوستر
+          this.downloadBtn.href = downloadUrl;
+          this.downloadBtn.style.display = 'inline-flex';
+          this.resultBtn.style.display = 'inline-flex'; // معاينة الصورة
+          if (window.__IS_ADMIN_VIEWING_AS_STUDENT__ === true && this.deleteBtn) {
+            this.deleteBtn.style.display = 'inline-flex';
+          }
+        } else if (this.typeKey === 'formative_essay_evaluator_v1' && files && Array.isArray(files) && files.length > 0) {
+          // التقييم التكويني: زر واحد يُنزّل كل الملفات (Word + PDF) + زر العرض
+          this.downloadsContainer.style.display = 'flex';
+          this.downloadsContainer.innerHTML = '';
+          const dlAllBtn = document.createElement('button');
+          dlAllBtn.type = 'button';
+          dlAllBtn.className = 'btn btn-secondary';
+          dlAllBtn.innerHTML = `<i class="fa-solid fa-download"></i> تنزيل جميع الملفات (${files.length})`;
+          dlAllBtn.addEventListener('click', () => this._downloadAllFormative(files.map(f => f.url)));
+          this.downloadsContainer.appendChild(dlAllBtn);
+          this.resultBtn.style.display = 'inline-flex';
+          if (window.__IS_ADMIN_VIEWING_AS_STUDENT__ === true && this.deleteBtn) {
+            this.deleteBtn.style.display = 'inline-flex';
+          }
         } else if (files && Array.isArray(files) && files.length > 0) {
           // أدوات ترجع عدة ملفات (مثل test_design_v1)
           this.downloadsContainer.style.display = 'flex';
           this.resultBtn.style.display = 'none';
-          
+
           files.forEach(file => {
             const btn = document.createElement('a');
             btn.className = 'btn btn-secondary';
@@ -2227,13 +2328,22 @@ class AiToolInstance {
           // زر إعادة التوليد بالذكاء الاصطناعي للأدمن فقط
           if (window.__IS_ADMIN_VIEWING_AS_STUDENT__ === true) {
             this.retryBtn.style.display = 'inline-flex';
-            this.retryBtn.className = 'btn btn-secondary ai-tool-retry-btn';
-            this.retryBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> إعادة التوليد (AI)';
+            this.retryBtn.className = 'btn btn-secondary ai-tool-retry-btn ait-icon-btn';
+            this.retryBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i>';
+            this.retryBtn.title = 'إعادة التوليد (AI)';
           }
-          // زر إعادة بناء الملف للجميع
-          this.rebuildFileBtn.style.display = 'inline-flex';
+          // زر إعادة بناء الملف للجميع — يُخفى للأدوات التي تبني ملفاتها عند الاعتماد (لا قالب لإعادة البناء)
+          if (!['formative_essay_evaluator_v1', 'final_essay_evaluator_v1'].includes(this.typeKey)) {
+            this.rebuildFileBtn.style.display = 'inline-flex';
+          }
         }
 
+
+        // ✅ عرض النتيجة داخل البطاقة (inline) لكل الأنواع — صورة/ملف/ملفات/نصوص
+        if (this.currentJobId && this._inlineRenderedJob !== this.currentJobId) {
+          this._inlineRenderedJob = this.currentJobId;
+          this.renderInlineResult();
+        }
 
         // لأداة المنتدى: إظهار زر "كتابة رد على إجابة أحد الزملاء" بعد إنشاء الرد الأول
         if (this.typeKey === 'forum_reply_v1' && this.commentReplyBtn) {
@@ -2570,11 +2680,100 @@ class AiToolInstance {
       
       const jobId = json.job_id || this.currentJobId;
       console.log('[ai-tools] Rendering review modal for job:', jobId);
+      if (this.typeKey === 'formative_essay_evaluator_v1') {
+        this._renderFormativeReviewModal(json.evaluation_data, jobId);
+        return;
+      }
       this._renderReviewModal(json.evaluation_data, jobId);
     } catch (err) {
       console.error('[ai-tools] review modal error', err);
       notifyUser('error', 'تعذّر تحميل بيانات التقييم: ' + err.message);
     }
+  }
+
+  /**
+   * ✅ مودال مراجعة التقييم التكويني (بلا درجات) — formative_essay_evaluator_v1
+   * يعرض المجالات الأربعة (Gibbs) والتعليقات، وزر اعتماد → /approve-formative.
+   */
+  _renderFormativeReviewModal(evalData, jobId) {
+    const report = (evalData && evalData.report) || {};
+    const annotations = (evalData && evalData.annotations) || [];
+    const domains = [
+      ['knowledge_understanding_application', 'المعرفة والفهم والتطبيق'],
+      ['cognitive_skills', 'المهارات المعرفية (التفكير الناقد والتأمّل)'],
+      ['professional_skills', 'المهارات المهنية وأصول التدريس'],
+      ['presentation', 'العرض والتقديم'],
+    ];
+    const stages = [
+      ['what_happened', 'الوصف'], ['feelings', 'المشاعر'], ['evaluation', 'التقييم'],
+      ['analysis', 'التحليل'], ['conclusion', 'الاستنتاج'], ['action_plan', 'خطة العمل'],
+    ];
+    const esc = (s) => String(s == null ? '' : s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
+    let domainsHtml = '';
+    domains.forEach(([k, label]) => {
+      const d = report[k] || {};
+      let rows = '';
+      stages.forEach(([sk, sl]) => {
+        const v = String(d[sk] || '').trim();
+        if (v) rows += `<div style="margin-bottom:6px;line-height:1.7;"><b style="color:#374151;">${sl}:</b> ${esc(v)}</div>`;
+      });
+      domainsHtml += `<div style="margin:10px 0;padding:12px;border:1px solid #e5e7eb;border-radius:8px;"><h4 style="margin:0 0 8px;color:#2E75B6;">${label}</h4>${rows || '<i style="color:#9ca3af;">—</i>'}</div>`;
+    });
+    const actions = Array.isArray(report.overall_suggested_actions) ? report.overall_suggested_actions : [];
+    const actionsHtml = actions.length
+      ? `<div style="margin:10px 0;padding:12px;border:1px solid #e5e7eb;border-radius:8px;"><h4 style="margin:0 0 8px;color:#2E75B6;">الإجراءات الكلّية المقترحة</h4><ul style="margin:0;padding-inline-start:20px;line-height:1.8;">${actions.map(a => `<li>${esc(a)}</li>`).join('')}</ul></div>`
+      : '';
+    const annHtml = `<div style="margin:10px 0;padding:12px;border:1px solid #e5e7eb;border-radius:8px;"><h4 style="margin:0 0 8px;color:#2E75B6;">التعليقات على المقالة (${annotations.length})</h4>${annotations.map(a => `<div style="margin-bottom:8px;padding:8px 10px;background:#f9fafb;border-radius:6px;line-height:1.7;"><b>«${esc(a.anchor_text || '')}»</b><br>${esc(a.comment || '')}</div>`).join('') || '<i style="color:#9ca3af;">لا توجد تعليقات</i>'}</div>`;
+
+    const root = document.getElementById('ai-tools-modals-root') || document.body;
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.innerHTML = `
+      <div style="background:#fff;max-width:880px;width:100%;max-height:90vh;overflow:auto;border-radius:12px;direction:rtl;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;">
+          <h3 style="margin:0;color:#1F4E79;">مراجعة التقييم التكويني للمقالة</h3>
+          <button type="button" id="fmrv-close" style="border:none;background:#f3f4f6;border-radius:8px;padding:6px 12px;cursor:pointer;">إغلاق</button>
+        </div>
+        <div style="padding:16px 18px;">
+          <p style="color:#6b7280;margin-top:0;">راجِع التغذية الراجعة والتعليقات ثم اعتمدها لبناء ملفّي Word: المقالة الأصلية مع التعليقات + تقرير التقييم.</p>
+          ${domainsHtml}${actionsHtml}${annHtml}
+        </div>
+        <div style="display:flex;gap:10px;padding:14px 18px;border-top:1px solid #eee;position:sticky;bottom:0;background:#fff;">
+          <button type="button" id="fmrv-approve" style="background:#2E75B6;color:#fff;border:none;border-radius:8px;padding:10px 18px;cursor:pointer;font-weight:bold;">اعتماد وبناء الملفات</button>
+          <button type="button" id="fmrv-cancel" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:10px 18px;cursor:pointer;">إلغاء</button>
+        </div>
+      </div>`;
+    root.appendChild(overlay);
+    const close = () => overlay.remove();
+    overlay.querySelector('#fmrv-close').addEventListener('click', close);
+    overlay.querySelector('#fmrv-cancel').addEventListener('click', close);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    overlay.querySelector('#fmrv-approve').addEventListener('click', async () => {
+      const btn = overlay.querySelector('#fmrv-approve');
+      btn.disabled = true; btn.textContent = 'جارٍ بناء الملفات…';
+      try {
+        const res = await fetch(`${API_BASE}/approve-formative`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ job_id: jobId }),
+        });
+        const j = await res.json().catch(() => ({}));
+        if (res.status === 200 && j.ok) {
+          close();
+          notifyUser('success', j.message || 'تم الاعتماد وبناء الملفات.');
+          this.applyState('done', '', j.download_url || null, jobId, j.files || null);
+          this.refreshStatus({ withSpinner: false });
+        } else {
+          btn.disabled = false; btn.textContent = 'اعتماد وبناء الملفات';
+          notifyUser('error', j.message || (j.messages && j.messages.error) || 'فشل الاعتماد.');
+        }
+      } catch (e) {
+        btn.disabled = false; btn.textContent = 'اعتماد وبناء الملفات';
+        notifyUser('error', 'تعذّر الاعتماد: ' + e.message);
+      }
+    });
   }
 
   _renderReviewModal(evalData, jobId) {
@@ -2822,6 +3021,87 @@ class AiToolInstance {
   }
 
 
+  /**
+   * ✅ عرض النتيجة داخل بطاقة الأداة (inline) — يجلب النتيجة ويعرضها حسب نوعها:
+   * صورة / ملف واحد / عدّة ملفات / نصوص. الأنواع المعقّدة (تقييمات) تبقى بزر تفاصيل.
+   */
+  async renderInlineResult() {
+    const box = this.resultInline;
+    if (!box) return;
+    box.style.display = 'block';
+    box.innerHTML = '<div class="ai-inline-loading"><span class="status-spinner"></span> جارٍ تحميل النتيجة…</div>';
+    try {
+      const studentId = this.getStudentIdentifierForJob?.(this.currentJobId) || this.getStudentIdentifier();
+      const qs = new URLSearchParams({ type_key: this.typeKey, task_id: this.context.taskId });
+      if (studentId) qs.set('student_id', studentId);
+      if (this.currentJobId) qs.set('job_id', this.currentJobId);
+      const res = await fetch(`${API_BASE}/result?${qs.toString()}`, {
+        credentials: 'include', headers: { 'Accept': 'application/json' },
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!json?.ok || json.state !== 'done') { box.style.display = 'none'; return; }
+      let data = json.result || {};
+      if (typeof data === 'string') { try { data = JSON.parse(data); } catch { /* keep */ } }
+      box.innerHTML = '';
+      box.appendChild(this._buildInlineResult(data, json));
+      box.style.display = 'block';
+    } catch (e) {
+      console.warn('[ai-tools] inline result failed', e);
+      box.style.display = 'none';
+    }
+  }
+
+  /** يبني عقدة عرض النتيجة inline حسب النوع. */
+  _buildInlineResult(result, json) {
+    const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const wrap = document.createElement('div');
+    wrap.className = 'ai-inline-card';
+    const files = Array.isArray(json.files) ? json.files : [];
+    const downloadUrl = json.download_url || '';
+    const view = this.placement.result_view || {};
+
+    // 1) صورة (البوستر أو أي ناتج صورة)
+    const imgUrl = (this.typeKey === 'inquiry_poster_v1') ? (downloadUrl || (files[0] && files[0].url) || '') : '';
+    if (imgUrl) {
+      // الصورة فقط (الأزرار الأيقونية: معاينة/تنزيل تظهر أسفلها في شريط الإجراءات)
+      wrap.innerHTML = `<a href="${esc(imgUrl)}" target="_blank" rel="noopener" class="ai-inline-imgwrap"><img src="${esc(imgUrl)}" alt="النتيجة" loading="lazy"></a>`;
+      return wrap;
+    }
+
+    // 2) عدّة ملفات
+    if (files.length) {
+      wrap.innerHTML = `<div class="ai-inline-files">${files.map(f =>
+        `<a class="ai-inline-file" href="${esc(f.url)}" target="_blank" rel="noopener"><i class="fa-solid fa-file-arrow-down"></i> <span>${esc(f.name || 'ملف')}</span></a>`
+      ).join('')}</div>`;
+      return wrap;
+    }
+
+    // 3) ملف واحد (Word/PDF…)
+    if (downloadUrl) {
+      wrap.innerHTML = `<div class="ai-inline-files"><a class="ai-inline-file" href="${esc(downloadUrl)}" target="_blank" rel="noopener"><i class="fa-solid fa-file-arrow-down"></i> <span>${esc(this.placement.panel?.download_label || 'تنزيل الملف')}</span></a></div>`;
+      return wrap;
+    }
+
+    // 4) نصوص / حقول JSON
+    const fields = Array.isArray(view.fields) ? view.fields : Object.keys(result || {}).map(k => ({ key: k, label: k }));
+    let html = '';
+    fields.forEach(f => {
+      if (!f.key) return;
+      let v = result ? result[f.key] : undefined;
+      if (v === undefined || v === null || v === '') return;
+      if (Array.isArray(v)) v = v.filter(x => x != null && x !== '').join('، ');
+      if (typeof v !== 'string') v = String(v);
+      if (!v.trim()) return;
+      html += `<div class="ai-inline-field">${f.label ? `<h5>${esc(f.label)}</h5>` : ''}<div>${esc(v).replace(/\n/g, '<br>')}</div></div>`;
+    });
+    if (html) { wrap.innerHTML = html; return wrap; }
+
+    // 5) احتياط: زر تفاصيل (للأنواع المعقّدة كالتقييمات)
+    wrap.innerHTML = `<button type="button" class="btn btn-secondary ai-inline-open"><i class="fa-solid fa-eye"></i> عرض التفاصيل</button>`;
+    wrap.querySelector('.ai-inline-open').addEventListener('click', () => this.showResult());
+    return wrap;
+  }
+
   async showResult() {
     const studentId = this.getStudentIdentifierForJob(this.currentJobId) || this.getStudentIdentifier();
     const qs = new URLSearchParams({
@@ -2851,6 +3131,11 @@ class AiToolInstance {
         try { data = JSON.parse(data); } catch { /* keep as-is */ }
       }
 
+      // لبوستر البحث الاستقصائي: مرّر رابط الصورة (من download_url أو أول ملف) للمعاينة
+      if (this.typeKey === 'inquiry_poster_v1' && data && typeof data === 'object') {
+        data.__poster_url = json.download_url || (Array.isArray(json.files) && json.files[0] ? json.files[0].url : '') || '';
+      }
+
       // لأداة المنتدى: جلب ردود التعليقات أيضاً
       let comments = [];
       if (this.typeKey === 'forum_reply_v1') {
@@ -2875,6 +3160,121 @@ class AiToolInstance {
     }
   }
 
+  /**
+   * ✅ يُطلق تنزيل عدّة ملفات (Word + PDF) عبر روابط download-attach بفاصل زمني لتفادي حجب المتصفّح.
+   */
+  _downloadAllFormative(urls) {
+    const list = (urls || []).filter(Boolean);
+    if (!list.length) return;
+    list.forEach((url, i) => {
+      setTimeout(() => {
+        const a = document.createElement('a');
+        a.href = url;
+        a.rel = 'noopener';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }, i * 700);
+    });
+    notifyUser('info', `جارٍ تنزيل ${list.length} ملفات (Word + PDF)...`);
+  }
+
+  /**
+   * ✅ معاينة بوستر البحث الاستقصائي (صورة) مع زر تنزيل.
+   */
+  _renderPosterResultModal(posterUrl) {
+    if (!posterUrl) {
+      notifyUser('info', 'تعذّر العثور على صورة البوستر.');
+      return;
+    }
+    const root = document.getElementById('ai-tools-modals-root') || document.body;
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.innerHTML = `
+      <div style="background:#fff;max-width:1100px;width:100%;max-height:92vh;overflow:auto;border-radius:12px;direction:rtl;box-shadow:0 10px 40px rgba(0,0,0,0.35);">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;">
+          <h3 style="margin:0;font-size:1.05rem;color:#0a3247;"><i class="fa-solid fa-image"></i> بوستر البحث الاستقصائي</h3>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <a href="${posterUrl}" download rel="noopener" style="background:#2E75B6;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-weight:bold;text-decoration:none;"><i class="fa-solid fa-download"></i> تنزيل الصورة</a>
+            <button type="button" id="poster-close" style="background:#e5e7eb;border:none;border-radius:8px;padding:9px 16px;cursor:pointer;">إغلاق</button>
+          </div>
+        </div>
+        <div style="padding:16px;text-align:center;background:#f3f4f6;">
+          <img src="${posterUrl}" alt="بوستر البحث الاستقصائي" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.15);" />
+        </div>
+      </div>`;
+    const close = () => overlay.remove();
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    overlay.querySelector('#poster-close')?.addEventListener('click', close);
+    root.appendChild(overlay);
+  }
+
+  /** يبني قائمة روابط الملفات الأربعة من معرّفات النتيجة. */
+  _formativeFiles(result) {
+    const defs = [
+      [result && result.file_report_id, 'تقرير التغذية الراجعة البنائي (Word)'],
+      [result && result.file_report_pdf_id, 'تقرير التغذية الراجعة البنائي (PDF)'],
+      [result && result.file_annotated_id, 'المقالة الأصلية مع التعليقات (Word)'],
+      [result && result.file_annotated_pdf_id, 'المقالة الأصلية مع التعليقات (PDF)'],
+    ];
+    return defs.filter(x => x[0]).map(x => ({ url: `${API_BASE}/download-attach/${x[0]}`, name: x[1] }));
+  }
+
+  /**
+   * ✅ عرض نتيجة مقيّم المقالة التكويني: زر واحد لتنزيل الملفات الأربعة + عرض المجالات والتعليقات.
+   */
+  _renderFormativeResultModal(result) {
+    const report = (result && result.report) || {};
+    const annotations = (result && result.annotations) || [];
+    const esc = (s) => String(s == null ? '' : s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+    const files = this._formativeFiles(result);
+    const domains = [
+      ['knowledge_understanding_application', 'المعرفة والفهم والتطبيق'],
+      ['cognitive_skills', 'المهارات المعرفية (التفكير الناقد والتأمّل)'],
+      ['professional_skills', 'المهارات المهنية وأصول التدريس'],
+      ['presentation', 'العرض والتقديم'],
+    ];
+    let domainsHtml = '';
+    domains.forEach(([k, label]) => {
+      const d = report[k] || {};
+      domainsHtml += `<div style="margin:10px 0;padding:12px;border:1px solid #e5e7eb;border-radius:8px;">
+        <h4 style="margin:0 0 8px;color:#2E75B6;">${label}</h4>
+        <div style="margin-bottom:6px;line-height:1.7;"><b style="color:#15803d;">نقاط القوّة:</b> ${esc((d.strengths || '').toString().trim()) || '<i style="color:#9ca3af;">—</i>'}</div>
+        <div style="line-height:1.7;"><b style="color:#b45309;">مجالات التحسين:</b> ${esc((d.areas_for_improvement || '').toString().trim()) || '<i style="color:#9ca3af;">—</i>'}</div>
+      </div>`;
+    });
+    const overall = (report.overall_suggested_actions || '').toString().trim();
+    const overallHtml = overall ? `<div style="margin:10px 0;padding:12px;border:1px solid #e5e7eb;border-radius:8px;"><h4 style="margin:0 0 8px;color:#2E75B6;">الإجراءات الإجماليّة المُقترحة</h4><div style="line-height:1.7;">${esc(overall)}</div></div>` : '';
+    const annHtml = `<div style="margin:10px 0;padding:12px;border:1px solid #e5e7eb;border-radius:8px;"><h4 style="margin:0 0 8px;color:#2E75B6;">التعليقات على المقالة (${annotations.length})</h4>${annotations.map(a => `<div style="margin-bottom:8px;padding:8px 10px;background:#f9fafb;border-radius:6px;line-height:1.7;">${esc(a.comment || '').replace(/\n/g, '<br>')}</div>`).join('') || '<i style="color:#9ca3af;">—</i>'}</div>`;
+
+    const dlAllBtn = files.length
+      ? `<button type="button" id="fmrs-dlall" style="background:#2E75B6;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-weight:bold;cursor:pointer;"><i class="fa-solid fa-download"></i> تنزيل جميع الملفات (${files.length})</button>`
+      : '';
+    const fileLinks = files.map(f => `<a href="${f.url}" rel="noopener" style="color:#2E75B6;text-decoration:none;font-size:0.88rem;white-space:nowrap;"><i class="fa-solid fa-file-arrow-down"></i> ${esc(f.name)}</a>`).join('');
+
+    const root = document.getElementById('ai-tools-modals-root') || document.body;
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.innerHTML = `
+      <div style="background:#fff;max-width:880px;width:100%;max-height:90vh;overflow:auto;border-radius:12px;direction:rtl;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;">
+          <h3 style="margin:0;color:#1F4E79;">مخرجات التقييم التكويني</h3>
+          <button type="button" id="fmrs-close" style="border:none;background:#f3f4f6;border-radius:8px;padding:6px 12px;cursor:pointer;">إغلاق</button>
+        </div>
+        <div style="padding:14px 18px;border-bottom:1px solid #eee;">
+          <div style="margin-bottom:10px;">${dlAllBtn}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:14px;">${fileLinks}</div>
+        </div>
+        <div style="padding:16px 18px;">${domainsHtml}${overallHtml}${annHtml}</div>
+      </div>`;
+    root.appendChild(overlay);
+    const close = () => overlay.remove();
+    overlay.querySelector('#fmrs-close').addEventListener('click', close);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    const dlall = overlay.querySelector('#fmrs-dlall');
+    if (dlall) dlall.addEventListener('click', () => this._downloadAllFormative(files.map(f => f.url)));
+  }
+
   renderResultModal(result, comments = []) {
     ensureStyles();
 
@@ -2891,9 +3291,22 @@ class AiToolInstance {
       return;
     }
 
-    // معالجة خاصة لتقييم تقرير البحث الاستقصائي
-    if (cleanTypeKey === 'inquiry_report_evaluator_v1') {
+    // معالجة خاصة لتقييم تقرير البحث الاستقصائي / المقالة التأملية الختامية (نفس هيكل النتيجة)
+    if (cleanTypeKey === 'inquiry_report_evaluator_v1' || cleanTypeKey === 'final_essay_evaluator_v1') {
       this.renderInquiryReportEvaluatorResult(result);
+      return;
+    }
+
+    // ✅ معالجة خاصة لمقيّم المقالة التكويني (تقرير + مقالة مُعلَّقة)
+    if (cleanTypeKey === 'formative_essay_evaluator_v1') {
+      this._renderFormativeResultModal(result);
+      return;
+    }
+
+    // ✅ بوستر البحث الاستقصائي: معاينة الصورة الناتجة
+    if (cleanTypeKey === 'inquiry_poster_v1') {
+      const posterUrl = (result && (result.__poster_url || (result.file_poster_id ? `${API_BASE}/download/${result.file_poster_id}` : ''))) || '';
+      this._renderPosterResultModal(posterUrl);
       return;
     }
 
@@ -3954,6 +4367,34 @@ class AiToolInstance {
   /**
    * بناء واجهة قائمة Jobs
    */
+  /** يجلب مقتطف نصّي (سطران) لنتيجة نصّية ويعرضه في عنصر المعاينة. */
+  async _fillTextSnippet(jobId, el) {
+    if (!el) return;
+    try {
+      const qs = new URLSearchParams({ type_key: this.typeKey, task_id: this.context.taskId, job_id: jobId });
+      const res = await fetch(`${API_BASE}/result?${qs.toString()}`, { credentials: 'include', headers: { 'Accept': 'application/json' } });
+      const json = await res.json().catch(() => ({}));
+      let data = json.result || {};
+      if (typeof data === 'string') { try { data = JSON.parse(data); } catch { /* keep */ } }
+      const view = this.placement.result_view || {};
+      const fields = Array.isArray(view.fields) ? view.fields : Object.keys(data || {}).map(k => ({ key: k }));
+      let txt = '';
+      for (const f of fields) {
+        if (!f.key) continue;
+        let v = data ? data[f.key] : undefined;
+        if (v === undefined || v === null || v === '') continue;
+        if (Array.isArray(v)) v = v.filter(x => x != null && x !== '').join('، ');
+        v = String(v).trim();
+        if (!v) continue;
+        txt += (txt ? ' • ' : '') + v;
+        if (txt.length > 240) break;
+      }
+      el.textContent = txt || 'نتيجة نصّية — اضغط «عرض» للتفاصيل.';
+    } catch (e) {
+      el.textContent = 'نتيجة نصّية — اضغط «عرض» للتفاصيل.';
+    }
+  }
+
   buildJobsListUI() {
     if (!this.jobsListContainer) return;
 
@@ -3968,8 +4409,18 @@ class AiToolInstance {
       };
     }
 
+    // ✅ المكوّن الموحّد: لا نتائج (وليس بحثاً) → لا سجل، والبطاقة تُظهر زر الإنشاء فقط
+    if ((!this.jobsList || this.jobsList.length === 0) && !this.jobsPagination.search) {
+      this.jobsListContainer.style.display = 'none';
+      this.jobsListContainer.innerHTML = '';
+      this._jobsListVisible = false;
+      return;
+    }
+
+    // نتيجة واحدة أو أكثر → تُعرض بنفس الإطار الموحّد
     this.jobsListContainer.style.display = 'block';
     this.jobsListContainer.innerHTML = '';
+    this._jobsListVisible = true; // حالة/أزرار البطاقة الرئيسية تُخفى (تُعرض داخل العنصر الموحّد)
 
     // Header مع البحث
     const header = document.createElement('div');
@@ -3978,11 +4429,11 @@ class AiToolInstance {
 
     const headerTitle = document.createElement('div');
     headerTitle.style.cssText = 'display: flex; align-items: center; gap: 8px;';
-    headerTitle.innerHTML = `<i class="fa-solid fa-clock-rotate-left"></i> <span>النتائج السابقة (${this.jobsPagination.total || 0})</span>`;
+    headerTitle.innerHTML = `<i class="fa-solid fa-clock-rotate-left"></i> <span>النتائج (${this.jobsPagination.total || (this.jobsList ? this.jobsList.length : 0)})</span>`;
     header.appendChild(headerTitle);
 
-    // حقل البحث (لمقيم المقالات، مقيم التقرير الاستقصائي، ومقيم الخطة الاستقصائية)
-    if (['article_evaluator_v1', 'inquiry_report_evaluator_v1', 'inquiry_plan_evaluator_v1'].includes(this.typeKey)) {
+    // حقل البحث (لمقيم المقالات، مقيم التقرير الاستقصائي، مقيم الخطة الاستقصائية، ومقيم المقالة الختامية)
+    if (['article_evaluator_v1', 'inquiry_report_evaluator_v1', 'inquiry_plan_evaluator_v1', 'final_essay_evaluator_v1'].includes(this.typeKey)) {
       const searchContainer = document.createElement('div');
       searchContainer.style.cssText = 'display: flex; gap: 8px; align-items: center; flex: 1; min-width: 200px; max-width: 300px;';
 
@@ -4053,7 +4504,7 @@ class AiToolInstance {
       const jobNum = document.createElement('span');
       jobNum.className = 'ai-job-item-num';
       // تخصيص العنوان باسم الطالب ورقمه الوزاري/الأكاديمي للأدوات المدعومة
-      if (this.typeKey === 'inquiry_report_evaluator_v1' && job.student_name && job.student_id) {
+      if (['inquiry_report_evaluator_v1', 'formative_essay_evaluator_v1', 'final_essay_evaluator_v1'].includes(this.typeKey) && job.student_name && job.student_id) {
         jobNum.textContent = `${job.student_name} - ${job.student_id}`;
       } else if (['article_evaluator_v1', 'inquiry_plan_evaluator_v1'].includes(this.typeKey) && job.teacher_name && job.student_number) {
         jobNum.textContent = `${job.teacher_name} - ${job.student_number}`;
@@ -4111,7 +4562,26 @@ class AiToolInstance {
         // منطق إظهار الأزرار حسب نوع النتيجة:
         // - إذا كان هناك ملف (download_url) → زر التنزيل + زر التعديل (لمقيم المقالات) + زر التقرير (لمقيم المقالات)
         // - إذا لم يكن هناك ملف → زر العرض + النسخ + زر التعديل (لمقيم المقالات) + زر التقرير (لمقيم المقالات)
-        if (job.download_url) {
+        if (this.typeKey === 'formative_essay_evaluator_v1' && Array.isArray(job.files) && job.files.length) {
+          // التقييم التكويني: زر واحد لتنزيل كل الملفات (Word + PDF) + زر العرض
+          const dlAll = document.createElement('button');
+          dlAll.type = 'button';
+          dlAll.className = 'btn btn-sm btn-secondary';
+          dlAll.style.cssText = 'padding: 6px 14px; font-size: 0.8rem; border-radius: 8px;';
+          dlAll.innerHTML = `<i class="fa-solid fa-download"></i> <span>تنزيل (${job.files.length})</span>`;
+          dlAll.title = 'تنزيل جميع الملفات (Word + PDF)';
+          dlAll.addEventListener('click', (e) => { e.stopPropagation(); this._downloadAllFormative(job.files.map(f => f.url)); });
+          itemActions.appendChild(dlAll);
+
+          const viewBtn = document.createElement('button');
+          viewBtn.type = 'button';
+          viewBtn.className = 'btn btn-sm btn-primary';
+          viewBtn.style.cssText = 'padding: 6px 14px; font-size: 0.8rem; border-radius: 8px;';
+          viewBtn.innerHTML = '<i class="fa-solid fa-eye"></i> <span>عرض</span>';
+          viewBtn.title = 'عرض النتيجة';
+          viewBtn.addEventListener('click', (e) => { e.stopPropagation(); this.showResultForJob(job.id); });
+          itemActions.appendChild(viewBtn);
+        } else if (job.download_url) {
           // يوجد ملف → زر التنزيل
           const downloadBtn = document.createElement('a');
           downloadBtn.href = job.download_url;
@@ -4222,6 +4692,24 @@ class AiToolInstance {
 
       itemHeader.appendChild(itemActions);
       item.appendChild(itemHeader);
+
+      // ✅ معاينة موحّدة حسب النوع (صورة/ملفات/نص) داخل نفس العنصر
+      if (job.status === 'done') {
+        const prev = document.createElement('div');
+        prev.className = 'ai-job-preview';
+        const _imgUrl = (this.typeKey === 'inquiry_poster_v1') ? (job.download_url || '') : '';
+        if (_imgUrl) {
+          prev.innerHTML = `<a href="${_imgUrl}" target="_blank" rel="noopener" class="ai-job-thumb" onclick="event.stopPropagation()"><img src="${_imgUrl}" loading="lazy" alt="النتيجة"></a>`;
+        } else if (Array.isArray(job.files) && job.files.length) {
+          prev.innerHTML = `<div class="ai-job-files">${job.files.map(f => `<a class="ai-job-file" href="${f.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><i class="fa-solid fa-file-arrow-down"></i> <span>${(f.name || 'ملف')}</span></a>`).join('')}</div>`;
+        } else if (job.download_url) {
+          prev.innerHTML = `<div class="ai-job-files"><a class="ai-job-file" href="${job.download_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><i class="fa-solid fa-file-arrow-down"></i> <span>${this.placement.panel?.download_label || 'تنزيل الملف'}</span></a></div>`;
+        } else {
+          prev.innerHTML = `<div class="ai-job-snippet">…</div>`;
+          this._fillTextSnippet(job.id, prev.querySelector('.ai-job-snippet'));
+        }
+        item.appendChild(prev);
+      }
 
       // النقر على العنصر للتبديل إليه
       item.addEventListener('click', () => {
@@ -4363,6 +4851,11 @@ class AiToolInstance {
       let data = json.result || {};
       if (typeof data === 'string') {
         try { data = JSON.parse(data); } catch { /* keep as-is */ }
+      }
+
+      // لبوستر البحث الاستقصائي: مرّر رابط الصورة للمعاينة
+      if (this.typeKey === 'inquiry_poster_v1' && data && typeof data === 'object') {
+        data.__poster_url = json.download_url || (Array.isArray(json.files) && json.files[0] ? json.files[0].url : '') || '';
       }
 
       // لأداة المنتدى: جلب ردود التعليقات أيضاً
@@ -4729,7 +5222,10 @@ class AiToolInstance {
     header.style.cssText = 'flex-shrink:0;';
     const titleEl = document.createElement('div');
     titleEl.className = 'ai-modal-title';
-    titleEl.innerHTML = '<i class="fa-solid fa-clipboard-check"></i> نتيجة تقييم تقرير البحث الاستقصائي';
+    const evalResultTitle = this.typeKey === 'final_essay_evaluator_v1'
+      ? 'نتيجة تقييم المقالة التأملية الختامية'
+      : 'نتيجة تقييم تقرير البحث الاستقصائي';
+    titleEl.innerHTML = `<i class="fa-solid fa-clipboard-check"></i> ${evalResultTitle}`;
 
     const headerActions = document.createElement('div');
     headerActions.style.cssText = 'display:flex; gap:10px; align-items:center';

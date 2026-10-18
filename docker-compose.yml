@@ -91,6 +91,19 @@ services:
       - ./tools.howplatform.net/public_html/.env:/var/www/html/.env:ro
       - ./tools.howplatform.net/public_html/storage:/var/www/html/storage
 
+  plans:
+    <<: *app-common
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.laravel
+      args: { APP_PATH: Plans.howplatform.net/public_html }
+    image: howplatform_plans:latest
+    container_name: howplatform_plans
+    ports: ["127.0.0.1:4116:80"]
+    volumes:
+      - ./Plans.howplatform.net/public_html/.env:/var/www/html/.env:ro
+      - ./Plans.howplatform.net/public_html/storage:/var/www/html/storage
+
   diploma:
     <<: *app-common
     build:

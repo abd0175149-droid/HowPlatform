@@ -62,11 +62,6 @@
                         <i class="fa-solid fa-caret-down" aria-hidden="true"></i>
                     </button>
                     <div class="dropdown-menu" role="menu">
-                        @if (!empty($authUser['is_sales']) && $authUser['is_sales'] == 1)
-                            <a href="{{ url('/pos/dashboard') }}" class="dropdown-item" role="menuitem">لوحة المبيعات</a>
-                            <a href="{{ url('/pos/sales/dashboard') }}" class="dropdown-item" role="menuitem">لوحة المبيعات - مستخدم</a>
-                            <a href="{{ url('/pos/issue') }}" class="dropdown-item" role="menuitem">اصدار بطاقة</a>
-                        @endif
                         <a href="https://auth.howplatform.net/profile" class="dropdown-item" role="menuitem">الحساب الشخصي</a>
                         <a href="https://auth.howplatform.net/logout-everywhere?redirect={{ urlencode(url()->current()) }}"
                            class="dropdown-item" role="menuitem">تسجيل الخروج</a>

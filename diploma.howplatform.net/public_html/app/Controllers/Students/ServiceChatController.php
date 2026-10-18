@@ -133,6 +133,35 @@ class ServiceChatController extends BaseController
         return $this->json(['success' => false, 'message' => $msg] + $extra, $status);
     }
 
+    /** إصدار Firebase custom token + إعداد الويب العام للعميل (للشات اللحظي). */
+    public function firebaseToken(): ResponseInterface
+    {
+        $uid = $this->currentUserId();
+        if ($uid <= 0) {
+            return $this->fail('Authentication required.', 401);
+        }
+        try {
+            $fb    = new \App\Libraries\FirebaseAdmin();
+            $token = $fb->createCustomToken(\App\Libraries\ChatSignal::uid($uid), ['role' => 'student']);
+        } catch (\Throwable $e) {
+            log_message('error', 'firebaseToken(student) failed: ' . $e->getMessage());
+            return $this->fail('Realtime unavailable.', 503);
+        }
+
+        return $this->ok([
+            'token'  => $token,
+            'uid'    => \App\Libraries\ChatSignal::uid($uid),
+            'config' => [
+                'apiKey'            => getenv('FIREBASE_API_KEY') ?: '',
+                'authDomain'        => getenv('FIREBASE_AUTH_DOMAIN') ?: '',
+                'projectId'         => getenv('FIREBASE_PROJECT_ID') ?: '',
+                'storageBucket'     => getenv('FIREBASE_STORAGE_BUCKET') ?: '',
+                'messagingSenderId' => getenv('FIREBASE_MESSAGING_SENDER_ID') ?: '',
+                'appId'             => getenv('FIREBASE_APP_ID') ?: '',
+            ],
+        ]);
+    }
+
     private function mkRef(): string
     {
         return bin2hex(random_bytes(6));
@@ -359,7 +388,7 @@ class ServiceChatController extends BaseController
         $beforeId = (int) ($this->request->getGet('before_id') ?? 0);
         $limit    = min(50, max(1, (int) ($this->request->getGet('limit') ?? self::PAGE_MSG_LIMIT)));
 
-        $select = 'sm.id, sm.body, sm.sender_user_id, sm.created_at';
+        $select = 'sm.id, sm.body, sm.sender_user_id, sm.sender_role, sm.created_at';
         if ($this->readsEnabled()) {
             $select .= ", EXISTS(SELECT 1 FROM service_message_reads r WHERE r.message_id = sm.id AND r.reader_user_id = {$uid}) AS is_read";
         } else {
@@ -415,8 +444,9 @@ class ServiceChatController extends BaseController
         foreach ($rowsAsc as &$row) {
             $mid = (int) ($row['id'] ?? 0);
             $row['files'] = $filesByMsg[$mid] ?? [];
-            $row['is_me'] = ((int) ($row['sender_user_id'] ?? 0) === $uid) ? 1 : 0;
-            $row['sender_name'] = $row['is_me'] ? $meName : null;
+            $isAi = (($row['sender_role'] ?? '') === 'ai');
+            $row['is_me'] = (!$isAi && (int) ($row['sender_user_id'] ?? 0) === $uid) ? 1 : 0;
+            $row['sender_name'] = $isAi ? 'فَطين' : ($row['is_me'] ? $meName : null);
             $row['is_read'] = (int) ($row['is_read'] ?? 0);
         }
         unset($row);
@@ -666,6 +696,27 @@ class ServiceChatController extends BaseController
             $this->db->transComplete();
             if (!$this->db->transStatus()) {
                 return $this->fail('Failed to send message.', 500, ['ref' => $ref]);
+            }
+
+            // إشارة لحظية (Firestore) — غير قاتلة، لا تكسر الإرسال إن تعطّلت
+            $assignedAdminId = (int) ($this->db->table('service_requests')
+                ->select('assigned_to')->where('id', $reqId)->get()->getRow()->assigned_to ?? 0);
+            \App\Libraries\ChatSignal::bump($reqId, $msgId, 'student', $uid, $assignedAdminId ?: null);
+
+            // إشعار الآدمن برسالة الطالب (المُسنَد إن وُجد، وإلا كل الآدمن)
+            if ($assignedAdminId > 0) {
+                \App\Libraries\NotificationService::push(
+                    $assignedAdminId,
+                    'رسالة جديدة في طلب خدمة',
+                    \App\Libraries\NotificationService::snippet($body),
+                    '#service_chat'
+                );
+            } else {
+                \App\Libraries\NotificationService::pushToAdmins(
+                    'رسالة جديدة في طلب خدمة',
+                    \App\Libraries\NotificationService::snippet($body),
+                    '#service_chat'
+                );
             }
 
             return $this->ok(['message_id' => $msgId, 'ref' => $ref], 'Message sent.');

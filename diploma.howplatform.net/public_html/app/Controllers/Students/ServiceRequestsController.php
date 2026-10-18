@@ -133,6 +133,38 @@ class ServiceRequestsController extends BaseController
             return $this->failJSON('فشل حفظ الطلب، حاول لاحقًا.');
         }
 
+        // رد فَطين الأولي (غير قاتل): يُخزَّن في MySQL كرسالة AI ثم إشارة لحظية
+        try {
+            $studentName = (string) (session('user_name') ?? '');
+            $aiText      = \App\Libraries\AiReply::serviceFirstReply($subject, $description, $studentName);
+            if ($aiText !== null && $aiText !== '') {
+                $this->db->table('service_messages')->insert([
+                    'service_request_id' => $reqId,
+                    'sender_user_id'     => null,   // فَطين (لا مستخدم بشري)
+                    'sender_role'        => 'ai',
+                    'body'               => $aiText,
+                    'created_at'         => date('Y-m-d H:i:s'),
+                ]);
+                $aiMsgId = (int) $this->db->insertID();
+                \App\Libraries\ChatSignal::bump($reqId, $aiMsgId, 'ai', $userId, null);
+                \App\Libraries\NotificationService::push(
+                    $userId,
+                    'رد جديد من فَطين على طلبك',
+                    \App\Libraries\NotificationService::snippet($aiText),
+                    '#/service'
+                );
+            }
+        } catch (\Throwable $e) {
+            log_message('error', 'Service AI first reply failed for request ' . $reqId . ': ' . $e->getMessage());
+        }
+
+        // إشعار الآدمن بطلب خدمة جديد
+        \App\Libraries\NotificationService::pushToAdmins(
+            'طلب خدمة جديد',
+            'طلب جديد: ' . $subject,
+            '#service_chat'
+        );
+
         return $this->okJSON([
             'request_id' => $reqId,
             'priority'   => $priority,
@@ -158,6 +190,24 @@ class ServiceRequestsController extends BaseController
      */
   private function decidePriorityFromSubscription(int $userId): string
 {
+    // وضع api: مستوى الخطّة من Plans (entitlements) مع fail-open للـ SQL المحلّي.
+    try {
+        $client = new \App\Libraries\PlansClient();
+        if ($client->entitlementsMode() === 'api') {
+            $ent = $client->entitlements($userId);
+            if (is_array($ent)) {
+                if (! ($ent['has_plan'] ?? false)) {
+                    return 'low';
+                }
+                $level = (int) ($ent['plan']['level'] ?? 0);
+                return $this->levelToPriority($level);
+            }
+            // Plans غير متاح → تابع للقراءة المحلّية (fail-open)
+        }
+    } catch (\Throwable $e) {
+        log_message('warning', 'ServiceRequests::decidePriority Plans failed: ' . $e->getMessage());
+    }
+
     // لو الجدولين غير موجودين، نعطي أولوية منخفضة بدون كسر النظام
     if (!$this->tableExists('user_subscriptions') || !$this->tableExists('plans')) {
         return 'low';

@@ -15,7 +15,7 @@
 
     .view-all:hover {
         font-weight: 700;
-        transform: translateX(5px);
+        transform: translateX(4px);
         color: var(--link-hover);
     }
 
@@ -30,7 +30,7 @@
         align-items: center;
         margin-bottom: 1.2rem;
         padding-bottom: 0.8rem;
-        border-bottom: 1px solid var(--border-color);
+        border-bottom: 0.8px solid var(--border-color);
     }
 
     .section-header h3 {
@@ -38,7 +38,7 @@
         color: var(--text-strong);
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
     }
 
     .section-header i {
@@ -48,28 +48,28 @@
     /* ===== Tasks Grid ===== */
     .tasks-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
         gap: 1.5rem;
         padding: 1rem 0;
     }
 
     .task-card {
         background: var(--surface-0);
-        border-radius: 16px;
-        padding: 1.5rem;
-        box-shadow: var(--shadow-sm);
-        border-inline-start: 6px solid var(--btn-primary-bg);
-        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: 1.4rem 1.5rem;
+        box-shadow: none;
+        border: 0.8px solid var(--border-color);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         gap: 1rem;
-        transition: var(--transition);
+        transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
     }
 
     .task-card:hover {
-        transform: translateY(-6px);
-        box-shadow: var(--shadow-md);
+        transform: translateY(-1.6px);
+        border-color: var(--primary-300);
+        box-shadow: var(--shadow-sm);
     }
 
     .task-header {
@@ -90,7 +90,7 @@
         color: var(--text-muted);
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 4.8px;
         justify-content: flex-end;
     }
 
@@ -98,13 +98,13 @@
     .task-lable {
         align-self: flex-start;
         padding: 0.35rem 0.9rem;
-        border-radius: 30px;
+        border-radius: 24px;
         font-size: 0.85rem;
         font-weight: 600;
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        border: 1px solid transparent;
+        gap: 4.8px;
+        border: 0.8px solid transparent;
     }
 
     .course-name {
@@ -125,20 +125,20 @@
         font-weight: 600;
         font-size: .7rem;
         border: none;
-        border-radius: 10px;
+        border-radius: 8px;
         cursor: pointer;
         transition: var(--transition);
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
+        gap: 6.4px;
         text-align: center;
     }
 
     .view-btn {
         background: var(--info-soft);
         color: var(--link);
-        border: 1px solid var(--info-border);
+        border: 0.8px solid var(--info-border);
     }
 
     .view-btn:hover {
@@ -146,13 +146,12 @@
     }
 
     .submit-btn {
-        background: linear-gradient(to right, var(--accent-500), var(--accent-600));
+        background: var(--accent-500);
         color: var(--text-inverse);
     }
 
     .submit-btn:hover {
-        opacity: .95;
-        transform: translateY(-2px);
+        background: var(--accent-600);
     }
 
     /* ✅ Mobile */
@@ -196,42 +195,42 @@
     .quick-actions-container {
         position: relative;
         overflow: hidden;
-        padding: 10px 0 25px;
+        padding: 8px 0 20px;
     }
 
     .quick-actions-scroll {
         display: flex;
-        gap: 25px;
+        gap: 20px;
         overflow-x: auto;
         scrollbar-width: thin;
         scrollbar-color: var(--primary-300) transparent;
-        padding: 25px 15px 20px;
+        padding: 20px 12px 16px;
         scroll-behavior: smooth;
         direction: rtl;
         background: var(--surface-1);
-        border: 1px solid var(--border-color);
+        border: 0.8px solid var(--border-color);
         border-radius: var(--border-radius);
     }
 
     .quick-actions-scroll::-webkit-scrollbar {
-        height: 8px;
+        height: 6.4px;
     }
 
     .quick-actions-scroll::-webkit-scrollbar-track {
         background: var(--surface-1);
-        border-radius: 10px;
+        border-radius: 8px;
     }
 
     .quick-actions-scroll::-webkit-scrollbar-thumb {
         background: var(--primary-300);
-        border-radius: 10px;
+        border-radius: 8px;
     }
 
     .scroll-indicator {
         position: absolute;
         top: 0;
         bottom: 0;
-        width: 60px;
+        width: 48px;
         pointer-events: none;
         opacity: 0;
         transition: opacity .3s;
@@ -255,51 +254,64 @@
     .action-card ,.action-card-active {
         background: var(--surface-0);
         border-radius: var(--border-radius);
-        padding: 25px;
+        padding: 17.6px 16px;
         text-align: center;
-        box-shadow: var(--shadow-sm);
-        transition: var(--transition);
-        border: 1px solid var(--border-color);
+        box-shadow: none;
+        transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+        border: 0.8px solid var(--border-color);
         cursor: pointer;
         display: flex;
         flex-direction: column;
         align-items: center;
-        min-width: 250px;
+        min-width: 184px;
+        max-width: 184px;
         flex-shrink: 0;
     }
 
+    /* روابط الأدوات الديناميكية = عناصر flex في الشريط: لا تنكمش */
+    .quick-actions-scroll > a {
+        flex-shrink: 0;
+        display: block;
+    }
+
     .action-card:hover ,.action-card-active:hover {
-        transform: translateY(-8px);
-        border-color: var(--btn-primary-bg);
-        box-shadow: var(--shadow-md);
-        background: linear-gradient(135deg, var(--surface-0), var(--surface-1));
+        transform: translateY(-2.4px);
+        border-color: var(--primary-300);
+        box-shadow: var(--shadow-sm);
     }
 
     .action-icon {
-        width: 70px;
-        height: 70px;
-        border-radius: 20px;
-        background: var(--info-soft);
+        width: 44.8px;
+        height: 44.8px;
+        border-radius: 11.2px;
+        background: var(--primary-50);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 2rem;
-        color: var(--link);
-        margin-bottom: 20px;
-        border: 1px solid var(--info-border);
+        font-size: 1.6rem;
+        color: var(--primary-600);
+        margin-bottom: 12.8px;
+        border: none;
     }
 
     .action-title {
         font-weight: 700;
         color: var(--text-strong);
-        font-size: 1.2rem;
-        margin-bottom: 10px;
+        font-size: 1.05rem;
+        margin-bottom: 6.4px;
     }
 
     .action-desc {
         color: var(--text-muted);
         font-size: .95rem;
         line-height: 1.5;
+        /* أقصى 3 أسطر مع «…»، واحجز ارتفاع 3 أسطر ثابت لتتساوى كل الكروت */
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        overflow: hidden;
+        min-height: calc(1.5em * 3);
     }
 
 
@@ -307,21 +319,21 @@
     /* Secondary info header row */
     .secondary-info-grid-header {
         display: flex;
-        gap: 15px;
+        gap: 12px;
     }
 
     .info-item-header {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 8px 0;
+        gap: 8px;
+        padding: 6.4px 0;
         color: var(--text-inverse);
     }
 
     .info-item-header i {
         color: #fff;
         font-size: 1.1rem;
-        width: 24px;
+        width: 19.2px;
         text-align: center;
     }
 
@@ -333,33 +345,33 @@
     /* Secondary info grid */
     .secondary-info-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 15px;
-        margin-bottom: 25px;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+        margin-bottom: 20px;
     }
 
     .info-item {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 8px 12px;
-        border-radius: 8px;
+        gap: 8px;
+        padding: 6.4px 9.6px;
+        border-radius: 6.4px;
         background: var(--surface-0);
         box-shadow: var(--shadow-sm);
-        border: 1px solid var(--border-color);
+        border: 0.8px solid var(--border-color);
     }
 
     .info-item i {
         color: var(--btn-primary-bg);
         font-size: 1.1rem;
-        width: 24px;
+        width: 19.2px;
         text-align: center;
     }
 
     .info-item .label {
         color: var(--text-muted);
         font-size: .9rem;
-        margin-left: 5px;
+        margin-left: 4px;
     }
 
     .info-item .value {
@@ -370,14 +382,14 @@
     /* Description */
     .description-section {
         background: linear-gradient(to left, var(--surface-1), var(--info-soft));
-        border-radius: 12px;
-        padding: 10px;
-        margin-bottom: 30px;
+        border-radius: 9.6px;
+        padding: 8px;
+        margin-bottom: 24px;
         text-align: right;
         box-shadow: var(--shadow-sm);
         position: relative;
         overflow: hidden;
-        border: 1px solid var(--primary-500);
+        border: 0.8px solid var(--primary-500);
     }
 
     .description-section::before {
@@ -386,58 +398,58 @@
         top: 0;
         right: 0;
         width: 100%;
-        height: 5px;
+        height: 4px;
         background: linear-gradient(to right, var(--accent-500), var(--accent-600));
     }
 
     .description-section h3 {
         color: var(--accent-600);
-        margin-bottom: 20px;
+        margin-bottom: 16px;
         font-size: 1.3rem;
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 12px;
     }
 
     .description-section p {
         font-size: 1.05rem;
         line-height: 1.8;
         color: var(--text-strong);
-        margin-top: 15px;
-        padding: 15px;
+        margin-top: 12px;
+        padding: 12px;
         background: var(--surface-0);
-        border-radius: 10px;
-        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        border: 0.8px solid var(--border-color);
     }
 
     /* Files */
     .files-section {
-        margin-bottom: 30px;
+        margin-bottom: 24px;
     }
 
     .section-title {
         font-size: 1.3rem;
         color: var(--text-strong);
-        margin-bottom: 20px;
-        padding-right: 15px;
-        border-right: 5px solid var(--btn-primary-bg);
+        margin-bottom: 16px;
+        padding-right: 12px;
+        border-right: 4px solid var(--btn-primary-bg);
         display: inline-flex;
         align-items: center;
-        gap: 12px;
+        gap: 9.6px;
     }
 
     .files-container {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
     }
 
     .file-card {
-        border-radius: 12px;
-        padding: 20px;
+        border-radius: 9.6px;
+        padding: 16px;
         text-align: right;
         box-shadow: var(--shadow-sm);
-        border: 1px solid var(--primary-500);
+        border: 0.8px solid var(--primary-500);
         transition: var(--transition);
         display: flex;
         flex-direction: column;
@@ -446,7 +458,7 @@
     }
 
     .file-card:hover {
-        transform: translateY(-5px);
+        transform: translateY(-4px);
         box-shadow: var(--shadow-md);
     }
 
@@ -456,21 +468,21 @@
         top: 0;
         right: 0;
         width: 100%;
-        height: 4px;
+        height: 3.2px;
         background: var(--btn-primary-bg);
     }
 
     .file-header {
         display: flex;
         align-items: center;
-        gap: 15px;
-        margin-bottom: 15px;
+        gap: 12px;
+        margin-bottom: 12px;
     }
 
     .file-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 10px;
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
         background: var(--surface-1);
         display: flex;
         align-items: center;
@@ -478,7 +490,7 @@
         font-size: 1.5rem;
         color: var(--btn-primary-bg);
         flex-shrink: 0;
-        border: 1px solid var(--border-color);
+        border: 0.8px solid var(--border-color);
     }
 
     .file-info {
@@ -489,7 +501,7 @@
     .file-name {
         font-weight: 700;
         color: var(--text-strong);
-        margin-bottom: 5px;
+        margin-bottom: 4px;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
@@ -500,13 +512,13 @@
     .file-actions {
         display: flex;
         justify-content: flex-end;
-        gap: 12px;
-        margin-top: 15px;
+        gap: 9.6px;
+        margin-top: 12px;
     }
 
     .file-action-btn {
-        padding: 8px 16px;
-        border-radius: 6px;
+        padding: 6.4px 12.8px;
+        border-radius: 4.8px;
         border: none;
         cursor: pointer;
         font-weight: 600;
@@ -514,13 +526,13 @@
         transition: var(--transition);
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 6.4px;
     }
 
     .preview-btn {
         background: var(--surface-1);
         color: var(--text-strong);
-        border: 1px solid var(--border-color);
+        border: 0.8px solid var(--border-color);
     }
 
     .preview-btn:hover {
@@ -538,8 +550,8 @@
 
     /* View modal footer button */
     .action-btn {
-        padding: 12px 25px;
-        border-radius: 8px;
+        padding: 9.6px 20px;
+        border-radius: 6.4px;
         border: none;
         cursor: pointer;
         font-weight: 600;
@@ -547,13 +559,13 @@
         transition: var(--transition);
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
     }
 
     .close-btn-task {
         background: var(--btn-primary-bg);
         color: var(--text-inverse);
-        max-width: 250px;
+        max-width: 200px;
     }
 
     .close-btn-task:hover {
@@ -564,15 +576,15 @@
     /* Form controls (shared) */
     .form-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        margin-bottom: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 16px;
     }
 
     .form-group {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 6.4px;
     }
 
     .form-group label {
@@ -581,9 +593,9 @@
     }
 
     .form-control {
-        padding: 12px 15px;
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
+        padding: 9.6px 12px;
+        border-radius: 6.4px;
+        border: 0.8px solid var(--border-color);
         background: var(--surface-0);
         font-size: 1rem;
         transition: var(--transition);
@@ -605,15 +617,15 @@
     .specialty-options {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 20px;
+        gap: 8px;
+        margin-bottom: 16px;
     }
 
     .spec-card {
         flex: 1 1 auto;
-        padding: 10px 15px;
-        border: 1px solid var(--btn-primary-bg);
-        border-radius: 8px;
+        padding: 8px 12px;
+        border: 0.8px solid var(--btn-primary-bg);
+        border-radius: 6.4px;
         text-align: center;
         cursor: pointer;
         user-select: none;
@@ -631,8 +643,8 @@
 
     /* Upload zone */
     .file-upload-section {
-        border: 2px dashed var(--btn-primary-bg);
-        border-radius: 10px;
+        border: 1.6px dashed var(--btn-primary-bg);
+        border-radius: 8px;
         padding: 1.5rem;
         text-align: center;
         transition: background .2s, border-color .2s;
@@ -664,7 +676,7 @@
         color: var(--text-inverse);
         border: none;
         padding: .6rem 1.2rem;
-        border-radius: 6px;
+        border-radius: 4.8px;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
@@ -677,24 +689,24 @@
 
     .file-preview-container {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+        gap: 9.6px;
         margin-top: 1.2rem;
         justify-items: center;
     }
 
     .file-card {
         background: var(--surface-3);
-        border-radius: 12px;
+        border-radius: 9.6px;
         box-shadow: var(--shadow-sm);
         padding: .8rem;
         width: 100%;
-        max-width: 260px;
+        max-width: 208px;
         display: flex;
         flex-direction: column;
         align-items: center;
         position: relative;
-        border: 1px solid var(--primary-500);
+        border: 0.8px solid var(--primary-500);
         justify-content: space-around;
     }
 
@@ -717,8 +729,8 @@
         width: 100%;
         height: 2.4rem;
         padding: .3rem;
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
+        border: 0.8px solid var(--border-color);
+        border-radius: 3.2px;
         font-size: .8rem;
         resize: vertical;
         margin-bottom: .5rem;
@@ -728,10 +740,10 @@
 
     .file-card .remove-file {
         position: absolute;
-        top: 6px;
-        right: 6px;
+        top: 4.8px;
+        right: 4.8px;
         background: var(--surface-1);
-        border: 1px solid var(--border-color);
+        border: 0.8px solid var(--border-color);
         border-radius: 50%;
         width: 1.6rem;
         height: 1.6rem;
@@ -751,26 +763,26 @@
     }
 
     .modal-footer {
-        padding-top: 20px;
+        padding-top: 16px;
         display: flex;
         justify-content: space-between;
     }
 
     .no-results {
         text-align: center;
-        padding: 40px;
+        padding: 32px;
         color: var(--text-muted);
     }
 
     .no-results i {
         font-size: 5rem;
         color: var(--primary-300);
-        margin-bottom: 20px;
+        margin-bottom: 16px;
     }
 
     .no-results h3 {
         font-size: 1.8rem;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
         color: var(--text-strong);
     }
 
@@ -800,7 +812,7 @@
 
     @media (max-width: 480px) {
         .modal-body {
-            padding: 20px;
+            padding: 16px;
         }
 
         .file-header {
@@ -815,7 +827,7 @@
     @media (max-width: 900px) {
         .modal-footer {
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
     }
 </style>
@@ -825,7 +837,8 @@
             <section class="dashboard-section">
                 <div class="section-header">
                     <h3><i class="fas fa-tasks"></i> المهام القادمة</h3>
-                    <a href="#" class="view-all">
+                    <a href="#/tasks" class="view-all" data-section="tasks"
+                       onclick="event.preventDefault(); (window.loadSection ? window.loadSection('tasks') : (location.hash='#/tasks'));">
                         عرض الكل <i class="fas fa-arrow-left"></i>
                     </a>
                 </div>
@@ -841,92 +854,27 @@
                 </div>
                 <div class="quick-actions-container">
                     <div class="quick-actions-scroll">
-                        
-                        <!-- اصدار باجات الدبلوم -->
-                        <a href="https://tools.howplatform.net/tools/id-card" target="_blank" style="text-decoration: none; color: inherit;">
-                            <div class="action-card-active">
-                                <div class="action-icon"><i class="fas fa-id-card"></i></div>
-                                <div class="action-title">إصدار باجات الدبلوم</div>
-                                <div class="action-desc">إنشاء وطباعة باجات خاصة بطلاب الدبلوم.</div>
+                        <?php $eduTools = $eduTools ?? []; ?>
+                        <?php if (empty($eduTools)): ?>
+                            <!-- تعذّر جلب الأدوات من منصّة الأدوات حاليًا -->
+                            <div class="action-card">
+                                <div class="action-icon"><i class="fas fa-toolbox"></i></div>
+                                <div class="action-title">الأدوات التعليمية</div>
+                                <div class="action-desc">سيتم عرض الأدوات المتاحة قريبًا.</div>
                             </div>
-                        </a>
-                        <!-- العجلة العشوائية (Spinner) -->
-                        <div class="action-card" data-tool="random-wheel">
-                            <div class="action-icon"><i class="fas fa-shuffle"></i></div>
-                            <div class="action-title">العجلة العشوائية (Spinner)</div>
-                            <div class="action-desc">اختيار طالب/سؤال/فريق بشكل عشوائي.</div>
-                        </div>
-
-                        <!-- ALL2PDF -->
-                        <div class="action-card" data-tool="all2pdf">
-                            <div class="action-icon"><i class="fas fa-file-pdf"></i></div>
-                            <div class="action-title">ALL2PDF</div>
-                            <div class="action-desc">دمج وتحويل مختلف الملفات إلى PDF.</div>
-                        </div>
-
-                        <!-- الكلمات المتقاطعة -->
-                        <div class="action-card" data-tool="crossword">
-                            <div class="action-icon"><i class="fas fa-puzzle-piece"></i></div>
-                            <div class="action-title">الكلمات المتقاطعة</div>
-                            <div class="action-desc">أنشئ لعبة كلمات متقاطعة مخصصة لطلابك.</div>
-                        </div>
-
-                        <!-- مؤقّت الحصة -->
-                        <div class="action-card" data-tool="class-timer">
-                            <div class="action-icon"><i class="fas fa-stopwatch"></i></div>
-                            <div class="action-title">مؤقّت الحصة</div>
-                            <div class="action-desc">عدٌّ تنازلي للأنشطة وإدارة الزمن داخل الصف.</div>
-                        </div>
-
-                        <!-- فرق عشوائية -->
-                        <div class="action-card" data-tool="random-teams">
-                            <div class="action-icon"><i class="fas fa-users"></i></div>
-                            <div class="action-title">تجميع فرق عشوائية</div>
-                            <div class="action-desc">تقسيم الطلاب لفرق متوازنة بضغطة زر.</div>
-                        </div>
-
-                        <!-- مولّد QR -->
-                        <div class="action-card" data-tool="qr-generator">
-                            <div class="action-icon"><i class="fas fa-qrcode"></i></div>
-                            <div class="action-title">مولّد أكواد QR</div>
-                            <div class="action-desc">مشاركة روابط الدروس والواجبات بسرعة.</div>
-                        </div>
-
-                        <!-- بطاقات فلاش -->
-                        <div class="action-card" data-tool="flashcards">
-                            <div class="action-icon"><i class="fas fa-clone"></i></div>
-                            <div class="action-title">بطاقات فلاش</div>
-                            <div class="action-desc">مفردات ومفاهيم بمراجعة تكرار متباعد.</div>
-                        </div>
-
-                        <!-- بنك أسئلة (سحب عشوائي) -->
-                        <div class="action-card" data-tool="question-draw">
-                            <div class="action-icon"><i class="fas fa-circle-question"></i></div>
-                            <div class="action-title">سحب سؤال عشوائي</div>
-                            <div class="action-desc">اختيار سؤال من بنك الأسئلة فورياً.</div>
-                        </div>
-
-                        <!-- تذكرة خروج -->
-                        <div class="action-card" data-tool="exit-ticket">
-                            <div class="action-icon"><i class="fas fa-ticket"></i></div>
-                            <div class="action-title">تذكرة خروج</div>
-                            <div class="action-desc">تقييم سريع لنواتج التعلّم قبل نهاية الحصة.</div>
-                        </div>
-
-                        <!-- ساعة رملية -->
-                        <div class="action-card" data-tool="hourglass">
-                            <div class="action-icon"><i class="fas fa-hourglass-half"></i></div>
-                            <div class="action-title">ساعة رملية</div>
-                            <div class="action-desc">تعزيز إدارة الوقت في نشاطات قصيرة.</div>
-                        </div>
-
-                        <!-- قائمة مهام الصف -->
-                        <div class="action-card" data-tool="class-todo">
-                            <div class="action-icon"><i class="fas fa-tasks"></i></div>
-                            <div class="action-title">قائمة مهام الصف</div>
-                            <div class="action-desc">تعقّب التقدّم وإنجاز الأنشطة خلال الأسبوع.</div>
-                        </div>
-
+                        <?php else: ?>
+                            <?php foreach ($eduTools as $tool): ?>
+                                <a href="<?= esc($tool['href'], 'attr') ?>" target="_blank" rel="noopener" style="text-decoration: none; color: inherit;">
+                                    <div class="action-card-active">
+                                        <div class="action-icon"<?= !empty($tool['icon_color']) ? ' style="color: ' . esc($tool['icon_color'], 'attr') . '"' : '' ?>>
+                                            <i class="<?= esc(($tool['icon_class'] ?? '') ?: 'fas fa-wrench', 'attr') ?>"></i>
+                                        </div>
+                                        <div class="action-title"><?= esc($tool['name']) ?></div>
+                                        <div class="action-desc"><?= esc($tool['description'] ?? '') ?></div>
+                                    </div>
+                                </a>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                     <div class="scroll-indicator left"></div>
                     <div class="scroll-indicator right"></div>

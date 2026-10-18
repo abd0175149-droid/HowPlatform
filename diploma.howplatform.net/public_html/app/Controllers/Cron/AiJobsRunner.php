@@ -385,7 +385,13 @@ class AiJobsRunner extends BaseController
         if (empty($typeKey)) {
             throw new \RuntimeException('Missing type_key on job type.');
         }
-        
+
+        // 🖼️ بوستر البحث الاستقصائي: حقن محتوى الملف المصدر (نصّ docx / مرفق pdf أو صورة)
+        // قبل مرحلة الاستخراج النصّي (generateJson) كي يقرأه النموذج.
+        if ($typeKey === 'inquiry_poster_v1') {
+            $payload = $this->preparePosterSource($payload);
+        }
+
         // 📊 Logging قبل استدعاء AI للتشخيص
         $provider = (string) ($jobType['provider'] ?? 'gemini');
         $model = (string) ($jobType['model_name'] ?? 'unknown');
@@ -451,6 +457,13 @@ class AiJobsRunner extends BaseController
             ]);
         }
     
+        // 🎯 بوستر البحث الاستقصائي: العناصر الستة مُستخرَجة الآن في $jsonObj
+        // → ولّد صورة الإنفوجرافيك بنموذج صور، واحفظها كملف PNG.
+        if ($typeKey === 'inquiry_poster_v1') {
+            $this->processInquiryPosterImage($job, $jsonObj, $payload, $db);
+            return;
+        }
+
         // 🎯 معالجة خاصة لأدوات تولّد ملفات خاصة بدون اعتماد template_path
         if ($typeKey === 'test_design_v1') {
             $this->processTestDesignJob($job, $jsonObj, $db);
@@ -460,6 +473,18 @@ class AiJobsRunner extends BaseController
         // 🎯 معالجة خاصة لمقيّم البحث الاستقصائي (ملفان: تغذية راجعة + روبريك)
         if ($typeKey === 'inquiry_report_evaluator_v1') {
             $this->processInquiryReportEvaluatorJob($job, $jsonObj, $payload, $db);
+            return;
+        }
+
+        // 🎯 مقيّم المقالة التأملية الختامية: نفس المنطق — حفظ JSON بحالة review (الملفان يُبنيان عند الاعتماد)
+        if ($typeKey === 'final_essay_evaluator_v1') {
+            $this->processInquiryReportEvaluatorJob($job, $jsonObj, $payload, $db);
+            return;
+        }
+
+        // 🎯 معالجة خاصة لمقيّم المقالة التكويني: حفظ JSON بحالة review (الملفات تُبنى عند الاعتماد)
+        if ($typeKey === 'formative_essay_evaluator_v1') {
+            $this->processFormativeEssayEvaluatorJob($job, $jsonObj, $payload, $db);
             return;
         }
 
@@ -669,7 +694,7 @@ class AiJobsRunner extends BaseController
     /**
      * إدراج ذكي في files يراعي اختلاف الأعمدة (uploader_id / uploaded_by، uploaded_at / created_at، file_size)
      */
-    public function insertFileRowSmart(string $relPath, int $userId, int $bytes): int
+    public function insertFileRowSmart(string $relPath, int $userId, int $bytes, string $mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'): int
     {
         $db = Database::connect();
 
@@ -678,7 +703,7 @@ class AiJobsRunner extends BaseController
         $data = [
             'file_name' => basename($relPath),
             'file_path' => $relPath,
-            'mime_type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'mime_type' => $mime,
         ];
 
         // ✅ مُرسل الملف: uploader_id أو uploaded_by
@@ -707,6 +732,122 @@ class AiJobsRunner extends BaseController
             throw new \RuntimeException('files insert failed (no insertID).');
         }
         return $id;
+    }
+
+    // ==================================================================
+    //  🖼️ بوستر البحث الاستقصائي (inquiry_poster_v1)
+    // ==================================================================
+
+    /**
+     * يحضّر محتوى مخطط البحث المصدر للمرحلة النصّية (الاستخراج):
+     *  - docx → نصّ مُستخرَج في source_text.
+     *  - pdf/صورة → مرفق inlineData في attachments ليقرأه النموذج متعدد الوسائط.
+     */
+    protected function preparePosterSource(array $payload): array
+    {
+        $srcRel = (string) ($payload['source_file_rel'] ?? '');
+        if ($srcRel === '') {
+            return $payload;
+        }
+        $abs = rtrim(FCPATH, '/\\') . DIRECTORY_SEPARATOR . ltrim($srcRel, '/\\');
+        if (!is_file($abs)) {
+            log_message('error', 'preparePosterSource: source file missing: ' . $abs);
+            return $payload;
+        }
+
+        $ext = strtolower((string) pathinfo($abs, PATHINFO_EXTENSION));
+
+        if ($ext === 'docx') {
+            try {
+                $docx = new \App\Libraries\FormativeEvaluatorDocx();
+                [$text] = $docx->extractEssayRuns($abs);
+                if (is_string($text) && trim($text) !== '') {
+                    $payload['source_text'] = $text;
+                }
+            } catch (\Throwable $e) {
+                log_message('error', 'preparePosterSource docx extract failed: ' . $e->getMessage());
+            }
+        } elseif ($ext === 'pdf') {
+            $payload['attachments'] = [[
+                'mime' => 'application/pdf',
+                'data' => base64_encode((string) file_get_contents($abs)),
+            ]];
+        } elseif (in_array($ext, ['png', 'jpg', 'jpeg', 'webp'], true)) {
+            $payload['attachments'] = [[
+                'mime' => 'image/' . ($ext === 'jpg' ? 'jpeg' : $ext),
+                'data' => base64_encode((string) file_get_contents($abs)),
+            ]];
+        }
+
+        return $payload;
+    }
+
+    /**
+     * يولّد صورة بوستر الإنفوجرافيك (لاند سكيب) من العناصر الستة المُستخرَجة، ويحفظها كـ PNG.
+     *
+     * @param array $job      صف المهمة.
+     * @param array $elements العناصر الستة المُستخرَجة (مخرجات المرحلة النصّية).
+     * @param array $payload  حمولة المهمة (تحوي source_file_rel).
+     */
+    protected function processInquiryPosterImage(array $job, array $elements, array $payload, $db): void
+    {
+        $maker       = new \App\Libraries\PromptMaker\InquiryPosterPromptMaker();
+        $imagePrompt = $maker->buildImagePrompt($elements);
+
+        // مرفق اختياري لمولّد الصور: الصورة المصدر فقط (إن كان المرفوع صورة) — لا نرفق docx/pdf.
+        $attachments = [];
+        $srcRel = (string) ($payload['source_file_rel'] ?? '');
+        $ext    = strtolower((string) pathinfo($srcRel, PATHINFO_EXTENSION));
+        if (in_array($ext, ['png', 'jpg', 'jpeg', 'webp'], true)) {
+            $abs = rtrim(FCPATH, '/\\') . DIRECTORY_SEPARATOR . ltrim($srcRel, '/\\');
+            if (is_file($abs)) {
+                $attachments[] = [
+                    'mime' => 'image/' . ($ext === 'jpg' ? 'jpeg' : $ext),
+                    'data' => base64_encode((string) file_get_contents($abs)),
+                ];
+            }
+        }
+
+        $imgClient = new AiClient();
+        $imgClient->withTrace('job#' . (int) $job['id'] . '#img');
+        $img = $imgClient->generateImage($imagePrompt, $attachments); // ['mime'=>..,'data'=>base64]
+
+        $bin = base64_decode((string) $img['data'], true);
+        if ($bin === false || $bin === '') {
+            throw new \RuntimeException('فشل فك ترميز صورة البوستر الناتجة.');
+        }
+
+        $mime = (string) ($img['mime'] ?? 'image/png');
+        $imgExt = ($mime === 'image/jpeg' || $mime === 'image/jpg') ? 'jpg' : (($mime === 'image/webp') ? 'webp' : 'png');
+
+        $fileName  = 'inquiry_poster_' . (int) $job['user_id'] . '_' . (int) $job['task_id'] . '_' . date('Ymd_His') . '.' . $imgExt;
+        $targetRel = 'downloads/inquiry_posters/' . $fileName;
+        $absTarget = rtrim(FCPATH, '/\\') . DIRECTORY_SEPARATOR . $targetRel;
+
+        $dir = dirname($absTarget);
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+        if (file_put_contents($absTarget, $bin) === false) {
+            throw new \RuntimeException('تعذّر حفظ صورة البوستر على القرص.');
+        }
+
+        $db = $this->ensureDbAlive($db);
+        $fileId = $this->insertFileRowSmart($targetRel, (int) $job['user_id'], (int) filesize($absTarget), $mime);
+        $this->linkTaskFileSafe((int) $job['task_id'], $fileId);
+
+        $result = [
+            'elements'       => $elements,
+            'file_poster_id' => $fileId,
+            'poster_mime'    => $mime,
+        ];
+
+        $db->table('ai_jobs')->where('id', (int) $job['id'])->update([
+            'result_json' => json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'file_id'     => $fileId,
+            'status'      => 'done',
+            'updated_at'  => date('Y-m-d H:i:s'),
+        ]);
     }
 
     /**
@@ -811,8 +952,8 @@ class AiJobsRunner extends BaseController
             return $out;
         }
 
-        // ✅ لمقيّم البحث الاستقصائي: تجهيز بيانات القالبين (تغذية راجعة + روبريك)
-        $isInquiryReportEvaluator = ($typeKey === 'inquiry_report_evaluator_v1');
+        // ✅ لمقيّم البحث الاستقصائي ومقيّم المقالة التأملية الختامية: تجهيز بيانات القالبين (تغذية راجعة + روبريك)
+        $isInquiryReportEvaluator = in_array($typeKey, ['inquiry_report_evaluator_v1', 'final_essay_evaluator_v1'], true);
         if ($isInquiryReportEvaluator) {
             // بيانات الطالب من payload (تُمرر عبر global)
             global $_inquiry_report_evaluator_payload;
@@ -1302,6 +1443,20 @@ class AiJobsRunner extends BaseController
     {
         // حفظ نتيجة التقييم فقط — بدون بناء ملفات
         // المستخدم سيراجع النتائج ويعتمدها قبل توليد الملفات
+        $db = $this->ensureDbAlive($db);
+        $db->table('ai_jobs')->where('id', (int)$job['id'])->update([
+            'result_json' => json_encode($jsonObj, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'status'     => 'review',
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
+
+    /**
+     * ✅ معالجة أداة تقييم المقالة التكويني: يحفظ report+annotations بحالة review.
+     * بناء الملفّين (التقرير + الأصل المُعلَّق) يتم عند الاعتماد عبر approve-formative.
+     */
+    protected function processFormativeEssayEvaluatorJob(array $job, array $jsonObj, array $payload, $db): void
+    {
         $db = $this->ensureDbAlive($db);
         $db->table('ai_jobs')->where('id', (int)$job['id'])->update([
             'result_json' => json_encode($jsonObj, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),

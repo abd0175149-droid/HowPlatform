@@ -10,6 +10,9 @@
 **/.env.*
 !**/.env.example
 **/secure-keys/
+
+# ---- Proprietary Office/Arabic fonts (baked into diploma image at build; NOT for public repo) ----
+/docker/fonts/
 **/*firebase-adminsdk*.json
 **/*adminsdk*.json
 **/vertex-service-account*.json

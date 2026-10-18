@@ -107,25 +107,10 @@ if ($userId) {
   </div>
 
   <ul class="menu">
-    <!-- الصفحة الترحيبية
-    <li class="menu-item">
-      <a href="#" class="menu-link" data-section="welcome">
-        <i class="fas fa-heart"></i>
-        <span>الصفحة الترحيبية</span>
-      </a>
-    </li>
-    -->
-    <?php if ($canSeeRewards): ?>
-    <!-- النقاط -->
-    <li class="menu-item points-item">
-      <a href="#" class="menu-link" data-section="rewards" title="نقاطك">
-        <i class="fas fa-star" style="color: #fbbf24;"></i>
-        <span>نقاطك: <?= number_format($studentPoints) ?></span>
-      </a>
-    </li>
-    <?php endif; ?>
-    
-    <!-- الرئيسية -->
+
+    <!-- ============ مجموعة: الرئيسية ============ -->
+    <li class="nav-group-label"><span>الرئيسية</span></li>
+
     <li class="menu-item">
       <a href="#" class="menu-link" data-section="dashboard">
         <i class="fas fa-home"></i>
@@ -133,15 +118,38 @@ if ($userId) {
       </a>
     </li>
 
-    <!-- 🔄 Mount point للمساقات (JS سيحقن هنا عناصر الفصول/المساقات) -->
+    <li class="menu-item">
+      <a href="#" class="menu-link" data-section="tasks">
+        <i class="fas fa-list-check"></i>
+        <span>المهام</span>
+      </a>
+    </li>
+
+    <?php if ($canSeeRewards): ?>
+    <li class="menu-item points-item">
+      <a href="https://auth.howplatform.net/profile?active=points" class="menu-link" title="نقاطك — النقاط والمحفظة">
+        <i class="fas fa-star" style="color: #fbbf24;"></i>
+        <span>نقاطك: <?= number_format($studentPoints) ?></span>
+      </a>
+    </li>
+    <?php endif; ?>
+
+    <!-- ============ مجموعة: المساقات ============ -->
+    <li class="nav-group-label"><span>المساقات</span></li>
+
+    <!-- 🔄 Mount point للمساقات (JS سيحقن عناصر الفصول قبل المرساة) -->
     <li class="menu-item" id="courses-mount" data-course-mount="true">
       <a href="#" class="menu-link" tabindex="-1" aria-disabled="true">
         <i class="fas fa-layer-group"></i>
         <span>يتم تحميل المساقات...</span>
       </a>
     </li>
+    <!-- مرساة ثابتة: JS يدرج الفصول/المساقات قبل هذا العنصر -->
+    <li id="courses-anchor" class="nav-anchor" aria-hidden="true"></li>
 
-    <!-- طلبات الخدمة -->
+    <!-- ============ مجموعة: الخدمات والحساب ============ -->
+    <li class="nav-group-label"><span>الخدمات والحساب</span></li>
+
     <li class="menu-item service-item">
       <a href="#" class="menu-link" data-section="service">
         <i class="fas fa-headset"></i>
@@ -153,26 +161,6 @@ if ($userId) {
         <?php endif; ?>
       </a>
     </li>
-
-    <li class="menu-item">
-      <a href="https://auth.howplatform.net/profile?active=diploma" class="menu-link">
-        <i class="fas fa-cog"></i>
-        الحساب الشخصي
-      </a>
-    </li>
-
-    <?php if ($canSeeUpgrade): ?>
-      <!-- زر الترقية / الاشتراكات -->
-      <li class="menu-item upgrade-item">
-        <a href="#" class="menu-link" data-section="upgrade" title="الترقية / الاشتراكات">
-          <i class="fas fa-crown"></i>
-          <span>الترقية / الاشتراكات</span>
-          <?php if ($showBetaBadge): ?>
-            <span class="badge">BETA</span>
-          <?php endif; ?>
-        </a>
-      </li>
-    <?php endif; ?>
 
     <?php
     // ✅ Feature Gate: زر "نظام المكافآت"
@@ -187,9 +175,8 @@ if ($userId) {
     }
     ?>
     <?php if ($canSeeRewards): ?>
-      <!-- زر نظام المكافآت -->
       <li class="menu-item rewards-item">
-        <a href="#" class="menu-link" data-section="rewards" title="نظام المكافآت">
+        <a href="https://auth.howplatform.net/profile?active=points" class="menu-link" title="نظام المكافآت — النقاط والمحفظة">
           <i class="fas fa-gift"></i>
           <span>المكافآت</span>
           <?php if ($showRewardsBeta): ?>
@@ -199,7 +186,25 @@ if ($userId) {
       </li>
     <?php endif; ?>
 
-    <!-- زر تحديث البيانات -->
+    <?php if ($canSeeUpgrade): ?>
+      <li class="menu-item upgrade-item">
+        <a href="https://auth.howplatform.net/profile?active=plans" class="menu-link" title="الترقية / الاشتراكات — الخطط والأسعار">
+          <i class="fas fa-crown"></i>
+          <span>الترقية / الاشتراكات</span>
+          <?php if ($showBetaBadge): ?>
+            <span class="badge">BETA</span>
+          <?php endif; ?>
+        </a>
+      </li>
+    <?php endif; ?>
+
+    <li class="menu-item">
+      <a href="https://auth.howplatform.net/profile?active=diploma" class="menu-link">
+        <i class="fas fa-cog"></i>
+        <span>الحساب الشخصي</span>
+      </a>
+    </li>
+
     <li class="menu-item refresh-item">
       <a href="#" class="menu-link refresh-link" id="refresh-courses">
         <i class="fas fa-sync-alt"></i>
@@ -222,7 +227,10 @@ if ($userId) {
 
 <!-- مساعد فَطين -->
 <div class="fateen-initiator" id="chat-initiator">
-    <img src="<?= base_url('assets/images/Fateen.svg') ?>" alt="Fateen" class="fateen-img">
+    <span class="fateen-img fateen-svg-host" aria-hidden="true"><?php
+        $fateenSvg = @file_get_contents(FCPATH . 'assets/images/Fateen.svg');
+        echo $fateenSvg !== false ? $fateenSvg : '<img src="' . base_url('assets/images/Fateen.svg') . '" alt="Fateen">';
+    ?></span>
     <div class="fateen-text">
         <span class="fateen-label">اسأل فَطين</span>
     </div>
@@ -231,15 +239,38 @@ if ($userId) {
 <div class="floating-chatbot" id="chatbot">
     <div class="fateen-modal-header">
         <h2>
-            <img src="<?= base_url('assets/images/Fateen.svg') ?>" alt="Fateen Logo" class="fateen-avatar">
+            <span class="fateen-avatar fateen-svg-host" aria-hidden="true"><?php
+                echo isset($fateenSvg) && $fateenSvg !== false
+                    ? $fateenSvg
+                    : '<img src="' . base_url('assets/images/Fateen.svg') . '" alt="Fateen Logo">';
+            ?></span>
             فَطين هُنا لمساعدتك
         </h2>
-        <button class="close-btn" id="close-btn">
-            <i class="fas fa-times"></i>
-        </button>
+        <div class="fateen-header-actions">
+            <button class="close-btn" id="history-btn" title="سجل المحادثات">
+                <i class="fas fa-history"></i>
+            </button>
+            <button class="close-btn" id="maximize-btn" title="تكبير المحادثة">
+                <i class="fas fa-expand"></i>
+            </button>
+            <button class="close-btn" id="minimize-btn" title="تصغير / العودة للنافذة العائمة">
+                <i class="fas fa-compress"></i>
+            </button>
+            <button class="close-btn" id="close-btn" title="إغلاق">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
     </div>
 
     <div class="chat-container">
+        <div class="fateen-history" id="fateen-history">
+            <div class="fateen-history-head">
+                <h3><i class="fas fa-history"></i> سجل المحادثات</h3>
+                <button id="history-new-btn" title="محادثة جديدة"><i class="fas fa-plus"></i> جديدة</button>
+            </div>
+            <div class="fateen-history-list" id="fateen-history-list"></div>
+        </div>
+
         <div class="service-selection" id="service-selection">
             <h3>اختر نوع الخدمة المطلوبة</h3>
             <p class="service-indicator">الرجاء تحديد نوع الخدمة لبدء المحادثة</p>
@@ -288,12 +319,14 @@ if ($userId) {
         </div>
 
         <div class="chat-area" id="chat-area">
-            <div class="new-chat-wrapper">
-                <button id="new-chat-btn" class="new-chat-btn" title="ابدأ محادثة جديدة">
-                    <i class="fas fa-arrows-rotate"></i>
-                </button>
+            <div class="chat-toolbar">
+                <div class="new-chat-wrapper">
+                    <button id="new-chat-btn" class="new-chat-btn" title="ابدأ محادثة جديدة">
+                        <i class="fas fa-arrows-rotate"></i>
+                    </button>
+                </div>
+                <div id="usage-counter" class="usage-counter"></div>
             </div>
-            <div id="usage-counter" class="usage-counter"></div>
 
             <div class="chat-messages" id="chat-messages"></div>
 
@@ -313,37 +346,37 @@ if ($userId) {
 <!-- CSS إضافي للسايد بار المحدث -->
 <style>
 /* تحسينات السايد بار والإحصاءات */
-.sidebar .stats-overview { background: var(--surface-1); margin: 10px 15px; padding: 15px; border-radius: 12px; border: none; }
-.sidebar-stats { display: flex; justify-content: space-between; gap: 10px; }
-.sidebar-stats .stat-item { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; color: var(--text-muted); }
+.sidebar .stats-overview { background: var(--surface-1); margin: 8px 12px; padding: 12px; border-radius: 9.6px; border: none; }
+.sidebar-stats { display: flex; justify-content: space-between; gap: 8px; }
+.sidebar-stats .stat-item { display: flex; align-items: center; gap: 4px; font-size: 0.8rem; color: var(--text-muted); }
 .sidebar-stats .stat-item i { font-size: 0.9rem; color: var(--primary-500); }
 .sidebar-stats .stat-item.premium { color: var(--accent-600); }
 .sidebar-stats .stat-item.premium i { color: var(--accent-500); }
 
 /* تحسين عرض المساقات */
-.course-item .course-link { position: relative; padding: 12px 15px; border-radius: 8px; transition: all 0.2s ease; }
-.course-item .course-link:hover { background: var(--primary-50); transform: translateX(-2px); }
-.course-name { display: block; font-weight: 600; margin-bottom: 4px; }
-.course-code { display: inline-block; background: var(--neutral-200); color: var(--neutral-700); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; margin-bottom: 6px; }
-.course-stats { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
-.course-stats span { display: flex; align-items: center; gap: 3px; font-size: 0.7rem; color: var(--text-muted); background: var(--surface-2); padding: 2px 6px; border-radius: 4px; }
+.course-item .course-link { position: relative; padding: 9.6px 12px; border-radius: 6.4px; transition: all 0.2s ease; }
+.course-item .course-link:hover { background: var(--primary-50); transform: translateX(-1.6px); }
+.course-name { display: block; font-weight: 600; margin-bottom: 3.2px; }
+.course-code { display: inline-block; background: var(--neutral-200); color: var(--neutral-700); padding: 1.6px 4.8px; border-radius: 3.2px; font-size: 0.7rem; font-weight: 600; margin-bottom: 4.8px; }
+.course-stats { display: flex; gap: 6.4px; margin-top: 3.2px; flex-wrap: wrap; }
+.course-stats span { display: flex; align-items: center; gap: 2.4px; font-size: 0.7rem; color: var(--text-muted); background: var(--surface-2); padding: 1.6px 4.8px; border-radius: 3.2px; }
 .course-stats i { font-size: 0.7rem; }
 .weeks-count i { color: var(--info-500); }
 .tasks-count i { color: var(--warning-500); }
 .available-indicator i.available { color: var(--success-500); font-size: 0.6rem; }
 
 /* عداد المساقات في الفصل */
-.semester-link .course-count { background: var(--primary-500); color: var(--text-inverse); padding: 2px 6px; border-radius: 50%; font-size: 0.7rem; font-weight: 600; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; margin-left: 5px; }
+.semester-link .course-count { background: var(--primary-500); color: var(--text-inverse); padding: 1.6px 4.8px; border-radius: 50%; font-size: 0.7rem; font-weight: 600; min-width: 14.4px; height: 14.4px; display: flex; align-items: center; justify-content: center; margin-left: 4px; }
 
 /* حالة عدم وجود مساقات */
-.no-courses-message { display: flex; align-items: center; gap: 8px; padding: 15px; color: var(--text-muted); font-size: 0.9rem; background: var(--surface-1); border-radius: 8px; margin: 10px 15px; }
+.no-courses-message { display: flex; align-items: center; gap: 6.4px; padding: 12px; color: var(--text-muted); font-size: 0.9rem; background: var(--surface-1); border-radius: 6.4px; margin: 8px 12px; }
 
 /* badge للطلبات غير المقروءة */
-.unread-badge { background: var(--error-500); color: var(--text-inverse); padding: 2px 6px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; margin-left: auto; animation: pulse 2s infinite; }
+.unread-badge { background: var(--error-500); color: var(--text-inverse); padding: 1.6px 4.8px; border-radius: 8px; font-size: 0.7rem; font-weight: 600; min-width: 14.4px; height: 14.4px; display: flex; align-items: center; justify-content: center; margin-left: auto; animation: pulse 2s infinite; }
 
 /* أسفل السايد بار */
-.sidebar-footer { margin-top: auto; padding: 15px; border-top: 1px solid var(--border-color); background: var(--surface-1); }
-.premium-badge { display: flex; align-items: center; gap: 6px; background: linear-gradient(135deg, var(--accent-500), var(--accent-600)); color: var(--text-inverse); padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; margin-bottom: 10px; }
+.sidebar-footer { margin-top: auto; padding: 12px; border-top: 0.8px solid var(--border-color); background: var(--surface-1); }
+.premium-badge { display: flex; align-items: center; gap: 4.8px; background: linear-gradient(135deg, var(--accent-500), var(--accent-600)); color: var(--text-inverse); padding: 6.4px 9.6px; border-radius: 6.4px; font-size: 0.8rem; font-weight: 600; margin-bottom: 8px; }
 .user-stats { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); }
 
 /* زر التحديث */
@@ -353,18 +386,18 @@ if ($userId) {
 @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 /* شارات */
-.menu-link .badge, .submenu-link .badge { background: #e74c3c; color: #fff; padding: 2px 6px; border-radius: 10px; font-size: 11px; margin-left: auto; min-width: 18px; text-align: center; font-weight: 600; }
-.menu-item.collapsed .badge { position: absolute; top: 8px; right: 8px; font-size: 9px; padding: 1px 4px; }
+.menu-link .badge, .submenu-link .badge { background: #e74c3c; color: #fff; padding: 1.6px 4.8px; border-radius: 8px; font-size: 8.8px; margin-left: auto; min-width: 14.4px; text-align: center; font-weight: 600; }
+.menu-item.collapsed .badge { position: absolute; top: 6.4px; right: 6.4px; font-size: 7.2px; padding: 0.8px 3.2px; }
 
 /* شعار */
-#student-sidebar .logo { text-align: center; padding: 1rem 0; border-bottom: 1px solid var(--gray-light); }
-#student-sidebar .logo img { max-width: 120px; height: auto; display: inline-block; object-fit: contain; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.1)); }
+#student-sidebar .logo { text-align: center; padding: 1rem 0; border-bottom: 0.8px solid var(--gray-light); }
+#student-sidebar .logo img { max-width: 96px; height: auto; display: inline-block; object-fit: contain; filter: drop-shadow(0 0.8px 2.4px rgba(0,0,0,0.1)); }
 
 /* تحسينات متجاوبة */
 @media (max-width: 768px) {
-  .sidebar-stats { flex-direction: column; gap: 8px; }
-  .course-stats { flex-direction: column; gap: 4px; }
-  .course-count { font-size: 0.6rem !important; min-width: 16px !important; height: 16px !important; }
+  .sidebar-stats { flex-direction: column; gap: 6.4px; }
+  .course-stats { flex-direction: column; gap: 3.2px; }
+  .course-count { font-size: 0.6rem !important; min-width: 12.8px !important; height: 12.8px !important; }
 }
 
 
@@ -396,12 +429,12 @@ if ($userId) {
   --primary-darker: var(--primary-700);
 
   /* حالات */
-  --shadow: 0 1px 3px rgba(0,0,0,.55);
+  --shadow: 0 0.8px 2.4px rgba(0,0,0,.55);
 }
 
 /* الهيدر: يبقى الجradient لكن بقيم primary الداكنة الجديدة */
 [data-theme="dark"] .service-header{
-  border: 1px solid rgba(255,255,255,.18);
+  border: 0.8px solid rgba(255,255,255,.18);
   color:#fff;
 }
 
@@ -534,7 +567,7 @@ if ($userId) {
 }
 [data-theme="dark"] .file-card:hover{
   border-color: var(--primary-200);
-  box-shadow: 0 6px 18px rgba(0,0,0,.45);
+  box-shadow: 0 4.8px 14.4px rgba(0,0,0,.45);
 }
 [data-theme="dark"] .file-card .thumb{ background:#12212a; }
 [data-theme="dark"] .file-card .icon-thumb i{ color: var(--primary-600); }
@@ -600,7 +633,7 @@ if ($userId) {
 @media (max-width: 768px) {
   [data-theme="dark"] .requests-ddl-mobile{
     background: var(--surface-1);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 0.8px solid var(--border-color);
   }
 }
 
@@ -614,7 +647,7 @@ if ($userId) {
 [data-theme="dark"] .card,
 [data-theme="dark"] .chat-container,
 [data-theme="dark"] .requests-sidebar{
-  box-shadow: 0 8px 24px rgba(0,0,0,.45);
+  box-shadow: 0 6.4px 19.2px rgba(0,0,0,.45);
 }
 
 </style>

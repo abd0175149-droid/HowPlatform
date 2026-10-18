@@ -323,10 +323,10 @@ class SpinnerController extends Controller
         $items = DB::table('spinner_items')->where('session_id',$id)->where('is_active',1)->pluck('label','id')->all();
         if (count($items) < 1) return response()->json(['ok'=>false,'error'=>'لا توجد عناصر مفعّلة']);
 
-        // اختيار حتمي (seed) أو عشوائي عادي — نستخدم seed زمنية بسيطة هنا
+        // اختيار عشوائي موحّد وغير متحيّز عبر CSPRNG (بدل crc32 الضعيف والمتحيّز بـ modulo)
         $seed = 'spin-'.round(microtime(true)*1000);
         $keys = array_keys($items);
-        $idx  = crc32($seed) % count($keys);
+        $idx  = random_int(0, count($keys) - 1);
         $itemId = $keys[$idx];
         $label  = $items[$itemId];
 

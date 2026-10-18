@@ -12,7 +12,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-LARAVEL_APPS="auth www library tools"
+LARAVEL_APPS="auth www library tools plans"
 
 if [ "${1:-}" != "--no-pull" ]; then
   echo ">> git pull"

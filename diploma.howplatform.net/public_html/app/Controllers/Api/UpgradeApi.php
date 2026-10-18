@@ -84,6 +84,10 @@ class UpgradeApi extends BaseController
     // ============================================================
     public function request()
     {
+        // مُتقاعد: الترقية تتم الآن عبر بطاقات/قسائم منصّة Plans (لا كتابة محلّية).
+        return $this->response->setStatusCode(410)->setJSON([
+            'error' => 'تم استبدال طلبات الترقية اليدوية بنظام البطاقات عبر منصّة Plans.',
+        ]);
         $userId = (int) session('user_id');
         if (! $userId) {
             return $this->response->setStatusCode(401)->setJSON(['error' => 'غير مصرح']);
@@ -186,6 +190,10 @@ class UpgradeApi extends BaseController
     // ============================================================
     public function confirm()
     {
+        // مُتقاعد: الاعتماد يتم الآن في منصّة Plans (لا كتابة محلّية لـ user_subscriptions/payments).
+        return $this->response->setStatusCode(410)->setJSON([
+            'error' => 'تم استبدال اعتماد الترقية اليدوي بمنصّة Plans.',
+        ]);
         // 🔐 حماية الاستدعاء
         if (! $this->guardAdminOrWebhook()) {
             return $this->response->setStatusCode(403)->setJSON(['error' => 'غير مصرح (لوحة الإدارة/ويبهوك فقط)']);

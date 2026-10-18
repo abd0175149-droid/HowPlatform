@@ -9,7 +9,7 @@
   if (window.__STUDENT_ROUTER_LOADED__) return;
   window.__STUDENT_ROUTER_LOADED__ = true;
 
-  const VERSION = 'v=2.0.1';
+  const VERSION = 'v=2.0.29';
   // === Date-bounded full purge (Amman TZ) ===
   const CLEAR_ON_DATES = ['2025-11-09', '2025-11-10']; // ✅ اليوم وغدًا فقط
 
@@ -132,7 +132,9 @@
     dashboard: () => import(`./sections/dashboard.js?${VERSION}`),
     upgrade: () => import(`./sections/upgrade.js?${VERSION}`),
     'task-details': () => import(`./sections/taskdetails.js?${VERSION}`),
-    welcome: () => import(`./sections/welcome.js?${VERSION}`)
+    welcome: () => import(`./sections/welcome.js?${VERSION}`),
+    'fateen-chat': () => import(`./sections/fateen_chat.js?${VERSION}`),
+    tasks: () => import(`./sections/tasks.js?${VERSION}`)
 
   };
 
@@ -156,7 +158,10 @@
   function getStudentsBasePath() {
     const path = window.location.pathname;
     const idx = path.toLowerCase().indexOf('/students');
-    return idx >= 0 ? path.slice(0, idx + '/students'.length) : '/students';
+    let base = idx >= 0 ? path.slice(0, idx + '/students'.length) : '/students';
+    // طبّع العنوان: أزِل أي بادئة إرثية مثل /public حتى لا يثبت شريط العنوان على /public/students
+    base = base.replace(/^\/public(?=\/)/i, '');
+    return base || '/students';
   }
 
   // ✅ ينظّف الـ URL ليكون /students فقط (بدون hash/ query)
@@ -254,6 +259,9 @@
 
     const serviceLink = container.querySelector('[data-section="service"]');
     const serviceItem = serviceLink ? serviceLink.closest('.menu-item') : null;
+    // مرساة ثابتة لإدراج المساقات تحت مجموعة "المساقات" (وإلا fallback قبل الخدمات)
+    const courseAnchor = container.querySelector('#courses-anchor');
+    const insertRef = courseAnchor || serviceItem;
 
     (meta.semesters || []).forEach(block => {
       const sem = block.semester || {};
@@ -266,7 +274,7 @@
         courses
       });
 
-      if (serviceItem) container.insertBefore(item, serviceItem);
+      if (insertRef) container.insertBefore(item, insertRef);
       else container.appendChild(item);
 
       semestersCount += 1;
@@ -297,9 +305,10 @@
 
         mount.appendChild(a);
 
+        const anchor2 = container.querySelector('#courses-anchor');
         const serviceLink2 = container.querySelector('[data-section="service"]');
-        const serviceItem2 = serviceLink2 ? serviceLink2.closest('.menu-item') : null;
-        if (serviceItem2) container.insertBefore(mount, serviceItem2);
+        const ref2 = anchor2 || (serviceLink2 ? serviceLink2.closest('.menu-item') : null);
+        if (ref2) container.insertBefore(mount, ref2);
         else container.appendChild(mount);
       } else {
         const span = mount.querySelector('.menu-link span');
@@ -615,7 +624,7 @@
     }
 
     // static sections
-    const STATIC = new Set(['dashboard', 'account', 'service', 'notifications', 'welcome']);
+    const STATIC = new Set(['dashboard', 'account', 'service', 'notifications', 'welcome', 'tasks', 'fateen-chat']);
     if (STATIC.has(section)) {
       await loadSection(section);
       scheduleClean();
@@ -908,7 +917,9 @@
         a.innerHTML = `<i class="fas fa-info-circle"></i> <span>تعذّر تحميل المساقات</span>`;
 
         mount.appendChild(a);
-        if (serviceItem) container.insertBefore(mount, serviceItem);
+        const anchorErr = container.querySelector('#courses-anchor');
+        const refErr = anchorErr || serviceItem;
+        if (refErr) container.insertBefore(mount, refErr);
         else container.appendChild(mount);
       } else if (mount) {
         const span = mount.querySelector('.menu-link span');

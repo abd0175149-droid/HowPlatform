@@ -137,6 +137,27 @@ class DiplomaStatsService
 
     public function getPlanDistribution(): array
     {
+        // وضع api: توزيع الاشتراكات من Plans (المصدر الموثوق) مع fail-open للـ CTE المحلّي.
+        try {
+            $client = new \App\Libraries\PlansClient();
+            if ($client->entitlementsMode() === 'api') {
+                $res = $client->adminSubscriptionStats();
+                if (is_array($res) && ($res['ok'] ?? false) && is_array($res['distribution'] ?? null)) {
+                    $items = array_map(static function (array $d): array {
+                        return [
+                            'label' => (string) ($d['label'] ?? ''),
+                            'users' => (int) ($d['users_count'] ?? 0),
+                        ];
+                    }, $res['distribution']);
+
+                    return ['items' => $items];
+                }
+                // Plans غير متاح → تابع للقراءة المحلّية (fail-open)
+            }
+        } catch (\Throwable $e) {
+            log_message('warning', 'DiplomaStatsService::getPlanDistribution Plans failed: ' . $e->getMessage());
+        }
+
         $sql = "
             WITH active_sub AS (
                 SELECT

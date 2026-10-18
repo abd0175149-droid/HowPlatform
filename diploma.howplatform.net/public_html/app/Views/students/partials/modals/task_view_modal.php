@@ -94,7 +94,7 @@
   transition: var(--transition);
 
   /* هام: مسافة حماية بسيطة لمنع الالتصاق بالحواف عندما يكون المحتوى طويل */
-  padding: clamp(8px, 2vh, 24px);
+  padding: clamp(6.4px, 2vh, 19.2px);
 }
 .modal-overlay.active,
 .modal-overlay.show{
@@ -106,7 +106,7 @@
 /* 2) صندوق المودال: احسب الارتفاع بنظام border-box ووسّطه ذاتياً أيضاً */
 .view-modal{
   background: var(--surface-0);
-  border-radius: 16px;
+  border-radius: 12.8px;
   width: 90vh;
   /* احسب أقصى ارتفاع وفق viewport الحديث + لا تتجاوز padding الأوفرلاي */
   box-sizing: border-box;
@@ -114,7 +114,7 @@
   overflow-y: auto;
   /* حركة الدخول */
   opacity: 0;
-  transform: translateY(30px) scale(0.98);
+  transform: translateY(24px) scale(0.98);
   transition: var(--transition);
   scrollbar-width: none;
 
@@ -135,18 +135,18 @@
 .view-modal .modal-header{
   background:linear-gradient(135deg, var(--primary-900), var(--primary-700));
   color:#fff;
-  padding:25px;
+  padding:20px;
   display:flex; justify-content:space-between; align-items:center;
   position:relative; z-index:2;
-  border-bottom:1px solid rgba(255,255,255,.15);
+  border-bottom:0.8px solid rgba(255,255,255,.15);
 }
 .view-modal .modal-header::before{
   content:""; position:absolute; top:0; right:0; width:100%; height:100%;
   opacity:.18; z-index:-1;
-  background:radial-gradient(1000px 200px at 80% -50%, rgba(255,255,255,.2), transparent);
+  background:radial-gradient(800px 160px at 80% -50%, rgba(255,255,255,.2), transparent);
 }
 .view-modal .modal-header h2{
-  font-size:1.8rem; display:flex; align-items:center; gap:15px; margin-bottom:10px;
+  font-size:1.8rem; display:flex; align-items:center; gap:12px; margin-bottom:8px;
 }
 .view-modal .modal-header h2 i{
   font-size:1.5rem; color:var(--accent-500);
@@ -155,7 +155,7 @@
 /* زر الإغلاق */
 .view-modal .close-modal{
   background:rgba(255,255,255,.2); border:none; color:#fff;
-  font-size:1.5rem; cursor:pointer; width:45px; height:45px;
+  font-size:1.5rem; cursor:pointer; width:36px; height:36px;
   border-radius:50%; display:flex; align-items:center; justify-content:center;
   transition:var(--transition); flex-shrink:0;
 }
@@ -165,107 +165,107 @@
 }
 
 /* شريط معلومات سريع داخل الهيدر */
-.secondary-info-grid-header{ display:flex; gap:15px; }
+.secondary-info-grid-header{ display:flex; gap:12px; }
 .info-item-header{
-  display:flex; align-items:center; gap:10px; padding:8px 0; color:var(--text-inverse);
+  display:flex; align-items:center; gap:8px; padding:6.4px 0; color:var(--text-inverse);
 }
-.info-item-header i{ color:#fff; font-size:1.1rem; width:24px; text-align:center; }
+.info-item-header i{ color:#fff; font-size:1.1rem; width:19.2px; text-align:center; }
 .info-item-header .value{ font-weight:600; color:#eef; }
 
 /* Body */
-.view-modal .modal-body{ padding:30px; background:var(--surface-0); }
+.view-modal .modal-body{ padding:24px; background:var(--surface-0); }
 
 /* شبكة معلومات ثانوية (إن استُخدمت داخل المودال) */
 .secondary-info-grid{
-  display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:15px; margin-bottom:25px;
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:12px; margin-bottom:20px;
 }
 .info-item{
-  display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:8px;
-  background:var(--surface-0); box-shadow:var(--shadow-sm); border:1px solid var(--border-color);
+  display:flex; align-items:center; gap:8px; padding:6.4px 9.6px; border-radius:6.4px;
+  background:var(--surface-0); box-shadow:var(--shadow-sm); border:0.8px solid var(--border-color);
 }
-.info-item i{ color:var(--btn-primary-bg, var(--primary-500)); font-size:1.1rem; width:24px; text-align:center; }
-.info-item .label{ color:var(--text-muted); font-size:.9rem; margin-left:5px; }
+.info-item i{ color:var(--btn-primary-bg, var(--primary-500)); font-size:1.1rem; width:19.2px; text-align:center; }
+.info-item .label{ color:var(--text-muted); font-size:.9rem; margin-left:4px; }
 .info-item .value{ font-weight:600; color:var(--text-strong); }
 
 /* وصف المهمة */
 .description-section{
   background:linear-gradient(to left, var(--surface-1), var(--info-100));
-  border-radius:12px; padding:10px; margin-bottom:30px; text-align:right;
+  border-radius:9.6px; padding:8px; margin-bottom:24px; text-align:right;
   box-shadow:var(--shadow-sm); position:relative; overflow:hidden;
-  border:1px solid var(--primary-500);
+  border:0.8px solid var(--primary-500);
 }
 .description-section::before{
-  content:""; position:absolute; top:0; right:0; width:100%; height:5px;
+  content:""; position:absolute; top:0; right:0; width:100%; height:4px;
   background:linear-gradient(to right, var(--accent-500), var(--accent-600));
 }
 .description-section h3{
-  color:var(--accent-600); margin-bottom:20px; font-size:1.3rem;
-  display:flex; align-items:center; gap:15px;
+  color:var(--accent-600); margin-bottom:16px; font-size:1.3rem;
+  display:flex; align-items:center; gap:12px;
 }
 .description-section p{
   font-size:1.05rem; line-height:1.8; color:var(--text-strong);
-  margin-top:15px; padding:15px; background:var(--surface-0);
-  border-radius:10px; border:1px solid var(--border-color);
+  margin-top:12px; padding:12px; background:var(--surface-0);
+  border-radius:8px; border:0.8px solid var(--border-color);
   white-space:pre-line; /* دعم فواصل الأسطر */
 }
 
 /* ملفات داخل المودال */
-.view-modal .files-section{ margin-bottom:30px; }
+.view-modal .files-section{ margin-bottom:24px; }
 .view-modal .section-title{
-  font-size:1.3rem; color:var(--text-strong); margin-bottom:20px;
-  padding-right:15px; border-right:5px solid var(--btn-primary-bg, var(--primary-500));
-  display:inline-flex; align-items:center; gap:12px;
+  font-size:1.3rem; color:var(--text-strong); margin-bottom:16px;
+  padding-right:12px; border-right:4px solid var(--btn-primary-bg, var(--primary-500));
+  display:inline-flex; align-items:center; gap:9.6px;
 }
 .view-modal .files-container{
-  display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
-  gap:20px;
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+  gap:16px;
 }
 .view-modal .file-card{
-  border-radius:12px; padding:20px; text-align:right; box-shadow:var(--shadow-sm);
-  border:1px solid var(--primary-500); transition:var(--transition);
+  border-radius:9.6px; padding:16px; text-align:right; box-shadow:var(--shadow-sm);
+  border:0.8px solid var(--primary-500); transition:var(--transition);
   display:flex; flex-direction:column; position:relative; overflow:hidden;
 }
-.view-modal .file-card:hover{ transform:translateY(-5px); box-shadow:var(--shadow-md); }
+.view-modal .file-card:hover{ transform:translateY(-4px); box-shadow:var(--shadow-md); }
 .view-modal .file-card::before{
-  content:""; position:absolute; top:0; right:0; width:100%; height:4px;
+  content:""; position:absolute; top:0; right:0; width:100%; height:3.2px;
   background:var(--btn-primary-bg, var(--primary-500));
 }
-.view-modal .file-header{ display:flex; align-items:center; gap:15px; margin-bottom:15px; }
+.view-modal .file-header{ display:flex; align-items:center; gap:12px; margin-bottom:12px; }
 .view-modal .file-icon{
-  width:50px; height:50px; border-radius:10px; background:var(--surface-1);
+  width:40px; height:40px; border-radius:8px; background:var(--surface-1);
   display:flex; align-items:center; justify-content:center; font-size:1.5rem;
-  color:var(--btn-primary-bg, var(--primary-500)); flex-shrink:0; border:1px solid var(--border-color);
+  color:var(--btn-primary-bg, var(--primary-500)); flex-shrink:0; border:0.8px solid var(--border-color);
 }
 .view-modal .file-info{ flex-grow:1; text-align:right; }
 .view-modal .file-name{
-  font-weight:700; color:var(--text-strong); margin-bottom:5px;
+  font-weight:700; color:var(--text-strong); margin-bottom:4px;
   display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
   overflow:hidden; text-overflow:ellipsis;
 }
 .view-modal .file-actions{
-  display:flex; justify-content:flex-end; gap:12px; margin-top:15px;
+  display:flex; justify-content:flex-end; gap:9.6px; margin-top:12px;
 }
 .view-modal .file-action-btn{
-  padding:8px 16px; border-radius:6px; border:none; cursor:pointer; font-weight:600;
-  font-size:.9rem; transition:var(--transition); display:inline-flex; align-items:center; gap:8px; text-decoration:none;
+  padding:6.4px 12.8px; border-radius:4.8px; border:none; cursor:pointer; font-weight:600;
+  font-size:.9rem; transition:var(--transition); display:inline-flex; align-items:center; gap:6.4px; text-decoration:none;
 }
 .view-modal .preview-btn{
-  background:var(--surface-1); color:var(--text-strong); border:1px solid var(--border-color);
+  background:var(--surface-1); color:var(--text-strong); border:0.8px solid var(--border-color);
 }
 .view-modal .preview-btn:hover{ background:var(--surface-2); }
 .view-modal .file-action-btn.btn-secondary.locked{ cursor:not-allowed; opacity:.6; }
 
 /* Footer */
 .view-modal .modal-footer{
-  padding-top:20px; display:flex; justify-content:space-between;
+  padding-top:16px; display:flex; justify-content:space-between;
 }
 .view-modal .action-btn{
-  padding:12px 25px; border-radius:8px; border:none; cursor:pointer; font-weight:600;
-  font-size:.9rem; transition:var(--transition); display:flex; align-items:center; gap:10px;
+  padding:9.6px 20px; border-radius:6.4px; border:none; cursor:pointer; font-weight:600;
+  font-size:.9rem; transition:var(--transition); display:flex; align-items:center; gap:8px;
 }
 .view-modal .close-btn-task{
-  background:var(--btn-primary-bg, var(--primary-500)); color:var(--text-inverse); max-width:250px;
+  background:var(--btn-primary-bg, var(--primary-500)); color:var(--text-inverse); max-width:200px;
 }
 .view-modal .close-btn-task:hover{
   background:var(--btn-primary-hover, var(--primary-600)); box-shadow:var(--shadow-sm);
@@ -280,33 +280,33 @@
   .secondary-info-grid-header{ display:flex; flex-direction:column; }
 }
 @media (max-width:480px){
-  .view-modal .modal-body{ padding:20px; }
+  .view-modal .modal-body{ padding:16px; }
   .view-modal .file-header{ text-align:center; }
   .view-modal .file-actions{ justify-content:center; }
 }
 @media (max-width:900px){
-  .view-modal .modal-footer{ flex-direction:column; gap:10px; }
+  .view-modal .modal-footer{ flex-direction:column; gap:8px; }
 }
 /* شبكة الملفات على شاشة صغيرة: عمود واحد */
 @media (max-width: 560px){
   .view-modal{
     width: 100%;
     max-width: none;
-    border-radius: 14px; /* زوايا أنعم على الجوال */
+    border-radius: 11.2px; /* زوايا أنعم على الجوال */
     max-height: min(100svh, 100dvh, 100vh);
   }
-  .view-modal .modal-body{ padding: 16px; }
-  .secondary-info-grid-header{ gap: 8px; }
+  .view-modal .modal-body{ padding: 12.8px; }
+  .secondary-info-grid-header{ gap: 6.4px; }
   .view-modal .files-container{ grid-template-columns: 1fr; }
   .view-modal .section-title{ font-size: 1.1rem; }
-  .view-modal .modal-header h2{ font-size: 1.25rem; gap: 10px; }
-  .info-item-header i{ width: 20px; font-size: 1rem; }
+  .view-modal .modal-header h2{ font-size: 1.25rem; gap: 8px; }
+  .info-item-header i{ width: 16px; font-size: 1rem; }
 }
 
 /* لو الشاشة أضيق جداً (هواتف صغيرة جداً) نستخدم نمط “تقريباً ملء الشاشة” */
 @media (max-width: 380px){
   .view-modal{
-    border-radius: 10px;
+    border-radius: 8px;
   }
 }
 </style>

@@ -190,6 +190,37 @@ public function download(Request $request, int $file)
         abort(404, 'File not found on storage');
     }
 
+    // 1.5) ✅ بوابة الحصص (منصّة النقاط): التحميل يتطلب دخولًا + حصّة يومية
+    //      (خطة: 10/25/50 حسب المستوى — بلا خطة: حصّة مجانية من الإعدادات).
+    //      المعاينة تبقى مجانية للجميع. mode=off → السلوك القديم حرفيًا.
+    $plans = new \App\Services\PlansClient();
+    if ($plans->enabled()) {
+        $userId = (int) (session('auth_user.id') ?? 0);
+
+        if ($userId <= 0) {
+            // ضيف → تسجيل الدخول ثم العودة لإكمال التحميل تلقائيًا
+            return redirect()->away(
+                'https://auth.howplatform.net/login?redirect=' . urlencode(route('library.download', $f->id))
+            );
+        }
+
+        $freeLimit = (int) config('plans.free_daily_downloads', 3);
+        $consume   = $plans->usageConsume($userId, 'downloads_per_day', 1, $freeLimit);
+
+        // تعذّر الاتصال بـ Plans → اسمح (fail-open) وسجّل
+        if (is_array($consume) && ($consume['allowed'] ?? true) === false) {
+            $limit = $consume['limit'] ?? $freeLimit;
+            return response()->view('library.quota', [
+                'limit'   => $limit,
+                'used'    => $consume['used'] ?? $limit,
+                'back'    => url()->previous() ?: url('/'),
+            ], 429);
+        }
+        if ($consume === null) {
+            \Log::warning('Library quota check unavailable (fail-open)', ['user_id' => $userId, 'file_id' => $f->id]);
+        }
+    }
+
     // 2) أسماء التنزيل (مع بديل ASCII)
     $downloadName  = trim($f->original_name ?: basename($path));
     $downloadName  = str_replace(["\r", "\n"], '', $downloadName);

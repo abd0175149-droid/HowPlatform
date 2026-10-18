@@ -90,7 +90,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
+        padding: 16px;
         animation: fadeIn 0.3s ease-out;
     }
     
@@ -98,17 +98,17 @@
         position: absolute;
         inset: 0;
         background: rgba(0, 0, 0, 0.75);
-        backdrop-filter: blur(4px);
+        backdrop-filter: blur(3.2px);
     }
     
     .terms-modal-content {
         position: relative;
         width: 100%;
-        max-width: 700px;
+        max-width: 560px;
         max-height: 90vh;
         background: var(--surface-0, #ffffff);
-        border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        border-radius: 16px;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
         display: flex;
         flex-direction: column;
         overflow: hidden;
@@ -121,13 +121,13 @@
     }
     
     @keyframes slideUp {
-        from { transform: translateY(30px); opacity: 0; }
+        from { transform: translateY(24px); opacity: 0; }
         to { transform: translateY(0); opacity: 1; }
     }
     
     .terms-modal-header {
-        padding: 24px 28px;
-        border-bottom: 2px solid var(--border-color, #e5e7eb);
+        padding: 19.2px 22.4px;
+        border-bottom: 1.6px solid var(--border-color, #e5e7eb);
         background: linear-gradient(135deg, var(--btn-primary-bg, #2563eb) 0%, var(--accent-500, #3b82f6) 100%);
         color: white;
         text-align: right;
@@ -139,7 +139,7 @@
         font-weight: 800;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 9.6px;
     }
     
     .terms-modal-header h2 i {
@@ -147,7 +147,7 @@
     }
     
     .terms-subtitle {
-        margin: 8px 0 0;
+        margin: 6.4px 0 0;
         font-size: 0.95rem;
         opacity: 0.95;
         font-weight: 400;
@@ -156,11 +156,11 @@
     .terms-modal-body {
         flex: 1;
         overflow-y: auto;
-        padding: 24px 28px;
+        padding: 19.2px 22.4px;
     }
     
     .terms-content-wrapper {
-        margin-bottom: 24px;
+        margin-bottom: 19.2px;
     }
     
     .terms-content {
@@ -172,19 +172,19 @@
     .terms-content h3 {
         color: var(--btn-primary-bg, #2563eb);
         font-size: 1.4rem;
-        margin: 0 0 20px;
-        padding-bottom: 12px;
-        border-bottom: 2px solid var(--border-color, #e5e7eb);
+        margin: 0 0 16px;
+        padding-bottom: 9.6px;
+        border-bottom: 1.6px solid var(--border-color, #e5e7eb);
     }
     
     .terms-content section {
-        margin-bottom: 24px;
+        margin-bottom: 19.2px;
     }
     
     .terms-content section h4 {
         color: var(--accent-600, #2563eb);
         font-size: 1.1rem;
-        margin: 0 0 10px;
+        margin: 0 0 8px;
         font-weight: 700;
     }
     
@@ -196,13 +196,13 @@
     
     .terms-warning {
         background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        border: 2px solid #f59e0b;
-        border-radius: 12px;
-        padding: 16px;
-        margin-top: 24px;
+        border: 1.6px solid #f59e0b;
+        border-radius: 9.6px;
+        padding: 12.8px;
+        margin-top: 19.2px;
         display: flex;
         align-items: flex-start;
-        gap: 12px;
+        gap: 9.6px;
         direction: rtl;
     }
     
@@ -210,25 +210,25 @@
         color: #f59e0b;
         font-size: 1.5rem;
         flex-shrink: 0;
-        margin-top: 2px;
+        margin-top: 1.6px;
     }
     
     .terms-warning strong {
         color: #92400e;
         display: block;
-        margin-bottom: 4px;
+        margin-bottom: 3.2px;
     }
     
     .terms-checkbox-wrapper {
-        margin-top: 24px;
-        padding-top: 20px;
-        border-top: 2px solid var(--border-color, #e5e7eb);
+        margin-top: 19.2px;
+        padding-top: 16px;
+        border-top: 1.6px solid var(--border-color, #e5e7eb);
     }
     
     .terms-checkbox-label {
         display: flex;
         align-items: flex-start;
-        gap: 12px;
+        gap: 9.6px;
         cursor: pointer;
         user-select: none;
         direction: rtl;
@@ -239,13 +239,13 @@
     }
     
     .terms-checkbox-custom {
-        width: 24px;
-        height: 24px;
-        border: 2px solid var(--border-color, #d1d5db);
-        border-radius: 6px;
+        width: 19.2px;
+        height: 19.2px;
+        border: 1.6px solid var(--border-color, #d1d5db);
+        border-radius: 4.8px;
         background: var(--surface-0, #ffffff);
         flex-shrink: 0;
-        margin-top: 2px;
+        margin-top: 1.6px;
         transition: all 0.2s ease;
         position: relative;
     }
@@ -262,7 +262,7 @@
         left: 50%;
         transform: translate(-50%, -50%);
         color: white;
-        font-size: 14px;
+        font-size: 11.2px;
         font-weight: bold;
     }
     
@@ -275,25 +275,25 @@
     }
     
     .terms-modal-footer {
-        padding: 20px 28px;
-        border-top: 2px solid var(--border-color, #e5e7eb);
+        padding: 16px 22.4px;
+        border-top: 1.6px solid var(--border-color, #e5e7eb);
         background: var(--surface-1, #f9fafb);
         display: flex;
-        gap: 12px;
+        gap: 9.6px;
         justify-content: flex-start;
     }
     
     .terms-btn {
-        padding: 12px 24px;
+        padding: 9.6px 19.2px;
         border: none;
-        border-radius: 10px;
+        border-radius: 8px;
         font-size: 1rem;
         font-weight: 700;
         cursor: pointer;
         transition: all 0.2s ease;
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 6.4px;
     }
     
     .terms-btn:disabled {
@@ -308,8 +308,8 @@
     
     .terms-btn-reject:hover:not(:disabled) {
         background: var(--error-600, #dc2626);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        transform: translateY(-1.6px);
+        box-shadow: 0 3.2px 9.6px rgba(239, 68, 68, 0.3);
     }
     
     .terms-btn-accept {
@@ -318,8 +318,8 @@
     }
     
     .terms-btn-accept:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        transform: translateY(-1.6px);
+        box-shadow: 0 3.2px 9.6px rgba(37, 99, 235, 0.4);
     }
     
     /* Responsive */
@@ -330,7 +330,7 @@
         }
         
         .terms-modal-header {
-            padding: 20px;
+            padding: 16px;
         }
         
         .terms-modal-header h2 {
@@ -338,7 +338,7 @@
         }
         
         .terms-modal-body {
-            padding: 20px;
+            padding: 16px;
         }
         
         .terms-content h3 {
@@ -347,7 +347,7 @@
         
         .terms-modal-footer {
             flex-direction: column-reverse;
-            padding: 16px 20px;
+            padding: 12.8px 16px;
         }
         
         .terms-btn {

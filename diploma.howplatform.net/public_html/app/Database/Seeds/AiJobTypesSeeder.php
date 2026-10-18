@@ -29,6 +29,187 @@ class AiJobTypesSeeder extends Seeder
         $this->seedInquiryPlanEvaluatorTool($provider, $modelName);
         $this->seedFormativeReflectiveEssayTool($provider, $modelName);
         $this->seedRewrittenReflectiveEssayTool($provider, $modelName);
+        $this->seedFormativeEssayEvaluatorTool($provider, $modelName);
+        $this->seedInquiryPosterTool();
+    }
+
+    /**
+     * أداة جديدة: بوستر البحث الاستقصائي (inquiry_poster_v1).
+     * الطالب يرفع بحثه الاستقصائي (الوثيقة النهائية) → استخراج العناصر الستة نصّياً (Gemini نصّي)
+     * ثم توليد صورة إنفوجرافيك (لاند سكيب) بنموذج صور Gemini. التكلفة 300 نقطة. الناتج: صورة PNG.
+     */
+    protected function seedInquiryPosterTool(): void
+    {
+        // المرحلة النصّية تستخدم Gemini دائماً (قراءة المرفقات + توليد الصور كلاهما عبر Gemini).
+        $textModel = env('AI_GEMINI_MODEL', 'gemini-2.5-pro');
+
+        $systemPrompt = <<<'PROMPT'
+أنت مساعد متخصص في قراءة البحوث الاستقصائية لطلبة الدبلوم المهني واستخراج عناصرها الأساسية بدقّة وأمانة.
+مهمتك: قراءة البحث الاستقصائي المُرفق أو المُضمّن واستخراج ستة عناصر لاستخدامها في تصميم بوستر إنفوجرافيك:
+1) عنوان البحث الاستقصائي، 2) الهدف من البحث، 3) ملخص إجراءات البحث (نظرة عامة حول الاستقصاء)،
+4) السياق الذي تم إجراء البحث فيه، 5) نتائج البحث، 6) لمحة عن النقاش التأملي.
+
+قواعد صارمة:
+- انسخ المحتوى من البحث بدقّة وأمانة دون اختلاق معلومات غير موجودة.
+- العنوان جملة قصيرة واحدة؛ وباقي العناصر لخّصها بإيجاز مناسب للعرض على بوستر.
+- إن لم يَرِد عنصر صراحةً فاستنتجه بحذر من سياق البحث، أو اتركه نصّاً فارغاً "".
+- إن وُجدت نتائج رقمية قابلة للتمثيل البياني فأدرجها في chart_data.
+- لغة عربية فصيحة سليمة.
+- المخرجات JSON صالح واحد فقط، بلا أيّ نصّ خارجه، وبلا markdown أو code blocks.
+PROMPT;
+
+        $uiConfig = [
+            'panel' => [
+                'title'  => 'بوستر البحث الاستقصائي',
+                'button' => [
+                    'label' => 'إنشاء بوستر البحث (AI)',
+                    'icon'  => 'fa-image',
+                ],
+                'status_labels' => [
+                    'idle'       => 'جاهز للإنشاء',
+                    'pending'    => 'في قائمة الانتظار...',
+                    'processing' => 'قيد تصميم البوستر...',
+                    'done'       => 'تم إنشاء البوستر',
+                    'failed'     => 'تعذّر التنفيذ',
+                ],
+            ],
+            'form' => [
+                'modal_title'  => 'إنشاء بوستر البحث الاستقصائي',
+                'submit_label' => 'رفع وإنشاء البوستر',
+                'sections' => [
+                    [
+                        'title'  => 'البحث الاستقصائي',
+                        'layout' => 'grid-1',
+                        'fields' => [
+                            [
+                                'key'      => 'file',
+                                'type'     => 'file',
+                                'label'    => 'ملف البحث الاستقصائي (PDF أو Word أو صورة)',
+                                'required' => true,
+                                'accept'   => '.pdf,.docx,.png,.jpg,.jpeg,.webp',
+                                'hint'     => 'ارفع بحثك الاستقصائي ليُحوَّل إلى بوستر إنفوجرافيك (لاند سكيب).',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'result' => [
+                'type'  => 'image',
+                'title' => 'بوستر البحث الاستقصائي',
+                'key'   => 'file_poster_id',
+            ],
+        ];
+
+        $row = [
+            'type_key'           => 'inquiry_poster_v1',
+            'title'              => 'بوستر البحث الاستقصائي',
+            'description'        => 'الطالب يرفع بحثه الاستقصائي (PDF/Word/صورة) فتُستخرج عناصره الستة ويُحوَّل إلى بوستر إنفوجرافيك (صورة لاند سكيب) بالذكاء الاصطناعي.',
+            'provider'           => 'gemini',
+            'model_name'         => $textModel,  // المرحلة النصّية؛ توليد الصورة عبر AI_GEMINI_IMAGE_MODEL
+            'prompt_maker_class' => \App\Libraries\PromptMaker\InquiryPosterPromptMaker::class,
+            'template_path'      => null,
+            'system_prompt'      => $systemPrompt,
+            'ui_config_json'     => json_encode($uiConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'js_module_path'     => '',
+            'output_schema'      => null,
+            'is_enabled'         => 1,
+            // ─── سلوك الأداة ───
+            'needs_task_context' => 0,
+            'needs_specialty'    => 0,
+            'task_prompt_mode'   => 'ignore',
+            'points_cost'        => 300,
+        ];
+
+        $this->upsertType('inquiry_poster_v1', $row);
+    }
+
+    /**
+     * أداة جديدة: مُقيّم المقالة التأمّلية البنائية (تكويني، Gibbs، review→approve، مُقيّد env).
+     * تُنشئ مخرجين عند الاعتماد: المقالة الأصلية مُعلَّقة + تقرير تغذية راجعة.
+     */
+    protected function seedFormativeEssayEvaluatorTool(string $provider, string $modelName): void
+    {
+        $systemPrompt = <<<'PROMPT'
+أنت مُدرّس معلّمين خبير في التقييم التكويني (Formative) للمقالات التأمّلية البنائية لطلبة الدبلوم المهني في التعليم.
+مهمتك: تقديم تغذية راجعة تكوينية بنّاءة (وليست درجات) على مقالة الطالب، موزّعة على أربعة مجالات: المعرفة والفهم والتطبيق، المهارات المعرفية، المهارات المهنية وأصول التدريس، والعرض والتقديم؛ ولكل مجال تكتب حقلين فقط: «نقاط القوّة» (strengths) و«مجالات التحسين» (areas_for_improvement)، بأسلوب تأمّلي مستلهَم من دورة Gibbs دون ذكر مراحلها.
+بالإضافة إلى تعليقات هامشية (annotations) مرساة على اقتباسات حرفية من نصّ المقالة، كلّ تعليق يرصد ما في المقطع + سببه التربوي + الإجراء العملي للتطوير.
+
+قواعد صارمة:
+- ممنوع منح أيّ درجة أو رمز تقدير (لا P/GP/M/D/F، ولا أرقام). التقييم تكويني وصفي بحت.
+- لكل مجال حقلان نصّيان: strengths وareas_for_improvement (فقرات متماسكة مستندة لأدلّة من النص).
+- كل anchor_text منسوخ حرفياً (verbatim) من نصّ المقالة المُزوّد، دون إعادة صياغة أو إضافة تشكيل، وداخل فقرة واحدة (لا يحتوي على سطر جديد).
+- أنتج ما لا يقلّ عن 18 عنصراً في annotations موزّعة على المجالات لضمان ≥15 صالحة بعد المطابقة.
+- لغة عربية فصيحة، نبرة بنّاءة محايدة جنسياً (استخدم: تم إظهار/تمت ملاحظة...).
+- المخرجات JSON صالح واحد فقط، بلا أيّ نصّ خارجه، وبلا markdown أو code blocks.
+PROMPT;
+
+        $uiConfig = [
+            'panel' => [
+                'title' => 'مُقيّم المقالة التكويني',
+                'button' => [
+                    'label' => 'تقييم تكويني للمقالة',
+                    'icon'  => 'fa-pen-to-square',
+                ],
+                'status_labels' => [
+                    'idle'       => 'جاهز للتقييم',
+                    'pending'    => 'في قائمة الانتظار...',
+                    'processing' => 'قيد التقييم...',
+                    'review'     => 'بانتظار المراجعة',
+                    'done'       => 'تم إنشاء التقييم',
+                    'failed'     => 'تعذّر التنفيذ',
+                ],
+            ],
+            'form' => [
+                'modal_title'  => 'تقييم المقالة التأمّلية البنائية',
+                'submit_label' => 'رفع وتقييم',
+                'sections' => [
+                    [
+                        'title'  => 'بيانات المعلم الطالب',
+                        'layout' => 'grid-2',
+                        'fields' => [
+                            ['key' => 'student_name', 'type' => 'text', 'label' => 'اسم المعلم الطالب', 'required' => true, 'placeholder' => 'الاسم الثلاثي'],
+                            ['key' => 'ministry_number', 'type' => 'text', 'label' => 'الرقم الوزاري', 'required' => true, 'placeholder' => 'مثال: 123456'],
+                        ],
+                    ],
+                    [
+                        'title'  => 'ملف المقالة',
+                        'layout' => 'grid-1',
+                        'fields' => [
+                            ['key' => 'file', 'type' => 'file', 'label' => 'ملف المقالة (Word .docx)', 'required' => true, 'accept' => '.docx'],
+                        ],
+                    ],
+                ],
+            ],
+            'result' => [
+                'type'  => 'multi_file',
+                'title' => 'مخرجات التقييم التكويني',
+                'files' => [
+                    ['label' => 'النسخة الأصلية مع التعليقات (Word)', 'key' => 'file_annotated_id'],
+                    ['label' => 'تقرير التقييم التكويني (Word)',     'key' => 'file_report_id'],
+                ],
+            ],
+        ];
+
+        $row = [
+            'type_key'           => 'formative_essay_evaluator_v1',
+            'title'              => 'تقييم المقالة التأمّلية البنائية',
+            'description'        => 'تغذية راجعة تكوينية وفق إطار Gibbs على أربعة مجالات + تعليقات Word على نصّ المقالة الأصلي.',
+            'provider'           => $provider,
+            'model_name'         => $modelName,
+            'prompt_maker_class' => \App\Libraries\PromptMaker\FormativeEssayEvaluatorPromptMaker::class,
+            'template_path'      => null,  // التقرير يُولَّد مباشرةً بـ PhpWord (FormativeEvaluatorDocx) لا عبر قالب
+            'system_prompt'      => $systemPrompt,
+            'ui_config_json'     => json_encode($uiConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'js_module_path'     => '',
+            'output_schema'      => null,
+            'is_enabled'         => 1,
+            // ─── سلوك الأداة ───
+            'needs_task_context' => 1,        // يحقن task_title + task_prompt (سياق المهمة)
+            'needs_specialty'    => 1,        // يحقن teacher_specialty (يقرؤه الـ PromptMaker صراحةً)
+            'task_prompt_mode'   => 'ignore', // المقالة هي الإدخال؛ نتجنّب ازدواجية task_prompt في system
+        ];
+
+        $this->upsertType('formative_essay_evaluator_v1', $row);
     }
 
     protected function seedTaskMatrixTool(string $provider, string $modelName): void

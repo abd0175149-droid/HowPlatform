@@ -45,6 +45,7 @@ class PromptMakerFactory
         'inquiry_research_v1'        => InquiryResearchPromptMaker::class,
         'inquiry_plan_evaluator_v1'  => InquiryPlanEvaluatorPromptMaker::class,
         'inquiry_report_evaluator_v1' => InquiryReportEvaluatorPromptMaker::class,
+        'final_essay_evaluator_v1'    => FinalEssayEvaluatorPromptMaker::class,
     ];
 
     /**

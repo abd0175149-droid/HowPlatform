@@ -146,7 +146,19 @@ final class FileAccessPolicy
         // حد يومي إجمالي حسب الخطة (إن وُجدت)
         $dailyCap = (int)($plan['daily_download_cap'] ?? 0);
         if ($dailyCap > 0) {
-            $dayCount = $this->countUserAllInRange($userId, $dayStart, $dayEnd);
+            // وضع api: العدّ اليومي من عدّاد Plans المركزي (fail-open للعدّ المحلي)
+            $dayCount = null;
+            try {
+                $snap = (new \App\Libraries\PlansClient())->usageSnapshot($userId, 'downloads_per_day', null);
+                if (is_array($snap)) {
+                    $dayCount = (int) ($snap['used'] ?? 0);
+                }
+            } catch (\Throwable $e) {
+                $dayCount = null;
+            }
+            if ($dayCount === null) {
+                $dayCount = $this->countUserAllInRange($userId, $dayStart, $dayEnd);
+            }
             if ($dayCount >= $dailyCap) {
                 return [
                     'allowed' => false,

@@ -1,0 +1,177 @@
+/* =================== Plans — Account Area (auth-style shell) =================== */
+/* يعتمد على tokens.css + profile.css من هوية أوث. هذا الملف يضيف قشرة متعددة الصفحات:
+   ناف بار + بانر بإحصاءات + شرائح تنقّل بين الصفحات + شبكة منصّات + بطاقات الخطط والأسعار. */
+
+/* ===== Back-compat aliases (للـ blades القديمة التي تستخدم أسماء brand القديمة) ===== */
+:root{
+  --brand-deep: var(--primary-900);
+  --brand:      var(--primary-700);
+  --brand-light:var(--primary-600);
+  --accent-d:   var(--accent-600);
+}
+.btn-brand{
+  background: linear-gradient(135deg, var(--accent-500), var(--accent-600));
+  border:none; color:#fff; font-weight:700; border-radius:12px;
+  padding:.6rem 1.2rem; transition:all .2s ease;
+}
+.btn-brand:hover{ filter:brightness(.96); color:#fff; transform:translateY(-1px); }
+.badge-soft{ background: var(--primary-50); color: var(--primary-700); }
+.page-title{ color: var(--text-strong); font-weight:800; }
+
+/* ===== Base ===== */
+body{ background: var(--neutral-100); margin:0; }
+*{ font-family:'Almarai', system-ui, 'Segoe UI', Tahoma, sans-serif; }
+a{ text-decoration:none; }
+
+/* ===== Top Navbar ===== */
+.acc-navbar{
+  background:#fff; border-bottom:1.5px solid var(--neutral-200);
+  box-shadow:0 1px 10px rgba(1,48,70,.05);
+  display:flex; align-items:center; gap:.75rem;
+  padding:.6rem 1.25rem; position:sticky; top:0; z-index:1040;
+}
+.acc-navbar .acc-logo{ height:36px; }
+.acc-navbar .acc-brand{ color:var(--text-strong); font-weight:800; font-size:.98rem; line-height:1.1; }
+.acc-navbar .acc-brand small{ display:block; color:var(--text-muted); font-weight:400; font-size:.7rem; }
+
+.acc-nav-actions{ margin-inline-start:auto; display:flex; align-items:center; gap:.6rem; }
+
+.acc-icon-btn{
+  position:relative; width:44px; height:44px; border-radius:12px; border:1.5px solid var(--neutral-200);
+  background:var(--neutral-50); color:var(--primary-700); font-size:1.05rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition:all .2s ease;
+}
+.acc-icon-btn:hover{ background:var(--primary-50); border-color:var(--primary-200); color:var(--primary-700); }
+
+.acc-user-chip{
+  display:flex; align-items:center; gap:.55rem; background:var(--neutral-50);
+  border:1.5px solid var(--neutral-200); border-radius:30px; padding:.28rem .8rem .28rem .3rem; cursor:pointer;
+}
+.acc-user-chip:hover{ background:var(--primary-50); border-color:var(--primary-200); }
+.acc-user-chip .av{
+  width:32px; height:32px; border-radius:50%; object-fit:cover;
+  background:linear-gradient(135deg,var(--primary-500),var(--primary-700)); color:#fff;
+  display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.9rem;
+}
+.acc-user-chip .nm{ font-weight:700; font-size:.85rem; color:var(--text-strong); }
+
+/* ===== App Launcher (شبكة المنصّات) ===== */
+.app-launcher-menu{ min-width:300px; padding:.75rem; border:none; border-radius:16px; box-shadow: var(--shadow-lg); }
+.app-launcher-title{ color:var(--text-muted); font-weight:700; font-size:.72rem; letter-spacing:.5px; padding:.15rem .35rem .5rem; }
+.app-launcher-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:.4rem; }
+.app-tile{
+  display:flex; flex-direction:column; align-items:center; gap:.45rem; padding:.85rem .4rem;
+  border-radius:12px; color:var(--text-strong); text-align:center; transition:all .18s ease; border:1.5px solid transparent;
+}
+.app-tile:hover{ background:var(--primary-50); border-color:var(--primary-100); color:var(--primary-700); transform:translateY(-2px); }
+.app-tile .ic{
+  width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+  font-size:1.15rem; color:#fff; background:linear-gradient(135deg,var(--primary-500),var(--primary-700));
+}
+.app-tile .lbl{ font-size:.74rem; font-weight:700; line-height:1.2; }
+
+/* ===== Banner stat chips (نقاط + خطة داخل البانر) ===== */
+.banner-chip{
+  display:inline-flex; align-items:center; gap:.5rem; padding:.5rem 1.1rem; border-radius:999px;
+  backdrop-filter: blur(12px); border:2px solid rgba(255,255,255,.28); background:rgba(255,255,255,.15);
+  color:#fff; font-weight:800; font-size:.9rem;
+}
+.banner-chip i{ opacity:.9; }
+.banner-chip .lbl{ font-weight:600; opacity:.85; font-size:.78rem; }
+
+/* ===== Chip nav as page links ===== */
+.profile-sections-nav .section-chip{ text-decoration:none; }
+
+/* ===== Stat tiles (dashboard/wallet) ===== */
+.stat-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; }
+.stat-tile{
+  background:#fff; border:1.5px solid var(--neutral-200); border-radius:18px; padding:1.25rem;
+  display:flex; align-items:flex-start; justify-content:space-between; gap:.75rem; box-shadow:0 2px 12px rgba(0,0,0,.05);
+}
+.stat-tile .st-label{ color:var(--text-muted); font-size:.85rem; font-weight:700; }
+.stat-tile .st-value{ font-size:1.9rem; font-weight:800; color:var(--text-strong); line-height:1.1; margin-top:.15rem; }
+.stat-tile .st-sub{ color:var(--text-muted); font-size:.78rem; }
+.stat-tile .st-ic{
+  width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center;
+  font-size:1.25rem; color:#fff; flex-shrink:0;
+}
+/* لِبقاء الـ blades القديمة (.stat / .stat .n) تعمل */
+.stat{ background:#fff; border:1.5px solid var(--neutral-200); border-radius:18px; padding:1.25rem; box-shadow:0 2px 12px rgba(0,0,0,.05); }
+.stat .n{ font-size:1.9rem; font-weight:800; color:var(--text-strong); }
+
+/* ===== Generic card (back-compat + light restyle) ===== */
+.acc-card, .card{
+  background:#fff; border:1.5px solid var(--neutral-200); border-radius:20px;
+  box-shadow:0 2px 12px rgba(0,0,0,.06);
+}
+.acc-card .card-body, .card .card-body{ padding:1.5rem; }
+
+/* ===== Plans & pricing ===== */
+.plan-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1.25rem; }
+.plan-card{
+  position:relative; background:#fff; border:1.5px solid var(--neutral-200); border-radius:20px; padding:1.5rem;
+  display:flex; flex-direction:column; gap:1rem; box-shadow:0 2px 12px rgba(0,0,0,.06); transition:all .22s ease;
+}
+.plan-card:hover{ transform:translateY(-4px); box-shadow:0 14px 34px rgba(33,158,188,.16); border-color:var(--primary-200); }
+.plan-card.is-current{ border-color:var(--accent-500); box-shadow:0 10px 30px rgba(253,158,2,.18); }
+.plan-card .plan-level{
+  align-self:flex-start; font-size:.72rem; font-weight:800; padding:.25rem .7rem; border-radius:999px;
+  background:var(--primary-50); color:var(--primary-700);
+}
+.plan-card .plan-name{ font-size:1.35rem; font-weight:800; color:var(--text-strong); }
+.plan-card .plan-price{ font-size:2rem; font-weight:800; color:var(--primary-700); line-height:1; }
+.plan-card .plan-price small{ font-size:.85rem; font-weight:600; color:var(--text-muted); }
+.plan-card .plan-duration{ color:var(--text-muted); font-size:.82rem; }
+.plan-features{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:.55rem; }
+.plan-features li{ display:flex; gap:.55rem; align-items:flex-start; font-size:.88rem; color:var(--text); font-weight:600; }
+.plan-features li i{ color:var(--success-500); margin-top:.2rem; flex-shrink:0; }
+.plan-grant{ font-size:.82rem; color:var(--accent-600); font-weight:700; }
+.plan-current-badge{
+  position:absolute; top:-11px; inset-inline-start:1.25rem; background:var(--accent-500); color:#fff;
+  font-size:.72rem; font-weight:800; padding:.2rem .8rem; border-radius:999px; box-shadow:0 4px 12px rgba(253,158,2,.35);
+}
+
+/* ===== Point packages (سلّم الأسعار) ===== */
+.pkg-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; }
+.pkg-card{
+  background:linear-gradient(135deg, var(--primary-800), var(--primary-900)); color:#fff; border-radius:18px;
+  padding:1.25rem; text-align:center; box-shadow:0 6px 20px rgba(10,50,71,.25); position:relative; overflow:hidden;
+}
+.pkg-card .pkg-points{ font-size:1.7rem; font-weight:800; }
+.pkg-card .pkg-points small{ font-size:.8rem; font-weight:600; opacity:.85; }
+.pkg-card .pkg-price{ margin-top:.4rem; font-weight:700; color:var(--accent-300); }
+.pkg-card .pkg-label{ font-size:.78rem; opacity:.85; margin-top:.25rem; }
+
+/* ===== Subscriptions ===== */
+.sub-current{
+  background:linear-gradient(135deg, var(--primary-500) 0%, var(--primary-800) 100%);
+  color:#fff; border-radius:20px; padding:1.75rem; box-shadow:0 10px 30px rgba(33,158,188,.22);
+}
+.sub-current .sc-plan{ font-size:1.6rem; font-weight:800; }
+.sub-current .sc-meta{ opacity:.9; font-weight:600; }
+
+.acc-table{ width:100%; border-collapse:collapse; }
+.acc-table thead th{ color:var(--text-muted); font-weight:700; font-size:.82rem; text-align:start; padding:.6rem .5rem; border-bottom:1.5px solid var(--neutral-200); }
+.acc-table tbody td{ padding:.7rem .5rem; border-bottom:1px solid var(--neutral-100); font-size:.9rem; }
+.acc-table tbody tr:hover{ background:var(--neutral-50); }
+.table thead th{ color:var(--text-muted); font-weight:700; font-size:.82rem; }
+
+.status-pill{ display:inline-flex; align-items:center; gap:.35rem; padding:.2rem .7rem; border-radius:999px; font-size:.75rem; font-weight:800; }
+.status-pill.ok{ background:var(--success-100); color:var(--success-600); }
+.status-pill.muted{ background:var(--neutral-100); color:var(--text-muted); }
+.status-pill.warn{ background:var(--warning-100); color:var(--warning-600); }
+
+/* ===== Points highlight (profile) ===== */
+.points-hero{
+  display:flex; align-items:center; gap:1rem; padding:1.1rem 1.25rem; border-radius:16px;
+  background:linear-gradient(135deg, var(--accent-50), #fff); border:1.5px solid var(--accent-200);
+}
+.points-hero .ph-ic{ width:52px; height:52px; border-radius:14px; background:linear-gradient(135deg,var(--accent-400),var(--accent-600)); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
+.points-hero .ph-value{ font-size:2rem; font-weight:800; color:var(--text-strong); line-height:1; }
+.points-hero .ph-label{ color:var(--text-muted); font-size:.82rem; font-weight:700; }
+
+/* ===== Responsive ===== */
+@media (max-width:640px){
+  .acc-navbar .acc-brand{ display:none; }
+  .app-launcher-menu{ min-width:260px; }
+}

@@ -2,33 +2,33 @@
     .ai-case-study-card {
       background: var(--surface, #fff);
       color: var(--text, #0a3247);
-      border: 1px solid var(--border, #e1e5e9);
-      border-radius: 14px;
-      padding: 16px;
+      border: 0.8px solid var(--border, #e1e5e9);
+      border-radius: 11.2px;
+      padding: 12.8px;
     }
-    .ai-cs-header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; }
-    .ai-cs-title { margin:0; font-size:20px; }
-    .ai-cs-actions { display:flex; gap:8px; align-items:center; }
-    .ai-btn { padding:10px 14px; border-radius:10px; cursor:pointer; border:1px solid var(--primary,#219ebc); background:var(--primary,#219ebc); color:#fff; }
+    .ai-cs-header { display:flex; align-items:center; justify-content:space-between; gap:9.6px; margin-bottom:6.4px; }
+    .ai-cs-title { margin:0; font-size:16px; }
+    .ai-cs-actions { display:flex; gap:6.4px; align-items:center; }
+    .ai-btn { padding:8px 11.2px; border-radius:8px; cursor:pointer; border:0.8px solid var(--primary,#219ebc); background:var(--primary,#219ebc); color:#fff; }
     .ai-btn.secondary { background:transparent; color:var(--primary,#219ebc); }
-    .ai-hint { color: var(--text-light,#5a6c7d); font-size:14px; margin:6px 0 10px; }
+    .ai-hint { color: var(--text-light,#5a6c7d); font-size:11.2px; margin:4.8px 0 8px; }
     .ai-modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:9999; }
-    .ai-modal { width:min(900px,92vw); max-height:90vh; overflow:auto; background:#fff; border-radius:14px; border:1px solid #e1e5e9; box-shadow:0 12px 36px rgba(0,0,0,.18); }
-    .ai-modal header, .ai-modal footer { padding:14px 16px; border-bottom:1px solid #e1e5e9; display:flex; align-items:center; justify-content:space-between; }
-    .ai-modal footer { border-top:1px solid #e1e5e9; border-bottom:0; justify-content:flex-start; gap:8px; }
-    .ai-modal .content { padding:14px 16px; }
-    .ai-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .ai-modal { width:min(720px,92vw); max-height:90vh; overflow:auto; background:#fff; border-radius:11.2px; border:0.8px solid #e1e5e9; box-shadow:0 9.6px 28.8px rgba(0,0,0,.18); }
+    .ai-modal header, .ai-modal footer { padding:11.2px 12.8px; border-bottom:0.8px solid #e1e5e9; display:flex; align-items:center; justify-content:space-between; }
+    .ai-modal footer { border-top:0.8px solid #e1e5e9; border-bottom:0; justify-content:flex-start; gap:6.4px; }
+    .ai-modal .content { padding:11.2px 12.8px; }
+    .ai-grid { display:grid; grid-template-columns:1fr 1fr; gap:9.6px; }
     .ai-grid .full { grid-column:1 / -1; }
-    .ai-field { display:flex; flex-direction:column; gap:6px; }
+    .ai-field { display:flex; flex-direction:column; gap:4.8px; }
     .ai-field input, .ai-field select, .ai-field textarea {
-      border:1px solid #dcdfe4; border-radius:10px; padding:10px 12px; background:#fff;
+      border:0.8px solid #dcdfe4; border-radius:8px; padding:8px 9.6px; background:#fff;
     }
-    .ai-field textarea { min-height:120px; resize:vertical; }
-    .ai-badge { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:20px; background:#eef7ff; color:var(--primary,#219ebc); border:1px solid #d9ecff; margin-top:6px; }
-    .criterion-row { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+    .ai-field textarea { min-height:96px; resize:vertical; }
+    .ai-badge { display:inline-flex; align-items:center; gap:6.4px; padding:6.4px 9.6px; border-radius:16px; background:#eef7ff; color:var(--primary,#219ebc); border:0.8px solid #d9ecff; margin-top:4.8px; }
+    .criterion-row { display:flex; gap:6.4px; align-items:center; margin-bottom:6.4px; }
     .criterion-row input { flex:1; }
-    .btn-remove-criterion { padding:8px 12px; background:#dc3545; color:#fff; border:none; border-radius:8px; cursor:pointer; }
-    .btn-add-criterion { padding:8px 16px; background:#28a745; color:#fff; border:none; border-radius:8px; cursor:pointer; margin-top:8px; }
+    .btn-remove-criterion { padding:6.4px 9.6px; background:#dc3545; color:#fff; border:none; border-radius:6.4px; cursor:pointer; }
+    .btn-add-criterion { padding:6.4px 12.8px; background:#28a745; color:#fff; border:none; border-radius:6.4px; cursor:pointer; margin-top:6.4px; }
     @media(max-width:720px){.ai-grid{grid-template-columns:1fr;}}
     .swal2-container{z-index:20000 !important;}
   </style>

@@ -108,6 +108,17 @@ class AiToolPlacementsSeeder extends Seeder
                 'button_icon' => 'fa-chalkboard-user',
                 'button_order' => 90,
                 'is_enabled' => 1,
+            ],
+            [
+                'type_key' => 'inquiry_poster_v1',
+                'task_type_id' => 17, // بوستر البحث الاستقصائي
+                'university_id' => 0, // كل الجامعات
+                'course_id' => 0,     // كل المساقات
+                'min_subscription_level' => 0,
+                'button_label' => 'إنشاء بوستر البحث (AI)',
+                'button_icon' => 'fa-image',
+                'button_order' => 100,
+                'is_enabled' => 1,
             ]
         ];
 

@@ -9,14 +9,186 @@ const userInput = document.getElementById("user-input");
 const sendBtn = document.getElementById("send-btn");
 const typingIndicator = document.getElementById("typing-indicator");
 const newChatBtn = document.getElementById("new-chat-btn");
+const maximizeBtn = document.getElementById("maximize-btn");
+const minimizeBtn = document.getElementById("minimize-btn");
+const historyBtn = document.getElementById("history-btn");
+const historyNewBtn = document.getElementById("history-new-btn");
+const historyList = document.getElementById("fateen-history-list");
 const serviceOptions = document.querySelectorAll(".service-option");
 
 // ======================== المتغيرات العامة ========================
 let selectedService = "";
 let chatHistory = [];
-const chatHistoryForAPI = [];
+let chatHistoryForAPI = [];
 let pendingController = null;
 let userBlocked = false;
+
+// ======================== سجل المحادثات (محادثات متعددة) ========================
+const FATEEN_STORE_KEY = "fateen_chats_v1";
+let activeConvId = null;
+
+function loadStore() {
+  try {
+    const s = JSON.parse(localStorage.getItem(FATEEN_STORE_KEY) || "null");
+    if (s && Array.isArray(s.list)) return s;
+  } catch (e) {}
+  return { activeId: null, maximized: false, list: [] };
+}
+
+function persistStore(s) {
+  try { localStorage.setItem(FATEEN_STORE_KEY, JSON.stringify(s)); } catch (e) {}
+}
+
+function genConvId() {
+  return "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+function deriveTitle() {
+  const u = (chatHistoryForAPI || []).find((m) => m.role === "user");
+  let t = u && u.parts && u.parts[0] ? u.parts[0].text : "";
+  t = (t || "").replace(/\s+/g, " ").trim();
+  if (t) return t.length > 34 ? t.slice(0, 34) + "…" : t;
+  return selectedService || "محادثة جديدة";
+}
+
+function fmtConvTime(ts) {
+  if (!ts) return "";
+  try {
+    const d = new Date(ts);
+    return d.toLocaleDateString("ar", { day: "2-digit", month: "2-digit" }) +
+      " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  } catch (e) { return ""; }
+}
+
+// لقطة للمحادثة النشطة الحالية → التخزين
+function snapshotActive() {
+  const inChat =
+    chatArea && chatArea.style.display !== "none" &&
+    chatMessages && chatMessages.children.length > 0;
+  if (!inChat) return;
+
+  const store = loadStore();
+  if (!activeConvId) activeConvId = genConvId();
+  let conv = store.list.find((c) => c.id === activeConvId);
+  if (!conv) {
+    conv = { id: activeConvId };
+    store.list.unshift(conv);
+  }
+  conv.service = selectedService;
+  conv.title = deriveTitle();
+  conv.messagesHTML = chatMessages.innerHTML;
+  conv.historyForAPI = chatHistoryForAPI;
+  conv.updatedAt = Date.now();
+
+  store.activeId = activeConvId;
+  store.maximized = chatbot.classList.contains("maximized");
+  persistStore(store);
+  renderHistoryList();
+}
+
+function renderHistoryList() {
+  if (!historyList) return;
+  const store = loadStore();
+  if (!store.list.length) {
+    historyList.innerHTML =
+      '<div class="fh-empty">لا توجد محادثات محفوظة بعد</div>';
+    return;
+  }
+  const sorted = store.list
+    .slice()
+    .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  historyList.innerHTML = sorted
+    .map(
+      (c) => `
+      <div class="fh-item${c.id === activeConvId ? " active" : ""}" data-id="${c.id}">
+        <div class="fh-item-main">
+          <span class="fh-title">${escapeHTML(c.title || c.service || "محادثة")}</span>
+          <span class="fh-meta">${escapeHTML(c.service || "")} · ${fmtConvTime(c.updatedAt)}</span>
+        </div>
+        <button class="fh-del" data-id="${c.id}" title="حذف المحادثة">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>`
+    )
+    .join("");
+}
+
+function openConversation(id) {
+  const store = loadStore();
+  const conv = store.list.find((c) => c.id === id);
+  if (!conv) return;
+  activeConvId = id;
+  selectedService = conv.service || "";
+  chatHistoryForAPI = Array.isArray(conv.historyForAPI) ? conv.historyForAPI : [];
+  chatMessages.innerHTML = conv.messagesHTML || "";
+  serviceSelection.style.display = "none";
+  chatArea.style.display = "flex";
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  userBlocked = false;
+  store.activeId = id;
+  persistStore(store);
+  chatbot.classList.remove("show-history");
+  renderHistoryList();
+}
+
+function newConversation() {
+  snapshotActive(); // احفظ الحالية أولاً
+  activeConvId = genConvId();
+  selectedService = "";
+  chatHistory = [];
+  chatHistoryForAPI = [];
+  userBlocked = false;
+  chatMessages.innerHTML = "";
+  if (userInput) userInput.value = "";
+  chatArea.style.display = "none";
+  serviceSelection.style.display = "flex";
+  const store = loadStore();
+  store.activeId = activeConvId;
+  persistStore(store);
+  chatbot.classList.remove("show-history");
+  renderHistoryList();
+}
+
+function deleteConversation(id) {
+  const store = loadStore();
+  store.list = store.list.filter((c) => c.id !== id);
+  persistStore(store);
+  if (id === activeConvId) {
+    activeConvId = genConvId();
+    selectedService = "";
+    chatHistoryForAPI = [];
+    chatMessages.innerHTML = "";
+    chatArea.style.display = "none";
+    serviceSelection.style.display = "flex";
+  }
+  renderHistoryList();
+}
+
+function syncMaximizeIcon() {
+  if (!maximizeBtn) return;
+  const on = chatbot.classList.contains("maximized");
+  maximizeBtn.innerHTML = on
+    ? '<i class="fas fa-compress"></i>'
+    : '<i class="fas fa-expand"></i>';
+  maximizeBtn.title = on ? "تصغير المحادثة" : "تكبير المحادثة";
+}
+
+function restoreChatState() {
+  const store = loadStore();
+  if (store.activeId) {
+    const conv = store.list.find((c) => c.id === store.activeId);
+    if (conv && conv.messagesHTML) {
+      openConversation(conv.id);
+    } else {
+      activeConvId = store.activeId;
+    }
+  }
+  renderHistoryList();
+  syncMaximizeIcon();
+}
+
+// توافق مع النداءات القديمة
+function saveChatState() { snapshotActive(); }
 
 // ======================== تعليمات الخدمات ========================
 const systemPrompts = {
@@ -352,6 +524,7 @@ function addMessage(text, type) {
   messageDiv.appendChild(timestamp);
   chatMessages.appendChild(messageDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
+  saveChatState();
 }
 
 // ======================== إرسال الرسالة ========================
@@ -465,6 +638,7 @@ async function generateAIResponse(userMessage) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
     chatHistory.push({ type: "ai", content: aiReplyRaw, timestamp });
+    saveChatState();
     fetchUsageCounter();
 
   } catch (err) {
@@ -570,6 +744,7 @@ closeBtn.addEventListener("click", () => {
 document.addEventListener("click", function (event) {
   if (
     chatbot.classList.contains("active") &&
+    !chatbot.classList.contains("in-section") &&
     !chatbot.contains(event.target) &&
     !chatInitiator.contains(event.target)
   ) {
@@ -581,16 +756,76 @@ document.addEventListener("click", function (event) {
   }
 });
 
-newChatBtn.addEventListener("click", () => {
-  chatMessages.innerHTML = "";
-  userInput.value = "";
-  selectedService = "";
-  chatHistory = [];
-  chatHistoryForAPI.length = 0;
+newChatBtn.addEventListener("click", newConversation);
 
-  chatArea.style.display = "none";
-  serviceSelection.style.display = "flex";
-});
+if (historyNewBtn) historyNewBtn.addEventListener("click", newConversation);
+
+if (maximizeBtn) {
+  maximizeBtn.addEventListener("click", () => {
+    snapshotActive();
+    // التكبير = فتح قسم فَطين الكامل (صفحة SPA كاملة مثل بقية الموقع)
+    if (window.StudentRouter && typeof window.StudentRouter.navigate === "function") {
+      // تذكّر القسم الحالي للعودة إليه عند التصغير
+      try {
+        const cur = localStorage.getItem("student_active_section") || "dashboard";
+        window.__fateenReturnSection = cur !== "fateen-chat" ? cur : "dashboard";
+      } catch (e) { window.__fateenReturnSection = "dashboard"; }
+      chatbot.classList.remove("active", "show-history");
+      document.body.classList.remove("no-scroll");
+      window.StudentRouter.navigate("fateen-chat");
+      return;
+    }
+    // احتياطي: لو الراوتر غير متوفر، استخدم وضع الطبقة الكاملة
+    chatbot.classList.toggle("maximized");
+    syncMaximizeIcon();
+    renderHistoryList();
+  });
+}
+
+// إتاحة تحديث قائمة السجل لقسم فَطين الكامل
+window.__fateenRenderHistory = renderHistoryList;
+
+if (historyBtn) {
+  historyBtn.addEventListener("click", () => {
+    chatbot.classList.toggle("show-history");
+    if (chatbot.classList.contains("show-history")) renderHistoryList();
+  });
+}
+
+// التصغير: العودة من القسم الكامل إلى النافذة العائمة
+if (minimizeBtn) {
+  minimizeBtn.addEventListener("click", () => {
+    snapshotActive();
+    const back = window.__fateenReturnSection || "dashboard";
+    // اطلب من unmount القسم أن يفتح النافذة العائمة بعد إعادة العقدة إلى body
+    window.__fateenWantFloating = true;
+    if (window.StudentRouter && typeof window.StudentRouter.navigate === "function") {
+      window.StudentRouter.navigate(back);
+    } else {
+      // احتياطي: لو الراوتر غير متاح
+      chatbot.classList.remove("in-section");
+      document.body.appendChild(chatbot);
+      chatbot.classList.add("active");
+      window.__fateenWantFloating = false;
+    }
+  });
+}
+
+if (historyList) {
+  historyList.addEventListener("click", (e) => {
+    const del = e.target.closest(".fh-del");
+    if (del) {
+      e.stopPropagation();
+      deleteConversation(del.getAttribute("data-id"));
+      return;
+    }
+    const item = e.target.closest(".fh-item");
+    if (item) openConversation(item.getAttribute("data-id"));
+  });
+}
+
+// استرجاع المحادثات وآخر محادثة نشطة عند تحميل الصفحة
+restoreChatState();
 
 serviceOptions.forEach((option) => {
   option.addEventListener("click", () => {
@@ -610,6 +845,7 @@ serviceOptions.forEach((option) => {
         : "اكتب سؤالك هنا...";
 
     userInput.focus();
+    saveChatState();
   });
 });
 

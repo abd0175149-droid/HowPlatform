@@ -11,37 +11,37 @@
 .introjs-tooltip {
   background: var(--surface-1);
   color: var(--text);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius, 12px);
+  border: 0.8px solid var(--border-color);
+  border-radius: var(--border-radius, 9.6px);
   box-shadow: var(--shadow-lg);
-  padding: 14px 16px;
-  max-width: min(440px, 86vw);
+  padding: 11.2px 12.8px;
+  max-width: min(352px, 86vw);
   line-height: 1.7; font-size: .98rem;
   z-index: 9999998;
   pointer-events: auto;
-  opacity: 0; transform: translateY(4px) scale(.98);
+  opacity: 0; transform: translateY(3.2px) scale(.98);
   transition: opacity .24s ease, transform .24s ease;
 }
 .introjs-showElement .introjs-tooltip { opacity: 1; transform: translateY(0) scale(1); }
 
 .introjs-tooltip .introjs-arrow { border: none; }
 .introjs-tooltip:before, .introjs-tooltip:after {
-  content: ""; position: absolute; width: 12px; height: 12px;
+  content: ""; position: absolute; width: 9.6px; height: 9.6px;
   background: var(--surface-1);
-  border-left: 1px solid var(--border-color);
-  border-top: 1px solid var(--border-color);
+  border-left: 0.8px solid var(--border-color);
+  border-top: 0.8px solid var(--border-color);
   transform: rotate(45deg);
 }
-.introjs-tooltip.right:before, .introjs-tooltip.right:after { left: -6px; top: 20px; }
-.introjs-tooltip.left:before,  .introjs-tooltip.left:after  { right: -6px; top: 20px; }
-.introjs-tooltip.bottom:before, .introjs-tooltip.bottom:after { top: -6px; right: 26px; }
-.introjs-tooltip.top:before,    .introjs-tooltip.top:after  { bottom: -6px; right: 26px; }
+.introjs-tooltip.right:before, .introjs-tooltip.right:after { left: -4.8px; top: 16px; }
+.introjs-tooltip.left:before,  .introjs-tooltip.left:after  { right: -4.8px; top: 16px; }
+.introjs-tooltip.bottom:before, .introjs-tooltip.bottom:after { top: -4.8px; right: 20.8px; }
+.introjs-tooltip.top:before,    .introjs-tooltip.top:after  { bottom: -4.8px; right: 20.8px; }
 
 /* Buttons */
 .introjs-button {
-  border-radius: 10px; border: 1px solid var(--border-color);
+  border-radius: 8px; border: 0.8px solid var(--border-color);
   background: var(--surface-0); color: var(--text);
-  padding: 8px 12px; transition: .2s ease;
+  padding: 6.4px 9.6px; transition: .2s ease;
 }
 .introjs-button:hover { background: var(--btn-neutral-hover); }
 .introjs-button.introjs-nextbutton,
@@ -53,29 +53,29 @@
 .introjs-disabled { opacity: .5; cursor: not-allowed; filter: grayscale(.2); }
 
 /* Helper ring (لا يلتقط النقرات) */
-.introjs-helperLayer, .introjs-helperNumberLayer { border-radius: 12px !important; }
+.introjs-helperLayer, .introjs-helperNumberLayer { border-radius: 9.6px !important; }
 .introjs-helperLayer {
-  box-shadow: 0 0 0 9999px rgba(0,0,0,.45), 0 0 0 2px var(--primary-300) !important;
+  box-shadow: 0 0 0 7999.2px rgba(0,0,0,.45), 0 0 0 1.6px var(--primary-300) !important;
   pointer-events: none !important;
 }
 
 /* Pulse */
 .onboarding-pulse { position: relative; }
 .onboarding-pulse:after {
-  content: ""; position: absolute; inset: -6px; border-radius: 12px;
+  content: ""; position: absolute; inset: -4.8px; border-radius: 9.6px;
   box-shadow: 0 0 0 0 rgba(33,158,188,.32);
   animation: pulse 1.6s ease-out infinite;
 }
-@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(33,158,188,.32); } 70% { box-shadow: 0 0 0 12px rgba(33,158,188,0); } 100% { box-shadow: 0 0 0 0 rgba(33,158,188,0); } }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(33,158,188,.32); } 70% { box-shadow: 0 0 0 9.6px rgba(33,158,188,0); } 100% { box-shadow: 0 0 0 0 rgba(33,158,188,0); } }
 @media (prefers-reduced-motion: reduce) { .introjs-tooltip { transition: none; } .onboarding-pulse:after { animation: none; } }
 
 /* Glow on target */
 .onb-glow {
   position: relative;
-  outline: 2px solid rgba(33,158,188,.38);
-  outline-offset: 3px;
-  border-radius: 12px;
-  box-shadow: 0 0 0 6px rgba(33,158,188,.10);
+  outline: 1.6px solid rgba(33,158,188,.38);
+  outline-offset: 2.4px;
+  border-radius: 9.6px;
+  box-shadow: 0 0 0 4.8px rgba(33,158,188,.10);
 }
 
 /* Quad Mask (click-through overlay pieces) */
@@ -105,19 +105,19 @@ body.tour-active .sidebar, body.tour-active #student-sidebar { position: relativ
 }
 
 /* دعم ضبابية الخلفية (لو متاح) */
-@supports (backdrop-filter: blur(2px)) {
-  .onb-dim-piece { backdrop-filter: blur(2px) saturate(95%); }
+@supports (backdrop-filter: blur(1.6px)) {
+  .onb-dim-piece { backdrop-filter: blur(1.6px) saturate(95%); }
 }
 
 /* وهج الهدف (يوحّد حافة الثقب بصريًا) */
 .onb-glow {
   position: relative;
-  outline: 2px solid rgba(33,158,188,.42);
-  outline-offset: 3px;
-  border-radius: 12px;
+  outline: 1.6px solid rgba(33,158,188,.42);
+  outline-offset: 2.4px;
+  border-radius: 9.6px;
   box-shadow:
-    0 0 0 6px rgba(33,158,188,.10),   /* هالة خفيفة حول الهدف */
-    0 8px 24px rgba(0,0,0,.18);
+    0 0 0 4.8px rgba(33,158,188,.10),   /* هالة خفيفة حول الهدف */
+    0 6.4px 19.2px rgba(0,0,0,.18);
   transition: box-shadow .2s ease, outline-color .2s ease;
 }
 /* عطّل تعتيم Intro.js الافتراضي واعتمد قناعنا */
@@ -136,7 +136,7 @@ html.onb-overlay-off .introjs-helperLayer {
 .onb-dim-svg-rect {
   /* يضيف نعومة عصرية عند الدعم */
 }
-@supports (backdrop-filter: blur(2px)) {
+@supports (backdrop-filter: blur(1.6px)) {
   .onb-dim-svg-rect { style: inherit; }
   /* لا يمكننا وضع backdrop-filter مباشرة داخل SVG،
      لكن ما زال المظهر ممتاز عبر fill + noise في CSS الخلفية العامة */

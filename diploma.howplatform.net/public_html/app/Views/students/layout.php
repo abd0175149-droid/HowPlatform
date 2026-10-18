@@ -33,7 +33,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   </noscript>
 
-  <link rel="stylesheet" href="<?= base_url('assets/css/student_style.css?v=1.11.3') ?>">
+  <link rel="stylesheet" href="<?= base_url('assets/css/student_style.css?v=1.12.5') ?>">
 
   <link rel="icon" type="image/png" href="<?= base_url('assets/images/icon.ico') ?>">
 
@@ -485,6 +485,7 @@
     }
 
     .terms-consent-modal:not(.show) {
+      display: none !important;
       opacity: 0;
       visibility: hidden;
     }
@@ -760,9 +761,9 @@
   </script>
 </head>
 
-<body style="zoom: 80%;">
+<body>
   <link rel="stylesheet" href="https://unpkg.com/intro.js/minified/introjs.min.css">
-  <link rel="stylesheet" href="<?= base_url('assets/css/onboarding.css') ?>">
+  <link rel="stylesheet" href="<?= base_url('assets/css/onboarding.css?v=1.1') ?>">
 
   <?php if (session('role') === 3): // طالب 
       // هوية الطالب (من السيشن/اليوزر الحالي)
@@ -805,7 +806,7 @@
       if (force || !(doneLS || doneCK || doneServer)) {
         window.__SHOW_ONBOARDING__ = true; // إشارة للسكربت الداخلي
         var s = document.createElement('script');
-        s.src = "<?= base_url('assets/js/onboarding.tour.stations.js') ?>";
+        s.src = "<?= base_url('assets/js/onboarding.tour.stations.js?v=1.2') ?>";
         s.defer = true;
         document.head.appendChild(s);
       }
@@ -829,14 +830,16 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Router: ES Module + defer -->
-  <script type="module" defer src="<?= base_url('assets/js/students/student_router.js?v=1.9.0') ?>"></script>
+  <script type="module" defer src="<?= base_url('assets/js/students/student_router.js?v=1.9.29') ?>"></script>
 
   <!-- Admin View Script -->
   <script src="<?= base_url('assets/js/students/admin_view.js?v=1.0.1') ?>" defer></script>
 
   <!-- سكربتات عامة -->
   <script src="<?= base_url('assets/js/alerts.js') ?>" defer></script>
-  <script src="<?= base_url('assets/js/FateenChatBot.js?v=1.3.6') ?>" defer></script>
+  <script src="<?= base_url('assets/js/vendor/gsap.min.js?v=3.13.0') ?>" defer></script>
+  <script src="<?= base_url('assets/js/FateenChatBot.js?v=1.3.10') ?>" defer></script>
+  <script src="<?= base_url('assets/js/FateenCharacter.js?v=1.0.1') ?>" defer></script>
   <script src="<?= base_url('assets/js/audio_player.js?v=1.0.2') ?>" defer></script>
 
   <!-- ✅ سكربت المودال بصيغة UMD (classic) ليعرّف window.openServiceRequestModal -->
@@ -850,13 +853,28 @@
 
 
   <script type="module">
-    import { ServiceRequestModal } from '/public/assets/js/students/service_request_modal.js';
+    import { ServiceRequestModal } from '<?= base_url('assets/js/students/service_request_modal.js?v=2.0.23') ?>';
     ServiceRequestModal.init();
     // مهم: اجعل الكائن متاحًا للـ onclick
     window.ServiceRequestModal = ServiceRequestModal;
   </script>
 
   <script src="<?= base_url('assets/js/students/terms_consent_modal.js?v=1.0.1') ?>" defer></script>
+  <script src="<?= base_url('assets/js/students/notifications_center.js?v=1.0.2') ?>" defer></script>
+  <script>
+    window.__FCM__ = {
+      config: {
+        apiKey: '<?= esc(getenv('FIREBASE_API_KEY') ?: '', 'js') ?>',
+        authDomain: '<?= esc(getenv('FIREBASE_AUTH_DOMAIN') ?: '', 'js') ?>',
+        projectId: '<?= esc(getenv('FIREBASE_PROJECT_ID') ?: '', 'js') ?>',
+        storageBucket: '<?= esc(getenv('FIREBASE_STORAGE_BUCKET') ?: '', 'js') ?>',
+        messagingSenderId: '<?= esc(getenv('FIREBASE_MESSAGING_SENDER_ID') ?: '', 'js') ?>',
+        appId: '<?= esc(getenv('FIREBASE_APP_ID') ?: '', 'js') ?>'
+      },
+      vapidKey: '<?= esc(getenv('FIREBASE_VAPID_KEY') ?: '', 'js') ?>'
+    };
+  </script>
+  <script src="<?= base_url('assets/js/webpush.js?v=1.0.0') ?>" defer></script>
 
 
 
@@ -1118,6 +1136,23 @@
   <!-- ضبط فترة التحقق (ملّي ثانية) — غيّرها براحتك -->
   <script>
     window.SVC_UNREAD_POLL_MS = 2000; // 2 ثانية
+  </script>
+
+  <!-- فوتر عام يظهر في كل أقسام الطالب (يُعاد حقنه بعد كل تحميل قسم) -->
+  <script>
+    (function () {
+      var ca = document.getElementById('student-content-area');
+      if (!ca) return;
+      function addFooter() {
+        if (ca.querySelector('.app-footer')) return;
+        var f = document.createElement('footer');
+        f.className = 'app-footer';
+        f.innerHTML = '© ' + new Date().getFullYear() + ' منصة كيف التعليمية — جميع الحقوق محفوظة';
+        ca.appendChild(f);
+      }
+      addFooter();
+      try { new MutationObserver(addFooter).observe(ca, { childList: true }); } catch (e) {}
+    })();
   </script>
 
 </body>

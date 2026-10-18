@@ -21,7 +21,7 @@ class TaskModel extends Model
     protected $primaryKey    = 'id';
     protected $allowedFields = [
         'weekly_content_id', 'task_type_id', 'title', 'description', 'task_prompt',
-        'ai_tool_version', 'is_for_all_specialties', 'visible_from_date', 'due_date'
+        'ai_tool_version', 'is_admin_only', 'is_for_all_specialties', 'visible_from_date', 'due_date'
     ];
     protected $returnType    = 'array';
     public    $useTimestamps = false;

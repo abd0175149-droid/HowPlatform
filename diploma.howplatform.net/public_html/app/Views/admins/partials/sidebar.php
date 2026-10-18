@@ -7,132 +7,107 @@
 </div>
 
 <ul class="menu">
-    <!-- الرئيسية -->
+
+    <!-- ============ مجموعة: الرئيسية ============ -->
+    <li class="nav-group-label"><span>الرئيسية</span></li>
+
     <li class="menu-item">
         <a href="#" class="menu-link" data-section="dashboard">
             <i class="fas fa-home"></i>
-            الرئيسية
+            <span>لوحة التحكم</span>
         </a>
     </li>
 
-    <!-- إدارة المحتوى -->
+    <!-- ============ مجموعة: إدارة المحتوى ============ -->
+    <li class="nav-group-label"><span>إدارة المحتوى</span></li>
+
     <li class="menu-item">
-        <a href="#" class="menu-link">
-            <i class="fas fa-folder-open"></i>
-            إدارة المحتوى
-            <i class="fas fa-chevron-down arrow"></i>
+        <a href="#" class="menu-link" data-section="courses">
+            <i class="fas fa-book"></i>
+            <span>إدارة المساقات</span>
         </a>
-        <ul class="submenu">
-            <li class="submenu-item">
-                <a href="#" class="submenu-link" data-section="courses">
-                    <i class="fas fa-book"></i>
-                    إدارة المساقات
-                </a>
-            </li>
-            <li class="submenu-item">
-                <a href="#" class="submenu-link" data-section="weeks">
-                    <i class="fas fa-calendar-week"></i>
-                    إدارة الأسابيع
-                </a>
-            </li>
-            <li class="submenu-item">
-                <a href="#" class="submenu-link" data-section="tasks">
-                    <i class="fas fa-tasks"></i>
-                    إدارة المهام
-                </a>
-            </li>
-            
-        </ul>
     </li>
+    <li class="menu-item">
+        <a href="#" class="menu-link" data-section="weeks">
+            <i class="fas fa-calendar-week"></i>
+            <span>إدارة الأسابيع</span>
+        </a>
+    </li>
+    <li class="menu-item">
+        <a href="#" class="menu-link" data-section="tasks">
+            <i class="fas fa-tasks"></i>
+            <span>إدارة المهام</span>
+        </a>
+    </li>
+
 <?php if (session('role') == 1): ?>
+    <!-- ============ مجموعة: ضبط الموقع ============ -->
+    <li class="nav-group-label"><span>ضبط خيارات الموقع</span></li>
+
     <li class="menu-item">
-        <a href="#" class="menu-link">
-            <i class="fas fa-cogs"></i>
-            ضبط خيارات الموقع
-            <i class="fas fa-chevron-down arrow"></i>
+        <a href="#" class="menu-link" data-section="academic_year_options">
+            <i class="fas fa-calendar-alt"></i>
+            <span>العام الدراسي والفصول</span>
         </a>
-        <ul class="submenu">
-            <li class="submenu-item">
-                <a href="#" class="submenu-link" data-section="academic_year_options">
-                    <i class="fas fa-calendar-alt"></i> 
-                    ادارة العام الدراسي والفصول
-                </a>
-            </li>
-            
-            <li class="submenu-item">
-                <a href="#" class="submenu-link" data-section="university_options">
-                    <i class="fas fa-university"></i>
-                    خيارات الجامعات والتخصصات
-                </a>
-            </li>
-            <li class="submenu-item">
-                <a href="#" class="submenu-link" data-section="task_type_options">
-                    <i class="fas fa-tasks"></i>
-                    ادارة أنواع المهام
-                </a>
-            </li>
-            <!-- Removed Lesson Plan Generator -->
-
-
-            <li class="submenu-item">
-                <a class="submenu-link" data-section="plans" href="#">
-                    <i class="fas fa-layer-group"></i>
-                إدارة الخطط
-                </a>
-            </li>
-             <li class="submenu-item">
-              <a href="#" class="submenu-link" data-section="library_upload">
-                <i class="fas fa-envelope-open-text"></i>
-                المكتبة الرقمية
-              </a>
-            </li>
-
-        </ul>
     </li>
-    <!-- إدارة المستخدمين -->
     <li class="menu-item">
-        <a href="#" class="menu-link">
-            <i class="fas fa-users"></i>
-            إدارة المستخدمين
-            <i class="fas fa-chevron-down arrow"></i>
+        <a href="#" class="menu-link" data-section="university_options">
+            <i class="fas fa-university"></i>
+            <span>الجامعات والتخصصات</span>
         </a>
-        <ul class="submenu">
-            <li class="submenu-item">
-                <a href="#" class="submenu-link" data-section="manage_users">
-                    <i class="fas fa-user-cog"></i>
-                    إدارة الحسابات
-                </a>
-            </li>
-             <li class="menu-item">
-              <a href="#" class="menu-link" data-section="service_chat">
-                <i class="fas fa-comments"></i>
-                <span>طلبات المراسلة</span>
-                <span id="serviceChatTotalUnread" class="menu-badge" style="display:none">0</span>
-              </a>
-            </li>
-            <li class="submenu-item">
-                <a href="#" class="submenu-link" data-section="service_requests">
-                    <i class="fas fa-user-plus"></i>
-                     جدول طلبات المراسلة
-                </a>
-            </li>
-            <li class="submenu-item">
-                <a href="#" class="submenu-link" data-section="service_requests_new">
-                    <i class="fas fa-comments"></i>
-                     طلبات الخدمة - جديد
-                </a>
-            </li>
+    </li>
+    <li class="menu-item">
+        <a href="#" class="menu-link" data-section="task_type_options">
+            <i class="fas fa-list-ul"></i>
+            <span>أنواع المهام</span>
+        </a>
+    </li>
+    <li class="menu-item">
+        <a href="#" class="menu-link" data-section="ai_tools">
+            <i class="fas fa-robot"></i>
+            <span>أدوات الذكاء الاصطناعي</span>
+        </a>
+    </li>
+    <li class="menu-item">
+        <a href="#" class="menu-link" data-section="plans">
+            <i class="fas fa-layer-group"></i>
+            <span>إدارة الخطط</span>
+        </a>
+    </li>
+    <li class="menu-item">
+        <a href="#" class="menu-link" data-section="library_upload">
+            <i class="fas fa-book-open"></i>
+            <span>المكتبة الرقمية</span>
+        </a>
+    </li>
 
-        </ul>
+    <!-- ============ مجموعة: المستخدمون والخدمة ============ -->
+    <li class="nav-group-label"><span>المستخدمون والخدمة</span></li>
+
+    <li class="menu-item">
+        <a href="#" class="menu-link" data-section="manage_users">
+            <i class="fas fa-user-cog"></i>
+            <span>إدارة الحسابات</span>
+        </a>
+    </li>
+    <li class="menu-item">
+        <a href="#" class="menu-link" data-section="service_chat">
+            <i class="fas fa-headset"></i>
+            <span>طلبات الخدمة</span>
+            <span id="serviceChatTotalUnread" class="menu-badge" style="display:none">0</span>
+        </a>
     </li>
 <?php endif; ?>
+
+    <!-- ============ مجموعة: الحساب ============ -->
+    <li class="nav-group-label"><span>الحساب</span></li>
+
     <li class="menu-item">
       <a href="https://auth.howplatform.net/profile?active=diploma" class="menu-link">
         <i class="fas fa-cog"></i>
-        الحساب الشخصي
+        <span>الحساب الشخصي</span>
       </a>
     </li>
 
 </ul>
 </aside>
-

@@ -170,6 +170,7 @@ class StuDashboard extends BaseController
                     )
                     AND (t.visible_from_date IS NULL OR t.visible_from_date <= NOW())
                     AND (t.due_date IS NULL OR t.due_date >= NOW())
+                    AND t.is_admin_only = 0
                 GROUP BY t.id
                 ORDER BY t.due_date IS NULL, t.due_date ASC, t.id DESC
                 LIMIT 10;
@@ -187,6 +188,180 @@ class StuDashboard extends BaseController
             $tasks = $query->getResultArray(); // نُعيد كمصفوفة
 
             return $this->response->setStatusCode(200)->setJSON($tasks);
+
+        } catch (\Throwable $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'message' => '❌ استثناء داخلي',
+                'error'   => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /* ======================== قائمة الفصول (خفيفة، للتبويبات) ======================== */
+    public function semestersList(): ResponseInterface
+    {
+        try {
+            $uid = $this->currentUserId();
+            if (!$uid) {
+                return $this->response->setStatusCode(401)->setJSON(['message' => 'يجب تسجيل الدخول.']);
+            }
+
+            $profile = $this->fetchDiplomaProfile($uid);
+            if (!$profile || empty($profile['university_id']) || empty($profile['academic_year_id'])) {
+                return $this->response->setJSON([
+                    'semesters' => [],
+                    'reason'    => $profile ? 'profile_incomplete' : 'no_profile',
+                ]);
+            }
+
+            $db = db_connect();
+            $universityId   = StudentViewHelper::getEffectiveUniversityId()   ?? $profile['university_id'];
+            $academicYearId = StudentViewHelper::getEffectiveAcademicYearId() ?? $profile['academic_year_id'];
+
+            $sql = "
+                SELECT DISTINCT s.id AS semester_id, s.name AS semester_name
+                FROM semesters s
+                JOIN course_offerings co ON co.semester_id = s.id AND co.university_id = ?
+                WHERE s.academic_year_id = ?
+                ORDER BY s.id ASC
+            ";
+            $rows = $db->query($sql, [$universityId, $academicYearId])->getResultArray();
+
+            $semesters = array_map(static fn($r) => [
+                'semester_id'   => (int) $r['semester_id'],
+                'semester_name' => $r['semester_name'],
+            ], $rows);
+
+            return $this->response->setStatusCode(200)->setJSON([
+                'success'   => true,
+                'semesters' => $semesters,
+            ]);
+        } catch (\Throwable $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'message' => '❌ استثناء داخلي',
+                'error'   => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /* ======================== كل المهام مقسّمة حسب الفصل (مع فلترة اختيارية بالفصل) ======================== */
+    public function allTasksBySemester(): ResponseInterface
+    {
+        try {
+            $uid = $this->currentUserId();
+            if (!$uid) {
+                return $this->response->setStatusCode(401)->setJSON([
+                    'message' => 'يجب تسجيل الدخول.',
+                ]);
+            }
+
+            $profile = $this->fetchDiplomaProfile($uid);
+            if (!$profile) {
+                return $this->response->setJSON([
+                    'semesters' => [],
+                    'reason'    => 'no_profile',
+                    'message'   => 'لم يتم العثور على ملف الطالب في المنصة.',
+                ]);
+            }
+
+            if (
+                empty($profile['university_id']) ||
+                empty($profile['academic_year_id']) ||
+                is_null($profile['specialty_id'])
+            ) {
+                return $this->response->setJSON([
+                    'semesters' => [],
+                    'reason'    => 'profile_incomplete',
+                    'message'   => 'الرجاء إكمال الملف الشخصي لاستخدام لوحة الطالب.',
+                ]);
+            }
+
+            $db = db_connect();
+
+            $universityId   = StudentViewHelper::getEffectiveUniversityId()   ?? $profile['university_id'];
+            $academicYearId = StudentViewHelper::getEffectiveAcademicYearId() ?? $profile['academic_year_id'];
+            $specialtyId    = StudentViewHelper::getEffectiveSpecialtyId()    ?? $profile['specialty_id'];
+
+            // فلترة اختيارية بفصل واحد (تحميل كسول حسب التبويب)
+            $semesterId = (int) ($this->request->getGet('semester_id') ?? 0);
+            $params     = [$universityId, $academicYearId, $specialtyId, $specialtyId];
+            $semFilter  = '';
+            if ($semesterId > 0) {
+                $semFilter = ' AND s.id = ? ';
+                $params[]  = $semesterId;
+            }
+
+            // نفس منطق JOIN المهام القادمة لكن بلا تقييد بتاريخ الاستحقاق وبلا LIMIT، مع معلومات الفصل
+            $sql = "
+                SELECT
+                    s.id          AS semester_id,
+                    s.name        AS semester_name,
+                    t.id          AS id,
+                    t.title       AS title,
+                    t.description AS description,
+                    t.due_date    AS due_date,
+                    wc.week_number AS week_number,
+                    co.id         AS course_offering_id,
+                    c.name        AS course_name,
+                    c.code        AS course_code
+                FROM tasks t
+                JOIN weekly_contents wc       ON wc.id = t.weekly_content_id
+                JOIN course_offerings co      ON co.id = wc.course_offering_id
+                JOIN courses c                ON c.id = co.course_id
+                JOIN semesters s              ON s.id = co.semester_id
+                LEFT JOIN task_specialties ts ON ts.task_id = t.id
+                WHERE
+                    co.university_id = ?
+                    AND s.academic_year_id = ?
+                    AND (
+                        t.is_for_all_specialties = 1
+                        OR ? IS NULL
+                        OR ts.specialty_id = ?
+                    )
+                    AND (t.visible_from_date IS NULL OR t.visible_from_date <= NOW())
+                    AND t.is_admin_only = 0
+                    {$semFilter}
+                GROUP BY t.id
+                ORDER BY s.id ASC, t.due_date IS NULL, t.due_date ASC, t.id DESC
+            ";
+
+            $query = $db->query($sql, $params);
+            if (!$query) {
+                return $this->response->setStatusCode(500)->setJSON([
+                    'message' => 'فشل الاستعلام',
+                    'error'   => $db->error(),
+                ]);
+            }
+
+            $rows = $query->getResultArray();
+
+            // تجميع حسب الفصل مع الحفاظ على الترتيب
+            $bySemester = [];
+            foreach ($rows as $r) {
+                $sid = (int) $r['semester_id'];
+                if (!isset($bySemester[$sid])) {
+                    $bySemester[$sid] = [
+                        'semester_id'   => $sid,
+                        'semester_name' => $r['semester_name'],
+                        'tasks'         => [],
+                    ];
+                }
+                $bySemester[$sid]['tasks'][] = [
+                    'id'                 => (int) $r['id'],
+                    'title'              => $r['title'],
+                    'description'        => $r['description'],
+                    'due_date'           => $r['due_date'],
+                    'week_number'        => $r['week_number'] !== null ? (int) $r['week_number'] : null,
+                    'course_offering_id' => (int) $r['course_offering_id'],
+                    'course_name'        => $r['course_name'],
+                    'course_code'        => $r['course_code'],
+                ];
+            }
+
+            return $this->response->setStatusCode(200)->setJSON([
+                'success'   => true,
+                'semesters' => array_values($bySemester),
+            ]);
 
         } catch (\Throwable $e) {
             return $this->response->setStatusCode(500)->setJSON([

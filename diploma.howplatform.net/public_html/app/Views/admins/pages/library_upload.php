@@ -5,14 +5,14 @@
 /* ===== Dropzone Specifics ===== */
 .upload-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(256px, 1fr));
+  gap: 12.8px;
   align-items: start;
 }
 
 .file-upload-section {
-  border: 2px dashed var(--primary-300);
-  border-radius: 12px;
+  border: 1.6px dashed var(--primary-300);
+  border-radius: 9.6px;
   padding: 1.6rem;
   text-align: center;
   background: var(--surface-1);
@@ -53,11 +53,11 @@
 }
 
 .file-upload-btn {
-  background: var(--primary-500);
-  color: #fff;
+  background: var(--primary-600);
+  color: var(--text-inverse);
   border: none;
-  padding: 10px 16px;
-  border-radius: 10px;
+  padding: 8px 12.8px;
+  border-radius: 8px;
   font-weight: 800;
   display: inline-flex;
   align-items: center;
@@ -68,7 +68,7 @@
 
 .file-upload-btn:hover {
   background: var(--primary-600);
-  transform: translateY(-2px);
+  transform: translateY(-1.6px);
   box-shadow: var(--shadow-sm);
 }
 
@@ -81,21 +81,21 @@
   color: var(--primary-700);
   font-weight: 700;
   display: block;
-  margin-top: 5px;
+  margin-top: 4px;
 }
 
 #upload-result {
-  margin-top: 16px;
+  margin-top: 12.8px;
 }
 
 /* المعاينة (Previews) */
 .preview-thumb {
-  max-width: 80px;
-  max-height: 80px;
+  max-width: 64px;
+  max-height: 64px;
   object-fit: cover;
   cursor: zoom-in;
   transition: transform 0.3s ease;
-  border-radius: 8px;
+  border-radius: 6.4px;
   box-shadow: var(--shadow-sm);
 }
 .preview-thumb:hover {
@@ -108,23 +108,23 @@
 .file-type-badge {
   background: var(--primary-50);
   color: var(--primary-700);
-  padding: 4px 12px; 
-  border-radius: 999px; 
+  padding: 3.2px 9.6px; 
+  border-radius: 799.2px; 
   font-weight: 700; 
   font-size: 0.85rem; 
   display: inline-block;
-  border: 1px solid var(--primary-200);
+  border: 0.8px solid var(--primary-200);
 }
 
-.action-buttons-lib { display: flex; gap: 8px; justify-content: center; }
+.action-buttons-lib { display: flex; gap: 6.4px; justify-content: center; }
 .action-btn-lib {
-  width: 34px; height: 34px; border-radius: 50%;
+  width: 27.2px; height: 27.2px; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center;
   cursor: pointer; transition: all 0.2s ease;
-  border: 1px solid var(--border-color); background: var(--surface-0);
+  border: 0.8px solid var(--border-color); background: var(--surface-0);
   color: var(--text-primary);
 }
-.action-btn-lib:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+.action-btn-lib:hover { transform: translateY(-1.6px); box-shadow: var(--shadow-sm); }
 .lib-delete-btn { background: #fef2f2; color: #ef4444; border-color: #fecaca; }
 .lib-delete-btn:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
 

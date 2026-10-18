@@ -56,18 +56,76 @@ class RewardsService
     ): bool {
         $db = db_connect();
 
+        // وضع api: القيد الحاكم في Plans (داخل المعاملة، الرفض يلغي الكتابة المحلية).
+        $plansClient = null;
+        $plansApi    = false;
+        try {
+            $plansClient = new \App\Libraries\PlansClient();
+            $plansApi    = ($plansClient->mode() === 'api');
+        } catch (\Throwable $e) {
+            $plansApi = false;
+        }
+
+        $plansApplied = false;
+        $plansKind    = '';
+        $plansKey     = '';
+
         try {
             $db->transException(true)->transStart();
 
             $this->rewardsUserModel->addPoints($userId, $points);
             $this->transactionModel->addTransaction($userId, $points, $type, $typeId, $description, $createdAt);
 
+            // التقط معرّف القيد قبل transComplete: الـ COMMIT يُصفّر insertID() إلى 0.
+            $txnId = (int) $db->insertID();
+
+            if ($plansApi && $txnId > 0) {
+                $plansKind = ($type === 'ai_tool_refund') ? 'refund' : ($points >= 0 ? 'earn' : 'spend');
+                // مفتاح مستقر لاسترجاع الأدوات (واحد لكل مهمة) — يمنع تكرار القيد عند إعادة المحاولة.
+                $plansKey = ($type === 'ai_tool_refund' && $typeId !== null)
+                    ? 'diploma:refund:job:' . $typeId
+                    : 'diploma:' . $plansKind . ':txn:' . $txnId;
+                $res = $plansClient->{$plansKind}($userId, $points, $plansKey, [
+                    'event_type'     => 'diploma.' . $type,
+                    'event_ref_type' => 'rewards_txn',
+                    'event_ref_id'   => (string) $txnId,
+                    'description'    => $description ?: ($type . ($typeId !== null ? (' #' . $typeId) : '')),
+                ]);
+
+                if (! ($res['ok'] ?? false)) {
+                    $db->transRollback();
+                    log_message('error', '[PlansWallet][' . $plansKind . '] user=' . $userId . ' points=' . $points . ' key=' . $plansKey . ' failed: ' . json_encode($res));
+                    return false;
+                }
+
+                $plansApplied = true;
+
+                // زامِن الكاش المحلي مع رصيد Plans (يعالج أي انحراف ذاتيًا)
+                if (isset($res['balance']) && $res['balance'] !== null) {
+                    $db->table('rewards_users')
+                        ->where('user_id', $userId)
+                        ->update(['total_points' => (int) $res['balance']]);
+                }
+            }
+
             $db->transComplete();
 
-            return $db->transStatus();
+            $ok = $db->transStatus();
+            if (! $ok && $plansApplied) {
+                // طُبّق في Plans لكن فشل الالتزام المحلي → اعكس القيد المركزي (تعويض idempotent)
+                $this->compensatePlansWallet($plansClient, $plansKind, $plansKey, $userId, $points);
+            }
+            if ($ok && $txnId > 0 && ! $plansApi) {
+                // ظل المحفظة المركزية (لا يؤثر على النتيجة المحلّية إطلاقًا).
+                $this->mirrorWalletShadow($userId, $points, $type, $typeId, $txnId);
+            }
+            return $ok;
         } catch (DatabaseException $e) {
             if ($db->transStatus() === false) {
                 $db->transRollback();
+            }
+            if ($plansApplied) {
+                $this->compensatePlansWallet($plansClient, $plansKind, $plansKey, $userId, $points);
             }
             log_message('error', 'RewardsService::addPoints DB error: ' . $e->getMessage());
             return false;
@@ -75,8 +133,66 @@ class RewardsService
             if ($db->transStatus() === false) {
                 $db->transRollback();
             }
+            if ($plansApplied) {
+                $this->compensatePlansWallet($plansClient, $plansKind, $plansKey, $userId, $points);
+            }
             log_message('error', 'RewardsService::addPoints error: ' . $e->getMessage());
             return false;
+        }
+    }
+
+    /**
+     * تعويض مركزي: طُبّق قيد في Plans لكن فشل الالتزام المحلي بعده → اعكسه.
+     * earn/refund يُعكَس بـ spend، وspend يُعكَس بـ refund. idempotent عبر مفتاح مشتق.
+     */
+    private function compensatePlansWallet(?\App\Libraries\PlansClient $client, string $kind, string $key, int $userId, int $points): void
+    {
+        if ($client === null || $kind === '' || $key === '') {
+            return;
+        }
+        try {
+            $reverse = ($kind === 'spend') ? 'refund' : 'spend';
+            $res = $client->{$reverse}($userId, $points, $key . ':compensate', [
+                'event_type'     => 'diploma.wallet.compensate',
+                'event_ref_type' => 'plans_key',
+                'event_ref_id'   => $key,
+                'description'    => 'تعويض: فشل الالتزام المحلي بعد قيد مركزي ناجح',
+            ]);
+            log_message('error', '[PlansWallet][compensate] user=' . $userId . ' key=' . $key . ' ok=' . (($res['ok'] ?? false) ? '1' : '0'));
+        } catch (\Throwable $e) {
+            log_message('critical', '[PlansWallet][compensate] FAILED user=' . $userId . ' key=' . $key . ' err=' . $e->getMessage());
+        }
+    }
+
+    /**
+     * ظل المحفظة المركزية لعملية كسب/استرجاع ناجحة محليًا.
+     * يختار نقطة Plans المناسبة: ai_tool_refund=refund، الموجب=earn، السالب=spend.
+     * مغلَّف بالكامل: أي خطأ هنا لا يؤثر على النتيجة المحلّية.
+     */
+    private function mirrorWalletShadow(int $userId, int $points, string $type, ?int $typeId, int $txnId): void
+    {
+        try {
+            $client = new \App\Libraries\PlansClient();
+            if (! $client->enabled() || $txnId <= 0) {
+                return;
+            }
+            $kind = ($type === 'ai_tool_refund') ? 'refund' : ($points >= 0 ? 'earn' : 'spend');
+            $key  = 'diploma:' . $kind . ':txn:' . $txnId;
+            $meta = [
+                'event_type'     => 'diploma.' . $type,
+                'event_ref_type' => 'rewards_txn',
+                'event_ref_id'   => (string) $txnId,
+                'description'    => 'shadow: ' . $type . ($typeId !== null ? (' #' . $typeId) : ''),
+            ];
+            $res = $client->{$kind}($userId, $points, $key, $meta);
+            log_message('info', sprintf(
+                '[PlansShadow][%s] user=%d points=%d type=%s plans_ok=%s status=%s plans_balance=%s key=%s',
+                $kind, $userId, $points, $type,
+                ($res['ok'] ?? false) ? '1' : '0',
+                (string) ($res['status'] ?? ''), (string) ($res['balance'] ?? ''), $key
+            ));
+        } catch (\Throwable $e) {
+            log_message('warning', 'PlansShadow earn hook error: ' . $e->getMessage());
         }
     }
 
@@ -88,6 +204,17 @@ class RewardsService
      */
     public function getUserPoints(int $userId): int
     {
+        // وضع api: اقرأ الرصيد من Plans (المصدر الموثوق) مع fail-open للقراءة المحلّية.
+        try {
+            $client = new \App\Libraries\PlansClient();
+            if ($client->mode() === 'api') {
+                $bal = $client->balance($userId);
+                if ($bal !== null) return $bal;
+            }
+        } catch (\Throwable $e) {
+            // تابع للقراءة المحلّية
+        }
+
         try {
             $user = $this->rewardsUserModel->getOrCreate($userId);
             $points = (int)($user['total_points'] ?? 0);
@@ -109,6 +236,26 @@ class RewardsService
      */
     public function getUserTransactions(int $userId, int $limit = 50, int $offset = 0): array
     {
+        // وضع api: سجل المعاملات من Plans (المصدر الموثوق) مع fail-open للقراءة المحلّية.
+        try {
+            $client = new \App\Libraries\PlansClient();
+            if ($client->txEnabled()) {
+                $res = $client->transactions($userId, $limit, $offset);
+                if (is_array($res) && isset($res['transactions']) && is_array($res['transactions'])) {
+                    return array_map(static function (array $t): array {
+                        return [
+                            'reward_type' => (string) ($t['kind'] ?? $t['event_type'] ?? ''),
+                            'description' => (string) ($t['description'] ?? ''),
+                            'points'      => (int) ($t['points'] ?? 0),
+                            'created_at'  => (string) ($t['created_at'] ?? ''),
+                        ];
+                    }, $res['transactions']);
+                }
+            }
+        } catch (\Throwable $e) {
+            log_message('warning', 'RewardsService::getUserTransactions Plans failed: ' . $e->getMessage());
+        }
+
         return $this->transactionModel->getUserTransactions($userId, $limit, $offset);
     }
     
@@ -120,6 +267,19 @@ class RewardsService
      */
     public function getUserTransactionsCount(int $userId): int
     {
+        // وضع api: العدد الإجمالي من Plans (total) مع fail-open للعد المحلّي.
+        try {
+            $client = new \App\Libraries\PlansClient();
+            if ($client->txEnabled()) {
+                $res = $client->transactions($userId, 1, 0);
+                if (is_array($res) && isset($res['total'])) {
+                    return (int) $res['total'];
+                }
+            }
+        } catch (\Throwable $e) {
+            log_message('warning', 'RewardsService::getUserTransactionsCount Plans failed: ' . $e->getMessage());
+        }
+
         return $this->transactionModel->getUserTransactionsCount($userId);
     }
 
@@ -135,6 +295,17 @@ class RewardsService
         $diplomaUser = $this->diplomaUserModel->where('user_id', $referredUserId)->first();
         if (!$diplomaUser || (int)($diplomaUser['is_complete'] ?? 0) !== 1) {
             return false; // البروفايل غير مكتمل
+        }
+
+        // وضع api: Plans يمنح مكافأة الإحالة (يحتاج دعوة مسجّلة في Plans).
+        try {
+            $client = new \App\Libraries\PlansClient();
+            if ($client->earningEnabled()) {
+                $res = $client->completeReferral($referredUserId);
+                return is_array($res) && ($res['ok'] ?? false);
+            }
+        } catch (\Throwable $e) {
+            // تابع للمنطق المحلّي
         }
 
         // 2. جلب دعوة pending
@@ -217,6 +388,21 @@ class RewardsService
      */
     public function updateConsecutiveDays(int $userId): array
     {
+        // وضع api: Plans يحسب التتابع ويمنح المكافأة (لا كتابة محلّية).
+        try {
+            $client = new \App\Libraries\PlansClient();
+            if ($client->earningEnabled()) {
+                $res = $client->earnLogin($userId);
+                if (is_array($res) && ($res['ok'] ?? false)) {
+                    return ['streak' => (int) ($res['streak'] ?? 0), 'rewarded' => (bool) ($res['rewarded'] ?? false)];
+                }
+                // Plans غير متاح → تجاهل هذا التحميل (لا fallback محلّي حتى لا نُعيد الكتابة المحلّية)
+                return ['streak' => 0, 'rewarded' => false];
+            }
+        } catch (\Throwable $e) {
+            // تابع للمنطق المحلّي
+        }
+
         try {
             $tz = new \DateTimeZone('Asia/Amman');
             $now = new \DateTime('now', $tz);
@@ -292,6 +478,25 @@ class RewardsService
      */
     public function getUserStats(int $userId): array
     {
+        // وضع api: الإحصائيات من Plans (المصدر الموثوق) مع fail-open للحساب المحلّي.
+        try {
+            $client = new \App\Libraries\PlansClient();
+            if ($client->statsEnabled()) {
+                $res = $client->stats($userId);
+                if (is_array($res) && ($res['ok'] ?? false)) {
+                    return [
+                        'total_points'         => (int) ($res['total_points'] ?? 0),
+                        'current_streak'       => (int) ($res['current_streak'] ?? 0),
+                        'total_referrals'      => (int) ($res['total_referrals'] ?? 0),
+                        'completed_referrals'  => (int) ($res['completed_referrals'] ?? 0),
+                        'pending_referrals'    => (int) ($res['pending_referrals'] ?? 0),
+                    ];
+                }
+            }
+        } catch (\Throwable $e) {
+            log_message('warning', 'RewardsService::getUserStats Plans failed: ' . $e->getMessage());
+        }
+
         $points = $this->getUserPoints($userId);
         $record = $this->consecutiveDaysModel->getOrCreate($userId);
         $referrals = $this->referralModel->getUserReferrals($userId);

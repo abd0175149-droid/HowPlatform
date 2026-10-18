@@ -5,19 +5,21 @@
 
 /* تنسيق الحاوية العامة */
 .profile-container {
-   /* max-width: 1000px;*/
+   /* max-width: 800px;*/
     margin: 0 auto;
-    background: white;
+    background: var(--surface-0);
     border-radius: var(--border-radius);
-    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+    border: 0.8px solid var(--border-color);
+    box-shadow: none;
     overflow: hidden;
 }
 
 /* رأس الصفحة */
 .profile-header-section {
-    background: var(--surface-2);
-    color: white;
-    padding: 25px 30px;
+    background: var(--surface-0);
+    color: var(--text-strong);
+    border-bottom: 0.8px solid var(--border-color);
+    padding: 20px 24px;
     text-align: center;
 }
 
@@ -26,8 +28,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 15px;
-    margin-bottom: 10px;
+    gap: 12px;
+    margin-bottom: 8px;
     color: var(--text);
 }
 
@@ -39,26 +41,26 @@
 
 /* بطاقة الملف الشخصي الرئيسية */
 .profile-card {
-    padding: 30px;
+    padding: 24px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
     background: var(--surface-1);
-    border-bottom: 1px solid #eee;
+    border-bottom: 0.8px solid #eee;
 }
 
 /* الصورة الدائرية */
 .profile-picture {
     position: relative;
-    width: 180px;
-    height: 180px;
-    margin: 0 auto 15px;
+    width: 144px;
+    height: 144px;
+    margin: 0 auto 12px;
     border-radius: 50%;
-    border: 3px solid var(--primary-500);
+    border: 2.4px solid var(--primary-500);
     overflow: hidden;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
 }
 
 #profilePictureIcon,
@@ -94,8 +96,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     background: rgba(0, 0, 0, 0.6);
     color: white;
@@ -118,7 +120,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
     text-align: center;
 }
 
@@ -131,35 +133,36 @@
 .actions-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 8px;
+    margin-bottom: 8px;
     flex-wrap: wrap;
     justify-content: center;
 }
 
 .btn {
-    padding: 10px 20px;
-    border-radius: 8px;
+    padding: 8px 16px;
+    border-radius: 6.4px;
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6.4px;
     border: none;
 }
 
 .btn-outline-primary {
     background: transparent;
-    border: 1px solid var(--primary-500);
+    border: 0.8px solid var(--primary-500);
     color: var(--primary-500);
 }
 
 .btn-outline-primary:hover {
     background: var(--primary-500);
     color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(33, 158, 188, 0.2);
+    transform: translateY(-1.6px);
+    border-color: var(--primary-300);
+    box-shadow: var(--shadow-sm);
 }
 
 .btn-success {
@@ -170,17 +173,17 @@
 
 .btn-success:hover {
     background: var(--accent-500);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 183, 3, 0.3);
+    transform: translateY(-1.6px);
+    box-shadow: var(--shadow-sm);
 }
 
 .account-type {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
+    gap: 6.4px;
+    padding: 6.4px 12.8px;
     background: var(--accent-100);
-    border-radius: 20px;
+    border-radius: 16px;
     color: var(--text);
     font-weight: 600;
 }
@@ -189,18 +192,18 @@
 .profile-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 12px;
     justify-content: center;
-    margin-top: 15px;
+    margin-top: 12px;
 }
 
 .meta-item {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6.4px;
     background: #8ecae64f;
-    padding: 10px 16px;
-    border-radius: 20px;
+    padding: 8px 12.8px;
+    border-radius: 16px;
     font-size: 1rem;
 }
 
@@ -212,33 +215,35 @@
 .info-section {
     display: flex;
     flex-direction: column;
-    gap: 25px;
-    padding: 30px 0;
+    gap: 20px;
+    padding: 24px 0;
     background: var(--surface-1);
 }
 
 .info-card {
     background: var(--surface-1);
-    padding: 25px;
+    padding: 20px;
     border-radius: var(--border-radius);
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    border: 0.8px solid var(--border-color);
+    box-shadow: none;
     transition: var(--transition);
 }
 
 .info-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1.6px);
+    border-color: var(--primary-300);
+    box-shadow: var(--shadow-sm);
 }
 
 .section-title {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 9.6px;
     font-size: 1.5rem;
     color: var(--primary-700);
-    margin-bottom: 25px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid var(--primary-50);
+    margin-bottom: 20px;
+    padding-bottom: 9.6px;
+    border-bottom: 1.6px solid var(--primary-50);
 }
 
 /* تصميم الجدول الجديد - مشابه للصورة */
@@ -248,7 +253,7 @@
 }
 
 .info-table tr {
-    border-bottom: 1px solid #eee;
+    border-bottom: 0.8px solid #eee;
 }
 
 .info-table tr:last-child {
@@ -256,10 +261,10 @@
 }
 
 .info-table td {
-    padding: 15px 10px;
+    padding: 12px 8px;
 }
 .info-table td i {
-padding-left: 5px;
+padding-left: 4px;
 }
 
 .info-label {
@@ -267,44 +272,44 @@ padding-left: 5px;
     text-align: right;
     color: var(--text);
     font-weight: 600;
-    padding-right: 20px;
+    padding-right: 16px;
 }
 
 .info-value {
     text-align: right;
-    padding-right: 20px;
+    padding-right: 16px;
 }
 
 .info-value span {
     display: block;
-    padding: 5px 0;
+    padding: 4px 0;
 }
 
 .form-control {
-    padding: 12px 15px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
+    padding: 9.6px 12px;
+    border-radius: 6.4px;
+    border: 0.8px solid #ddd;
     background: white;
     font-size: 1rem;
     transition: var(--transition);
     width: 100%;
-    max-width: 400px;
+    max-width: 320px;
     text-align: right;
 }
 
 .form-control:focus {
     border-color: var(--primary-300);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(33, 158, 188, 0.2);
+    box-shadow: 0 0 0 2.4px rgba(33, 158, 188, 0.2);
 }
 
 /* التذييل */
 .footer {
     text-align: center;
-    padding: 20px;
+    padding: 16px;
     color: var(--text);
     font-size: 0.9rem;
-    border-top: 1px solid #eee;
+    border-top: 0.8px solid #eee;
     background: var(--surface-1);
 }
 
@@ -325,26 +330,26 @@ padding-left: 5px;
 
 .modal-content {
     background: white;
-    padding: 25px;
+    padding: 20px;
     border-radius: var(--border-radius);
     max-width: 90vw;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    gap: 16px;
+    box-shadow: var(--shadow-md);
 }
 
 #cropImage {
     max-width: 80vw;
     max-height: 60vh;
     background: #f3f3f3;
-    border-radius: 8px;
+    border-radius: 6.4px;
 }
 
 .modal-actions {
     display: flex;
-    gap: 15px;
+    gap: 12px;
     justify-content: center;
 }
 
@@ -369,7 +374,7 @@ padding-left: 5px;
 /* التصميم المتجاوب */
 @media (max-width: 768px) {
     .info-section {
-        padding: 20px;
+        padding: 16px;
     }
     
     .profile-header-section h1 {
@@ -381,8 +386,8 @@ padding-left: 5px;
     }
     
     .profile-picture {
-        width: 150px;
-        height: 150px;
+        width: 120px;
+        height: 120px;
     }
     
     .actions-row {
@@ -395,15 +400,15 @@ padding-left: 5px;
     
     .info-table tr {
         display: block;
-        margin-bottom: 15px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #eee;
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 0.8px solid #eee;
     }
     
     .info-table td {
         display: block;
         width: 100% !important;
-        padding: 8px 0;
+        padding: 6.4px 0;
         text-align: right;
     }
     
@@ -519,10 +524,6 @@ padding-left: 5px;
       </table>
     </div>
   </div>
-</div>
-
-<div class="footer">
-  <p>© <span id="currentYear"></span> منصة كيف التعليمية - جميع الحقوق محفوظة</p>
 </div>
 
 <!-- Cropper Modal -->

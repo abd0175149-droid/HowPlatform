@@ -5,10 +5,13 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\UserModel;
 use App\Models\AiUsageLogModel;
+use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class Ai extends BaseController
 {
+    use ResponseTrait; // يوفّر failUnauthorized() / failNotFound() وغيرها
+
     // حدّ أقصى تفرضه الخِدمة جانب الخادم (حماية إضافية)
     private int $maxTurns = 8;
 

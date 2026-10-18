@@ -8,7 +8,7 @@
 if (!isset($referrals)) {
     $currentUserId = $userId ?? (session()->get('auth_user')['id'] ?? 0);
     $referralsModel = model(\App\Models\RewardsReferralModel::class);
-    $referrals = $referralsModel ? $referralsModel->where('referrer_id', $currentUserId)->orderBy('created_at', 'desc')->findAll() : [];
+    $referrals = $referralsModel ? $referralsModel->where('referrer_user_id', $currentUserId)->orderBy('created_at', 'desc')->findAll() : [];
 }
 
 $currentStreak = $currentStreak ?? ($stats['current_streak'] ?? 0);

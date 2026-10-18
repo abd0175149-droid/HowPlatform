@@ -3,10 +3,13 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class FileGateway extends BaseController
 {
+    use ResponseTrait; // يوفّر failNotFound() وغيرها
+
     /** موقع جذور الملفات الفعلي على الاستضافة (Hostinger) */
     private string $basePublicDir;
 
@@ -153,6 +156,13 @@ class FileGateway extends BaseController
         'user_agent'    => (string) $this->request->getUserAgent(),
         'downloaded_at' => $nowAmman->format('Y-m-d H:i:s'), // ← المهم
     ]);
+
+    // عدّاد Plans المركزي للتحميلات اليومية (best-effort — العدّ المحلي يبقى للتحليلات وكـ fallback)
+    try {
+        (new \App\Libraries\PlansClient())->usageConsume($userId, 'downloads_per_day', 1, null);
+    } catch (\Throwable $e) {
+        log_message('warning', 'FileGateway usageConsume failed: ' . $e->getMessage());
+    }
 
     // تنزيل (Content-Disposition: attachment)
     $this->response->noCache();

@@ -127,11 +127,11 @@
   /* أغمق قليلاً لتباين أفضل (من 200) */
   --border-strong: var(--neutral-400);
   /* أغمق لتباين أفضل (من 300) */
-  --focus-ring: 0 0 0 3px rgba(33, 158, 188, .25);
+  --focus-ring: 0 0 0 2.4px rgba(33, 158, 188, .25);
   /* فلسفة Google Flat: الظلال للطبقات العائمة فقط (Modal, Dropdown) */
-  --shadow-sm: 0 1px 3px rgba(32, 33, 36, .10);
-  --shadow-md: 0 1px 6px rgba(32, 33, 36, .20);
-  --shadow-lg: 0 8px 28px rgba(32, 33, 36, .20);
+  --shadow-sm: 0 0.8px 2.4px rgba(32, 33, 36, .10);
+  --shadow-md: 0 0.8px 4.8px rgba(32, 33, 36, .20);
+  --shadow-lg: 0 6.4px 22.4px rgba(32, 33, 36, .20);
 
   /* ===== Components (existing) ===== */
   --unread-bg: #f0f9ff;
@@ -139,9 +139,9 @@
   --notification-hover: #e3f4ff;
 
   /* ===== Layout / Motion ===== */
-  --sidebar-width: 260px;
-  --navbar-height: 60px;
-  --border-radius: 12px;
+  --sidebar-width: 208px;
+  --navbar-height: 48px;
+  --border-radius: 9.6px;
   --transition: all .25s ease;
 }
 
@@ -223,14 +223,14 @@ html[data-theme="dark"] {
   /* أوضح لتباين أفضل (من .08) */
   --border-strong: rgba(255, 255, 255, .20);
   /* أوضح لتباين أفضل (من .16) */
-  --focus-ring: 0 0 0 3px rgba(43, 179, 211, .35);
+  --focus-ring: 0 0 0 2.4px rgba(43, 179, 211, .35);
   /* من primary-500 */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, .6);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, .5);
-  --shadow-lg: 0 18px 48px rgba(0, 0, 0, .45);
+  --shadow-sm: 0 0.8px 2.4px rgba(0, 0, 0, .6);
+  --shadow-md: 0 6.4px 19.2px rgba(0, 0, 0, .5);
+  --shadow-lg: 0 14.4px 38.4px rgba(0, 0, 0, .45);
 
   /* نفس نصف القطر والانتقالات */
-  --border-radius: 16px;
+  --border-radius: 12.8px;
   --transition: all .25s ease;
 }
 
@@ -241,7 +241,7 @@ html[data-theme="dark"] {
 .admin-swal-popup {
   background: var(--surface-1) !important;
   color: var(--text) !important;
-  border: 1px solid var(--border-color) !important;
+  border: 0.8px solid var(--border-color) !important;
   border-radius: var(--border-radius) !important;
   box-shadow: var(--shadow-lg) !important;
 }
@@ -261,7 +261,7 @@ html[data-theme="dark"] {
   background-color: var(--primary-500) !important;
   color: var(--text-inverse) !important;
   box-shadow: var(--shadow-sm) !important;
-  border-radius: 12px !important;
+  border-radius: 9.6px !important;
   font-weight: 600 !important;
 }
 
@@ -275,7 +275,7 @@ html[data-theme="dark"] {
   background-color: var(--error-500) !important;
   color: #fff !important;
   box-shadow: var(--shadow-sm) !important;
-  border-radius: 12px !important;
+  border-radius: 9.6px !important;
   font-weight: 600 !important;
 }
 

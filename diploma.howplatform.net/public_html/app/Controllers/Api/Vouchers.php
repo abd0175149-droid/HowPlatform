@@ -25,6 +25,12 @@ class Vouchers extends BaseController
             return $this->response->setJSON(['status' => 'unknown']);
         }
 
+        // وضع api: التحقّق يتم عبر خدمة Plans المركزية.
+        $pc = new \App\Libraries\PlansClient();
+        if ($pc->cardsEnabled()) {
+            return $this->verifyViaPlans($pc, $code);
+        }
+
         $vModel = new VoucherModel();
         $voucher = $vModel->findByCode($code);
 
@@ -116,6 +122,13 @@ class Vouchers extends BaseController
         $code = strtoupper(trim(str_replace([' ', '-', '_'], '', (string) $this->request->getPost('code'))));
         if ($code === '') {
             return $this->response->setJSON(['status' => 'unknown']);
+        }
+
+        // وضع api: الاستبدال يتم في خدمة Plans المركزية (مصدر الحقيقة).
+        // لا نلمس جداول user_subscriptions / vouchers محليًا إطلاقًا.
+        $pc = new \App\Libraries\PlansClient();
+        if ($pc->cardsEnabled()) {
+            return $this->redeemViaPlans($pc, $userId, $code);
         }
 
         $db = db_connect();
@@ -383,6 +396,92 @@ class Vouchers extends BaseController
             log_message('error', 'Voucher redeem error: ' . $e->getMessage());
             return $this->response->setStatusCode(500)->setJSON(['status' => 'error', 'reason' => 'server_error']);
         }
+    }
+
+    /**
+     * استبدال الكود عبر خدمة Plans المركزية (وضع api).
+     * يحافظ على نفس عقد الـ JSON الذي يتوقّعه الواجهة:
+     *   نجاح: { status:'ok', action_applied, new_subscription_expiry }
+     *   فشل : { status:'error', reason } (الواجهة تعرض reason)
+     */
+    private function redeemViaPlans(\App\Libraries\PlansClient $pc, int $userId, string $code)
+    {
+        $res = $pc->redeemCard($userId, $code);
+
+        // null = تعذّر اتصال/استثناء → fail-closed
+        if ($res === null || empty($res['ok'])) {
+            $err = is_array($res) ? (string) ($res['error'] ?? '') : '';
+            $reason = match ($err) {
+                'card_not_found'  => 'الكود غير صالح',
+                'already_redeemed'=> 'تم استخدام هذا الكود مسبقًا',
+                'card_expired'    => 'انتهت صلاحية الكود',
+                'card_disabled'   => 'الكود معطّل',
+                default           => 'تعذّر إتمام العملية. حاول لاحقًا.',
+            };
+            return $this->response->setJSON(['status' => 'error', 'reason' => $reason]);
+        }
+
+        // نجاح: نحاول إثراء الرد بانتهاء الاشتراك/اسم الخطة من verify إن توفّر.
+        $newExpiry = $res['end_at'] ?? $res['new_subscription_expiry'] ?? null;
+        if ($newExpiry === null) {
+            $info = $pc->verifyCard($code);
+            if (is_array($info)) {
+                $newExpiry = $info['end_at'] ?? ($info['plan']['end_at'] ?? null);
+            }
+        }
+
+        return $this->response->setJSON([
+            'status'                  => 'ok',
+            'action_applied'          => (string) ($res['action_applied'] ?? 'new_activation'),
+            'new_subscription_expiry' => $newExpiry,
+        ]);
+    }
+
+    /**
+     * التحقّق من الكود عبر خدمة Plans المركزية (وضع api).
+     * يحافظ على نفس عقد الـ JSON:
+     *   نجاح: { status:'valid', data:{ plan_id, plan_name, level, duration_days, action, will_expire_to } }
+     *   فشل : { status:'unknown'|'redeemed'|'expired'|'policy_denied' }
+     */
+    private function verifyViaPlans(\App\Libraries\PlansClient $pc, string $code)
+    {
+        $res = $pc->verifyCard($code);
+
+        if ($res === null || empty($res['found'])) {
+            return $this->response->setJSON(['status' => 'unknown']);
+        }
+
+        if (!empty($res['already_redeemed'])) {
+            return $this->response->setJSON(['status' => 'redeemed']);
+        }
+
+        // انتهاء الصلاحية: Plans يعيد expires_at (تاريخ البطاقة) و status=active؛
+        // نكتشف الانتهاء من التاريخ لا من سلسلة status.
+        $expiresAt = $res['expires_at'] ?? null;
+        if (((string) ($res['status'] ?? '') === 'expired')
+            || (!empty($expiresAt) && strtotime((string) $expiresAt) < time())) {
+            return $this->response->setJSON(['status' => 'expired']);
+        }
+
+        if (empty($res['redeemable'])) {
+            // غير قابل للاستبدال لأي سبب آخر (معطّل/سياسة)
+            return $this->response->setJSON(['status' => 'policy_denied']);
+        }
+
+        $plan     = is_array($res['plan'] ?? null) ? $res['plan'] : [];
+        $duration = (int) ($plan['duration_days'] ?? 30);
+
+        return $this->response->setJSON([
+            'status' => 'valid',
+            'data'   => [
+                'plan_id'        => (int) ($plan['id'] ?? 0),
+                'plan_name'      => (string) ($plan['name'] ?? ''),
+                'level'          => (int) ($plan['level'] ?? 0),
+                'duration_days'  => $duration,
+                'action'         => 'new_activation',
+                'will_expire_to' => date('Y-m-d H:i:s', strtotime("+{$duration} days")),
+            ],
+        ]);
     }
 
     /**

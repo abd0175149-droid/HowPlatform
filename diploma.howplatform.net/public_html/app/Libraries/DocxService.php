@@ -1809,17 +1809,125 @@ class DocxService
     }
 
     /**
+     * ✅ بناء تقرير التغذية الراجعة الختامي للمقالة التأملية (final_essay_evaluator_v1)
+     * القالب RE_FB_template.docx يحتوي placeholders كاملة (بما فيها ${general_notes})
+     * — لا يحتاج الحقن النصي القديم (legacy fallbacks) المستخدم في قالب الاستقصاء.
+     *
+     * @param array $data بيانات التقرير (student_name, student_id, teacher_supervisor,
+     *                    date, overall_grade_word/symbol, strengths, areas_for_development, general_notes)
+     * @param string $targetRel المسار النسبي للملف الناتج
+     * @return array ['rel_path' => ..., 'bytes' => ...]
+     */
+    public function buildFinalEssayFeedbackReport(array $data, string $targetRel): array
+    {
+        $templateAbs = rtrim(FCPATH, '/') . '/templates/RE_FB_template.docx';
+        if (!is_file($templateAbs)) {
+            throw new \RuntimeException('Final essay feedback template not found: ' . $templateAbs);
+        }
+
+        $targetAbs = rtrim(FCPATH, '/') . '/' . ltrim($targetRel, '/');
+        $targetDir = dirname($targetAbs);
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0775, true);
+        }
+
+        copy($templateAbs, $targetAbs);
+
+        $zip = new \ZipArchive();
+        if ($zip->open($targetAbs) !== true) {
+            throw new \RuntimeException('Cannot open final essay feedback DOCX: ' . $targetAbs);
+        }
+
+        $xml = $zip->getFromName('word/document.xml');
+        if ($xml === false) {
+            $zip->close();
+            throw new \RuntimeException('Cannot read document.xml from final essay feedback template');
+        }
+
+        $esc = function ($text) {
+            return htmlspecialchars((string) $text, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+        };
+
+        // === استبدال الحقول عبر DOM (يتعامل مع النص المُجزّأ بين عدة w:t) ===
+        $dom = new \DOMDocument();
+        $dom->preserveWhiteSpace = true;
+        $dom->formatOutput = false;
+        libxml_use_internal_errors(true);
+        $dom->loadXML($xml);
+        libxml_clear_errors();
+        $ns = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+
+        $this->domReplaceTextInDocument($dom, $ns, [
+            '${student_name}'         => ($data['student_name'] ?? ''),
+            '${student_id}'           => ($data['student_id'] ?? ''),
+            '${overall_grade_word}'   => ($data['overall_grade_word'] ?? ''),
+            '${overall_grade_symbol}' => ($data['overall_grade_symbol'] ?? ''),
+            '${teacher_supervisor}'   => ($data['teacher_supervisor'] ?? ''),
+            '${date}'                 => ($data['date'] ?? date('Y-m-d')),
+            '${general_notes}'        => ($data['general_notes'] ?? ''),
+        ]);
+
+        $xml = $dom->saveXML();
+        $xml = preg_replace('/^<\?xml[^>]*>\n?/', '', $xml);
+
+        // نقاط القوة — فقرات bullet بعد عنوان "نقاط القوة"
+        $strengths = $data['strengths'] ?? [];
+        if (!empty($strengths)) {
+            $bulletXml = '';
+            foreach ($strengths as $item) {
+                $text = is_array($item) ? ($item['text'] ?? '') : (string) $item;
+                $text = $esc(trim($text));
+                if (!empty($text)) {
+                    $bulletXml .= $this->xmlBulletParagraph($text);
+                }
+            }
+            $xml = $this->xmlInsertParagraphsAfter($xml, 'نقاط القوة', $bulletXml);
+        }
+
+        // مجالات التطوير — فقرات bullet بعد عنوانها
+        $developments = $data['areas_for_development'] ?? [];
+        if (!empty($developments)) {
+            $bulletXml = '';
+            foreach ($developments as $item) {
+                $text = is_array($item) ? ($item['text'] ?? '') : (string) $item;
+                $text = $esc(trim($text));
+                if (!empty($text)) {
+                    $bulletXml .= $this->xmlBulletParagraph($text);
+                }
+            }
+            $xml = $this->xmlInsertParagraphsAfter($xml, 'المجالات التي تحتاج الى تطوير', $bulletXml);
+        }
+
+        // تنظيف أي متغيرات ${...} متبقية
+        $xml = $this->cleanPlaceholders($xml);
+
+        $zip->deleteName('word/document.xml');
+        $zip->addFromString('word/document.xml', $xml);
+        $zip->close();
+
+        if (!is_file($targetAbs)) {
+            throw new \RuntimeException('Failed saving final essay feedback report: ' . $targetAbs);
+        }
+
+        return [
+            'rel_path' => ltrim($targetRel, '/'),
+            'bytes'    => filesize($targetAbs) ?: 0,
+        ];
+    }
+
+    /**
      * ✅ بناء جدول الروبريك من القالب مباشرة عبر DOMDocument
      * يملأ الترويسة ويُظلل خلية المستوى المحقق بلون أصفر
      * يعتمد على موضع الخلية في الجدول (صف × عمود) وليس البحث النصي
      *
      * @param array $data بيانات الروبريك
      * @param string $targetRel المسار النسبي للملف الناتج
+     * @param string $templateName اسم قالب الروبريك داخل templates/ (افتراضياً قالب الاستقصاء)
      * @return array ['rel_path' => ..., 'bytes' => ...]
      */
-    public function buildRubricReport(array $data, string $targetRel): array
+    public function buildRubricReport(array $data, string $targetRel, string $templateName = 'R_template.docx'): array
     {
-        $templateAbs = rtrim(FCPATH, '/') . '/templates/R_template.docx';
+        $templateAbs = rtrim(FCPATH, '/') . '/templates/' . $templateName;
         if (!is_file($templateAbs)) {
             throw new \RuntimeException('Rubric template not found: ' . $templateAbs);
         }

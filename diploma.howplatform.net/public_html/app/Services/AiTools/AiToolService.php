@@ -204,12 +204,20 @@ class AiToolService
             if (!empty($job['result_json'])) {
                 $decoded = json_decode((string)$job['result_json'], true);
                 if (is_array($decoded)) {
-                    $result['evaluation_data'] = [
-                        'rubric_grades'      => $decoded['rubric_grades'] ?? [],
-                        'feedback_report'    => $decoded['feedback_report'] ?? [],
-                        'overall_evaluation' => $decoded['overall_evaluation'] ?? [],
-                        'student_info'       => $decoded['student_info'] ?? [],
-                    ];
+                    if ($typeKey === 'formative_essay_evaluator_v1') {
+                        // أداة التقييم التكويني: تحمل report (4 مجالات Gibbs) + annotations
+                        $result['evaluation_data'] = [
+                            'report'      => $decoded['report'] ?? [],
+                            'annotations' => $decoded['annotations'] ?? [],
+                        ];
+                    } else {
+                        $result['evaluation_data'] = [
+                            'rubric_grades'      => $decoded['rubric_grades'] ?? [],
+                            'feedback_report'    => $decoded['feedback_report'] ?? [],
+                            'overall_evaluation' => $decoded['overall_evaluation'] ?? [],
+                            'student_info'       => $decoded['student_info'] ?? [],
+                        ];
+                    }
                 }
             }
         } elseif ($status === 'failed') {
@@ -340,12 +348,53 @@ class AiToolService
             }
         }
 
+        // أداة تقييم المقالة التأملية الختامية: ملفان
+        if ($typeKey === 'final_essay_evaluator_v1') {
+            if (!empty($decoded['file_feedback_id'])) {
+                $files[] = ['name' => 'تقرير التغذية الراجعة الختامي (Word)', 'url' => $this->resolveDownloadUrl((int)$decoded['file_feedback_id'])];
+            }
+            if (!empty($decoded['file_rubric_id'])) {
+                $files[] = ['name' => 'مقاييس الدرجة التحصيلية (Word)', 'url' => $this->resolveDownloadUrl((int)$decoded['file_rubric_id'])];
+            }
+        }
+
+        // أداة التقييم التكويني للمقالة: ملفان (المقالة المُعلَّقة + التقرير)
+        if ($typeKey === 'formative_essay_evaluator_v1') {
+            return $this->buildFormativeFiles($decoded);
+        }
+
         return $files;
     }
 
     /**
      * حل رابط التنزيل
      */
+    /**
+     * ✅ قائمة ملفات المقيّم التكويني (4 ملفات): تقرير Word/PDF + مقالة مُعلَّقة Word/PDF.
+     * الروابط عبر download-attach لإجبار التنزيل (Content-Disposition: attachment) بالاسم وفق الاتفاقية.
+     */
+    public function buildFormativeFiles(array $decoded): array
+    {
+        $map = [
+            ['file_report_id',        'تقرير التغذية الراجعة البنائي (Word)'],
+            ['file_report_pdf_id',    'تقرير التغذية الراجعة البنائي (PDF)'],
+            ['file_annotated_id',     'المقالة الأصلية مع التعليقات (Word)'],
+            ['file_annotated_pdf_id', 'المقالة الأصلية مع التعليقات (PDF)'],
+        ];
+        $files = [];
+        foreach ($map as [$k, $label]) {
+            if (!empty($decoded[$k])) {
+                $id = (int) $decoded[$k];
+                $files[] = [
+                    'id'   => $id,
+                    'name' => $label,
+                    'url'  => site_url('students/ai-tools/download-attach/' . $id),
+                ];
+            }
+        }
+        return $files;
+    }
+
     protected function resolveDownloadUrl(int $fileId): ?string
     {
         $db = Database::connect();

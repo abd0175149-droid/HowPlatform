@@ -439,9 +439,8 @@ function renderAll(data) {
     const type = safe(data.task?.task_type_name || 'مهمة');
     const due = data.task?.due_date ? formatDate(data.task.due_date) : '—';
     meta.innerHTML = `
-      <span><i class="fas fa-tag"></i> ${type}</span>
-      <span style="margin-inline:8px;color:#bbb">|</span>
-      <span><i class="far fa-calendar-alt"></i> ${due}</span>
+      <span class="td-chip td-chip-type"><i class="fas fa-tag"></i> ${type}</span>
+      <span class="td-chip td-chip-due"><i class="far fa-calendar-alt"></i> ${due}</span>
     `;
   }
 
@@ -457,9 +456,27 @@ function renderAll(data) {
   if (desc) {
     const text = safe(data.task?.task_description || '');
     desc.innerHTML = `
-      <div class="td-desc-head"><i class="fas fa-align-left"></i> الوصف</div>
-      <div class="td-desc-body">${paragraphizeAndLink(text)}</div>
+      <div class="td-desc-body td-clamp">${paragraphizeAndLink(text)}</div>
+      <button type="button" class="td-desc-toggle"><i class="fas fa-chevron-down"></i> <span>عرض المزيد</span></button>
     `;
+    // إظهار زر "عرض المزيد" فقط إذا كان الوصف أطول من المساحة المقصوصة
+    requestAnimationFrame(() => {
+      const body = desc.querySelector('.td-desc-body');
+      const btn  = desc.querySelector('.td-desc-toggle');
+      if (!body || !btn) return;
+      if (body.scrollHeight > body.clientHeight + 4) {
+        btn.classList.add('show');
+        btn.addEventListener('click', () => {
+          const expanded = body.classList.toggle('expanded');
+          body.classList.toggle('td-clamp', !expanded);
+          btn.querySelector('span').textContent = expanded ? 'عرض أقل' : 'عرض المزيد';
+          btn.querySelector('i').className = expanded ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+        });
+      } else {
+        // نص قصير (سطر/سطرين): أزل القصّ والتلاشي حتى لا يحجب النص
+        body.classList.remove('td-clamp');
+      }
+    });
   }
 
   const dates = qs('td-dates');
@@ -508,10 +525,12 @@ function renderSiblings(siblings, currentId) {
   }
 
   tasks.forEach(s => {
+    const label = s.task_title || `مهمة #${s.task_id}`;
     const chip = document.createElement('button');
     chip.className = 'td-task-chip';
-    chip.textContent = s.task_title || `مهمة #${s.task_id}`;
-    chip.title = s.task_title || `مهمة #${s.task_id}`;
+    chip.innerHTML = `<span class="td-step-dot"></span><span class="td-step-label"></span>`;
+    chip.querySelector('.td-step-label').textContent = label;
+    chip.title = label;
     if (Number(s.task_id) === Number(currentId)) chip.classList.add('active');
     chip.addEventListener('click', e => { e.preventDefault(); navigateToTask(s.task_id); }, { passive: false });
     container.appendChild(chip);
@@ -1417,7 +1436,7 @@ async function mountAiModalForTask(taskMeta) {
       return;
     }
 
-    const mod = await import('/assets/js/students/sections/ai_tool_factory.js?');
+    const mod = await import('/assets/js/students/sections/ai_tool_factory.js?v=2.0.20');
     await mod?.default?.mount({
       taskId,
       taskTypeId,

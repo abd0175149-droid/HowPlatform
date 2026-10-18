@@ -63,7 +63,8 @@
         $cats   = $tool->categories ?? collect();
       @endphp
 
-      <a href="{{ $tool->url }}" class="tool-card" style="display:block;" target="_blank" rel="noopener">
+      <div class="tool-card-wrap" style="display:flex; flex-direction:column;">
+      <a href="{{ route('tools.go', $tool->slug) }}" class="tool-card" style="display:block;" target="_blank" rel="noopener">
         <div class="tool-media">
           <img src="{{ $image }}" alt="{{ $name }}" class="tool-image">
           <div class="tool-animation" style="background: {{ $grad }}; display:flex; align-items:center; justify-content:center;">
@@ -94,6 +95,11 @@
           </div>
         </div>
       </a>
+        <a href="{{ route('tools.show', $tool->slug) }}"
+           style="display:inline-block; margin-top:.4rem; font-size:.85rem; color:var(--primary-600); text-decoration:none;">
+          <i class="fas fa-circle-info"></i> تفاصيل الأداة
+        </a>
+      </div>
     @empty
       <div class="no-results">لا توجد أدوات مطابقة حالياً.</div>
     @endforelse

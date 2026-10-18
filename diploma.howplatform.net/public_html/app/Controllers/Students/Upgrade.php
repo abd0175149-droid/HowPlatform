@@ -38,16 +38,35 @@ class Upgrade extends BaseController
         // ✅ فحص حالة العلم (الميزة)
         $status = $this->upgradeGateStatus($userId, $userEmail);
 
-        // نجلب حالة الاشتراك لعرضها فورًا
+        // نجلب حالة الاشتراك لعرضها فورًا — وضع api: من Plans (المصدر الموثوق)،
+        // وإلا من علم is_premium المحلي القديم (fallback).
         $userRow      = null;
         $isPremium    = false;
         $premiumUntil = null;
 
         if ($userId > 0) {
-            $userRow = (new UserModel())->find($userId);
-            if ($userRow) {
-                $isPremium    = (int) ($userRow['is_premium'] ?? 0) === 1;
-                $premiumUntil = $userRow['premium_until'] ?? null; // نوع DATE
+            $fromPlans = false;
+            try {
+                $client = new \App\Libraries\PlansClient();
+                if ($client->entitlementsMode() === 'api') {
+                    $subs = $client->subscriptions($userId);
+                    if (is_array($subs) && ($subs['ok'] ?? false)) {
+                        $cur          = (is_array($subs['current'] ?? null)) ? $subs['current'] : null;
+                        $isPremium    = (bool) $cur;
+                        $premiumUntil = $cur ? ($cur['end_at'] ?? null) : null;
+                        $fromPlans    = true;
+                    }
+                }
+            } catch (\Throwable $e) {
+                $fromPlans = false;
+            }
+
+            if (! $fromPlans) {
+                $userRow = (new UserModel())->find($userId);
+                if ($userRow) {
+                    $isPremium    = (int) ($userRow['is_premium'] ?? 0) === 1;
+                    $premiumUntil = $userRow['premium_until'] ?? null; // نوع DATE
+                }
             }
         }
 
@@ -95,6 +114,62 @@ class Upgrade extends BaseController
 
         // ✅ حالة العلم
         $gate = $this->upgradeGateStatus($userId, $userEmail);
+
+        // وضع api: بناء الحالة من Plans (المصدر الموثوق) مع fail-open للـ SQL المحلّي.
+        try {
+            $client = new \App\Libraries\PlansClient();
+            if ($client->entitlementsMode() === 'api') {
+                $subs = $client->subscriptions($userId);
+                if (is_array($subs) && ($subs['ok'] ?? false)) {
+                    $cur = (is_array($subs['current'] ?? null)) ? $subs['current'] : null;
+                    $upc = (is_array($subs['upcoming'] ?? null)) ? $subs['upcoming'] : null;
+
+                    // المزايا من features_flat (نحوّلها لشكل [feature_key, limits_json] المتوقع في الواجهة)
+                    $features = [];
+                    if ($cur) {
+                        $ent = $client->entitlements($userId);
+                        if (is_array($ent) && is_array($ent['features_flat'] ?? null)) {
+                            foreach ($ent['features_flat'] as $fk => $fv) {
+                                $features[] = [
+                                    'feature_key' => (string) $fk,
+                                    'limits_json' => is_scalar($fv) ? (string) $fv : json_encode($fv),
+                                ];
+                            }
+                        }
+                    }
+
+                    return $this->response->setJSON([
+                        'status'          => 'ok',
+                        'feature'         => 'upgrade_page',
+                        'feature_enabled' => $gate['enabled'],
+                        'is_public'       => $gate['isPublic'],
+                        'mode'            => $gate['mode'],
+                        'rollout'         => $gate['rollout'],
+                        'reason'          => $gate['reason'],
+
+                        'is_premium'     => (bool) $cur,
+                        'premium_until'  => $cur ? ($cur['end_at'] ?? null) : null,
+                        'current_plan'   => $cur ? [
+                            'id'     => (int) ($cur['plan_id'] ?? 0),
+                            'name'   => (string) ($cur['name'] ?? ''),
+                            'level'  => (int) ($cur['level'] ?? 0),
+                            'end_at' => $cur['end_at'] ?? null,
+                        ] : null,
+                        'upcoming_plan'  => $upc ? [
+                            'id'       => (int) ($upc['plan_id'] ?? 0),
+                            'name'     => (string) ($upc['name'] ?? ''),
+                            'level'    => (int) ($upc['level'] ?? 0),
+                            'start_at' => $upc['start_at'] ?? null,
+                            'end_at'   => $upc['end_at'] ?? null,
+                        ] : null,
+                        'features'       => $features,
+                    ]);
+                }
+                // Plans غير متاح → تابع للقراءة المحلّية (fail-open)
+            }
+        } catch (\Throwable $e) {
+            log_message('warning', 'Upgrade::state Plans failed: ' . $e->getMessage());
+        }
 
         // ✅ حالة الاشتراك
         $db  = db_connect();

@@ -363,10 +363,11 @@ export const ServiceRequestModal = (() => {
     state.isLoading = true;
     state.submitBtn?.setAttribute('disabled', 'disabled');
     state.submitBtn?.classList.add('is-loading');
+    overlayShow('جارٍ معالجة طلبك…', 'يرجى الانتظار قليلاً — نُرسل طلبك ونجهّز رد «فَطين».');
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      const timeoutId = setTimeout(() => controller.abort(), 45000);
 
       const res = await fetch('/students/service-requests', {
         method: 'POST',
@@ -379,29 +380,37 @@ export const ServiceRequestModal = (() => {
 
       maybeUpdateCsrfFromResponse(res);
 
-      if (res.status === 401) { toast('🔒 يجب تسجيل الدخول لإرسال الطلب.'); return; }
-      if (res.status === 403 || res.status === 419) { toast('⛔ فشل التحقق الأمني (CSRF). حدّث الصفحة.'); return; }
-      if (res.status === 413) { toast('⚠️ أحد الملفات كبير جدًا. الحد الأقصى 10MB.'); return; }
+      if (res.status === 401) { overlayHide(); toast('🔒 يجب تسجيل الدخول لإرسال الطلب.'); return; }
+      if (res.status === 403 || res.status === 419) { overlayHide(); toast('⛔ فشل التحقق الأمني (CSRF). حدّث الصفحة.'); return; }
+      if (res.status === 413) { overlayHide(); toast('⚠️ أحد الملفات كبير جدًا.'); return; }
 
       let json = null;
       try { json = await res.json(); } catch {
-        if (!res.ok) { toast(`❌ فشل الإرسال (HTTP ${res.status})`); return; }
-        toast('✅ تم إرسال طلبك بنجاح');
-        close();
-        return;
+        if (!res.ok) { overlayHide(); toast(`❌ فشل الإرسال (HTTP ${res.status})`); return; }
+        json = { success: true, data: {} };
       }
 
       if (!res.ok || !json?.success) {
+        overlayHide();
         if (res.status === 422 && json?.fields) applyFieldErrors(json.fields);
         const msg = json?.message || `فشل الإرسال (HTTP ${res.status})`;
         toast('❌ ' + msg);
         return;
       }
 
-      toast('✅ تم إرسال طلبك بنجاح');
-      close();
+      // نجاح: حالة "تم الإرسال" ثم إغلاق + إشعار صفحة الخدمة لفتح الطلب
+      const reqId = json?.data?.request_id || json?.request_id || null;
+      overlaySuccess('تم إرسال طلبك ✓', 'فَطين يجهّز ردّه الآن، وسيتابعك الفريق الأكاديمي.');
+      try { resetForm(); } catch (_) {}
+      setTimeout(() => {
+        overlayHide();
+        close();
+        try { window.dispatchEvent(new CustomEvent('svc:request-created', { detail: { request_id: reqId } })); } catch (_) {}
+        if (typeof window.NotifCenter?.reloadCount === 'function') window.NotifCenter.reloadCount();
+      }, 1400);
 
     } catch (err) {
+      overlayHide();
       if (err?.name === 'AbortError') {
         toast('⏱️ انتهت المهلة. تحقّق من الاتصال وحاول مرة أخرى.');
       } else {
@@ -413,6 +422,31 @@ export const ServiceRequestModal = (() => {
       state.submitBtn?.removeAttribute('disabled');
       state.submitBtn?.classList.remove('is-loading');
     }
+  }
+
+  /* ===== طبقة اللودر/النجاح ===== */
+  function overlayShow(title, text) {
+    const ov = qs('#srvReqOverlay'); if (!ov) return;
+    const sp = qs('#srvSpin'), ck = qs('#srvCheck');
+    if (sp) sp.style.display = ''; if (ck) ck.style.display = 'none';
+    const t = qs('#srvOverlayTitle'), p = qs('#srvOverlayText');
+    if (t) t.textContent = title || 'جارٍ المعالجة…';
+    if (p) p.textContent = text || '';
+    ov.classList.add('show');
+  }
+  function overlaySuccess(title, text) {
+    const sp = qs('#srvSpin'), ck = qs('#srvCheck');
+    if (sp) sp.style.display = 'none'; if (ck) ck.style.display = 'flex';
+    const t = qs('#srvOverlayTitle'), p = qs('#srvOverlayText');
+    if (t) t.textContent = title || 'تم ✓';
+    if (p) p.textContent = text || '';
+  }
+  function overlayHide() { const ov = qs('#srvReqOverlay'); if (ov) ov.classList.remove('show'); }
+  function resetForm() {
+    const f = qs('#serviceRequestForm'); if (f) f.reset();
+    const list = qs('#uploadedFilesList'); if (list) list.innerHTML = '';
+    if (state) state.selectedFiles = [];
+    clearInvalids();
   }
 
   /* ===================== أدوات واجهة ===================== */

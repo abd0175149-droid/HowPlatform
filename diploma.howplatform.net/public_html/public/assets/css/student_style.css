@@ -1,3 +1,6 @@
+/* تصغير شامل للواجهة 20% عبر تصغير جذر rem (بديل zoom:80%) */
+html { font-size: 80%; }
+
 /* =================== Design Tokens (Light) =================== */
 :root {
   /* ===== Brand Scale ===== */
@@ -123,10 +126,10 @@
   /* ===== Borders / Shadows / Focus ===== */
   --border-color: var(--neutral-200);
   --border-strong: var(--neutral-300);
-  --focus-ring: 0 0 0 3px rgba(33, 158, 188, .25);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, .08);
-  --shadow-md: 0 6px 18px rgba(0, 0, 0, .10);
-  --shadow-lg: 0 16px 40px rgba(0, 0, 0, .16);
+  --focus-ring: 0 0 0 2.4px rgba(33, 158, 188, .25);
+  --shadow-sm: 0 0.8px 2.4px rgba(0, 0, 0, .08);
+  --shadow-md: 0 4.8px 14.4px rgba(0, 0, 0, .10);
+  --shadow-lg: 0 12.8px 32px rgba(0, 0, 0, .16);
 
   /* ===== Components (existing) ===== */
   --unread-bg: #f0f9ff;
@@ -135,8 +138,8 @@
 
   /* ===== Layout / Motion ===== */
   --sidebar-width: 20vw;
-  --navbar-height: 70px;
-  --border-radius: 16px;
+  --navbar-height: 56px;
+  --border-radius: 12.8px;
   --transition: all .25s ease;
 }
 
@@ -161,11 +164,11 @@
   /* Borders / Shadows / Focus */
   --border-color: rgba(255, 255, 255, .08);
   --border-strong: rgba(255, 255, 255, .16);
-  --focus-ring: 0 0 0 3px rgba(43, 179, 211, .35);
+  --focus-ring: 0 0 0 2.4px rgba(43, 179, 211, .35);
   /* من primary-500 */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, .60);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, .50);
-  --shadow-lg: 0 18px 48px rgba(0, 0, 0, .45);
+  --shadow-sm: 0 0.8px 2.4px rgba(0, 0, 0, .60);
+  --shadow-md: 0 6.4px 19.2px rgba(0, 0, 0, .50);
+  --shadow-lg: 0 14.4px 38.4px rgba(0, 0, 0, .45);
 
   /* Links / Buttons */
   --link: #1e8eab;
@@ -236,8 +239,8 @@ body {
   width: var(--sidebar-width);
   background: var(--surface-0);
   color: var(--text);
-  padding: 12px 0;
-  border-left: 1px solid var(--border-color);
+  padding: 9.6px 0;
+  border-left: 0.8px solid var(--border-color);
   box-shadow: none;
   position: fixed;
   top: 0;
@@ -256,21 +259,21 @@ body {
 
 /* =========[ ❷ الأزرار والقوائم ]========= */
 .logo-container {
-  padding: 0 16px 10px;
-  border-bottom: 1px solid var(--border-color);
-  margin-bottom: 8px;
+  padding: 0 12.8px 8px;
+  border-bottom: 0.8px solid var(--border-color);
+  margin-bottom: 6.4px;
 }
 
 .sidebar-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   justify-content: center;
 }
 
 .sidebar-logo img {
-  width: 32px;
-  height: 32px;
+  width: 25.6px;
+  height: 25.6px;
   object-fit: contain;
   display: none;
 }
@@ -283,24 +286,45 @@ body {
 
 .menu {
   list-style: none;
-  padding: 4px 8px;
+  padding: 3.2px 6.4px;
+}
+
+/* عناوين مجموعات السايد بار (نمط NotebookLM) */
+.nav-group-label {
+  list-style: none;
+  padding: 11.2px 11.2px 4.8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  text-transform: none;
+}
+
+.nav-group-label:first-child {
+  padding-top: 4.8px;
+}
+
+/* مرساة غير مرئية لإدراج المساقات */
+.nav-anchor {
+  list-style: none;
+  display: none;
 }
 
 .menu-item {
-  margin-bottom: 2px;
-  border-radius: 6px;
+  margin-bottom: 2.4px;
+  border-radius: 8px;
   overflow: visible;
 }
 
 .menu-link {
   display: flex;
   align-items: center;
-  padding: 10px 12px;
+  padding: 8.8px 11.2px;
   color: var(--text-muted);
   text-decoration: none;
   transition: background .15s ease, color .15s ease;
   position: relative;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.925rem;
 }
 
@@ -312,21 +336,32 @@ body {
 .menu-link.active {
   background: var(--primary-50);
   color: var(--primary-700);
-  font-weight: 600;
-  border-left: 3px solid var(--primary-500);
+  font-weight: 700;
+  border-left: none;
+}
+
+/* الدارك مود: خلفية شبه-أبيض (primary-50) غير مقبولة → تدرّج primary شفّاف + نص فاتح */
+[data-theme="dark"] .menu-link.active {
+  background: rgba(43, 179, 211, .16);
+  color: var(--primary-400);
+}
+
+[data-theme="dark"] .svc-item.active {
+  background: rgba(43, 179, 211, .16);
+  border-color: rgba(43, 179, 211, .40);
 }
 
 .menu-link i {
-  margin-left: 10px;
-  font-size: 16px;
-  width: 20px;
+  margin-left: 8px;
+  font-size: 12.8px;
+  width: 16px;
   text-align: center;
   flex-shrink: 0;
 }
 
 .menu-link .arrow {
   margin-right: auto;
-  font-size: 12px;
+  font-size: 9.6px;
   transition: transform .2s ease;
 }
 
@@ -336,10 +371,10 @@ body {
 
 .submenu {
   list-style: none;
-  padding: 2px 0 2px 0;
+  padding: 1.6px 0 1.6px 0;
   background: transparent;
-  border-radius: 6px;
-  margin-top: 2px;
+  border-radius: 4.8px;
+  margin-top: 1.6px;
   display: none;
 }
 
@@ -348,17 +383,17 @@ body {
 }
 
 .submenu-item {
-  padding: 1px 0;
+  padding: 0.8px 0;
 }
 
 .submenu-link {
   display: flex;
   align-items: center;
-  padding: 8px 12px 8px 40px;
+  padding: 6.4px 11.2px 6.4px 32px;
   color: var(--text-muted);
   text-decoration: none;
   transition: background .15s ease, color .15s ease;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: .875rem;
 }
 
@@ -370,14 +405,14 @@ body {
 .submenu-link.active {
   background: var(--primary-50);
   color: var(--primary-700);
-  font-weight: 600;
-  border-left: 3px solid var(--primary-500);
+  font-weight: 700;
+  border-left: none;
 }
 
 .submenu-link i {
-  font-size: 13px;
-  margin-left: 8px;
-  width: 16px;
+  font-size: 10.4px;
+  margin-left: 6.4px;
+  width: 12.8px;
   text-align: center;
 }
 
@@ -392,8 +427,8 @@ body {
 /* =========[ ❸ زر نصف الكرة ]========= */
 /* =========[ ❸ زر القائمة الجانبية (hamburger) داخل navbar ]========= */
 .navbar-menu-btn {
-  width: 38px;
-  height: 38px;
+  width: 30.4px;
+  height: 30.4px;
   border-radius: 50%;
   background: transparent;
   border: none;
@@ -430,7 +465,7 @@ body {
 
 @media (max-width: 992px) {
   .sidebar:not(.collapsed)+.sidebar-toggle {
-    right: 280px;
+    right: 224px;
   }
 }
 
@@ -460,11 +495,11 @@ body {
 
   .sidebar-toggle {
     right: 0;
-    width: 45px;
+    width: 36px;
   }
 
   .sidebar:not(.collapsed)+.sidebar-toggle {
-    right: 280px
+    right: 224px
   }
 }
 
@@ -475,8 +510,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px 0 20px;
-  border-bottom: 1px solid var(--border-color);
+  padding: 0 12.8px 0 16px;
+  border-bottom: 0.8px solid var(--border-color);
   position: fixed;
   top: 0;
   right: var(--sidebar-width);
@@ -489,11 +524,11 @@ body {
 .site-info {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .site-info .site-logo {
-  height: 32px;
+  height: 25.6px;
   object-fit: contain;
   cursor: pointer;
 }
@@ -507,14 +542,14 @@ body {
 .user-actions {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   position: relative
 }
 
 .student-info {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   transition: opacity 0.2s ease;
 }
 
@@ -524,8 +559,8 @@ body {
 
 /* أفاتار الطالب */
 .student-avatar {
-  width: 45px;
-  height: 45px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   overflow: hidden;
   background: var(--primary-100);
@@ -533,14 +568,14 @@ body {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-right: 8px;
+  margin-right: 6.4px;
   cursor: pointer;
-  border: 2px solid var(--primary-500);
+  border: 0.8px solid var(--border-color);
 }
 
 .student-avatar img.avatar-img {
-  width: 45px;
-  height: 45px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
   display: block;
@@ -556,16 +591,16 @@ body {
   vertical-align: middle;
   font-size: 1.1rem;
   color: var(--text-strong);
-  margin-left: 4px;
+  margin-left: 3.2px;
   cursor: pointer;
 }
 
 /* أزرار الهيدر */
 .action-btn-nav {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  border: 1px solid var(--border-color);
+  border: 0.8px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -577,21 +612,21 @@ body {
 }
 
 .action-btn-nav:hover {
-  background: var(--btn-primary-bg);
-  border-color: transparent;
-  color: var(--text-inverse);
+  background: var(--surface-2);
+  border-color: var(--primary-300);
+  color: var(--primary-700);
 }
 
 /* شارة الإشعارات */
 .notification-badge {
   position: absolute;
-  top: -5px;
-  right: -5px;
+  top: -4px;
+  right: -4px;
   background: var(--error-500);
   color: #fff;
   font-size: .7rem;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -603,14 +638,14 @@ body {
   position: absolute;
   top: 120%;
   left: 0;
-  width: 380px;
+  width: 304px;
   background: var(--surface-0);
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-lg);
   z-index: 200;
   display: none;
   overflow: hidden;
-  border: 1px solid var(--border-color);
+  border: 0.8px solid var(--border-color);
   transform-origin: top right;
 }
 
@@ -620,11 +655,11 @@ body {
 }
 
 .notifications-header {
-  padding: 18px 22px;
+  padding: 14.4px 17.6px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 0.8px solid var(--border-color);
   background: var(--surface-1);
 }
 
@@ -642,8 +677,8 @@ body {
   cursor: pointer;
   transition: var(--transition);
   font-weight: 500;
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 4.8px 9.6px;
+  border-radius: 4.8px;
 }
 
 .mark-all-read:hover {
@@ -652,15 +687,15 @@ body {
 }
 
 .notifications-list {
-  max-height: 400px;
+  max-height: 320px;
   overflow-y: auto;
 }
 
 .notification-item {
-  padding: 18px 22px;
-  border-bottom: 1px solid var(--border-color);
+  padding: 14.4px 17.6px;
+  border-bottom: 0.8px solid var(--border-color);
   display: flex;
-  gap: 15px;
+  gap: 12px;
   transition: var(--transition);
   cursor: pointer;
   position: relative;
@@ -683,14 +718,14 @@ body {
 }
 
 .notification-icon {
-  width: 42px;
-  height: 42px;
+  width: 33.6px;
+  height: 33.6px;
   border-radius: var(--border-radius);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 18px;
+  font-size: 14.4px;
   background: linear-gradient(135deg, var(--primary-300), var(--primary-600));
   color: #fff;
 }
@@ -701,26 +736,30 @@ body {
 
 .notification-title {
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 6.4px;
   color: var(--text-strong);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6.4px;
 }
 
 .notification-title .unread-badge {
   display: inline-block;
-  width: 8px;
-  height: 8px;
+  width: 6.4px;
+  height: 6.4px;
+  min-width: 6.4px;
+  padding: 0;
   border-radius: 50%;
   background: var(--accent-500);
+  animation: none;
+  flex-shrink: 0;
 }
 
 .notification-desc {
   font-size: .9rem;
   color: var(--text-muted);
   line-height: 1.5;
-  margin-bottom: 8px;
+  margin-bottom: 6.4px;
 }
 
 .notification-time {
@@ -728,25 +767,25 @@ body {
   color: var(--text-muted);
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 .notification-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 12px;
+  gap: 8px;
+  margin-top: 9.6px;
 }
 
 .action-link {
   font-size: .85rem;
-  padding: 6px 14px;
+  padding: 4.8px 11.2px;
   border-radius: var(--border-radius);
   text-decoration: none;
   transition: var(--transition);
   font-weight: 500;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 .view-link {
@@ -757,25 +796,25 @@ body {
 .view-link:hover {
   background: var(--btn-primary-bg);
   color: #fff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(33, 158, 188, .2);
+  transform: translateY(-1.6px);
+  box-shadow: 0 3.2px 6.4px rgba(33, 158, 188, .2);
 }
 
 .dismiss-link {
   background: var(--surface-1);
   color: var(--text-muted);
-  border: 1px solid var(--border-color);
+  border: 0.8px solid var(--border-color);
 }
 
 .dismiss-link:hover {
   background: var(--surface-2);
-  transform: translateY(-2px);
+  transform: translateY(-1.6px);
 }
 
 /* =========[ المحتوى الرئيسي ]========= */
 .content-area {
   flex: 1;
-  padding: 0 30px;
+  padding: 0 24px;
   overflow-y: auto;
   background: var(--surface-1);
   color: var(--text-muted);
@@ -789,26 +828,26 @@ body {
 }
 
 .content-placeholder {
-  max-width: 1400px;
-  padding: 40px;
+  max-width: 1120px;
+  padding: 32px;
   background: var(--surface-0);
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-md);
   margin: 0 auto;
   text-align: center;
-  border: 1px solid var(--border-color);
+  border: 0.8px solid var(--border-color);
 }
 
 .content-placeholder i {
   font-size: 5rem;
   color: var(--primary-600);
-  margin-bottom: 25px;
+  margin-bottom: 20px;
   opacity: .9;
 }
 
 .content-placeholder h3 {
   font-size: 1.8rem;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
   color: var(--text-strong);
   font-weight: 700;
 }
@@ -817,13 +856,13 @@ body {
   font-size: 1.1rem;
   line-height: 1.6;
   color: var(--text-muted);
-  margin-bottom: 30px;
+  margin-bottom: 24px;
 }
 
 /* =========[ تجاوب ]========= */
 @media (max-width: 992px) {
   .sidebar {
-    width: 280px;
+    width: 224px;
     position: fixed;
     right: 0;
     height: 100%;
@@ -851,8 +890,8 @@ body {
   }
 
   .notifications-dropdown {
-    width: 320px;
-    right: 10px;
+    width: 256px;
+    right: 8px;
   }
 }
 
@@ -867,30 +906,30 @@ body {
 
   .user-actions,
   .student-info {
-    gap: 5px;
+    gap: 4px;
   }
 
   .notifications-dropdown {
-    width: 300px;
+    width: 240px;
   }
 
   .content-placeholder {
-    padding: 30px 20px;
+    padding: 24px 16px;
   }
 }
 
 @media (max-width: 480px) {
   .notifications-dropdown {
-    width: 280px;
+    width: 224px;
     right: 0;
   }
 
   .navbar {
-    padding: 0 15px;
+    padding: 0 12px;
   }
 
   .content-area {
-    padding: 20px 15px;
+    padding: 16px 12px;
   }
 }
 
@@ -915,7 +954,7 @@ body {
   color: var(--text-strong);
   font-size: 1.5rem;
   cursor: pointer;
-  margin-left: 15px;
+  margin-left: 12px;
 }
 
 @media (max-width: 992px) {
@@ -943,17 +982,27 @@ body {
 /* =========[ الفوتر ]========= */
 .footer {
   text-align: center;
-  padding: 20px;
+  padding: 16px;
   color: var(--text-muted);
   font-size: .9rem;
-  border-top: 1px solid var(--border-color);
+  border-top: 0.8px solid var(--border-color);
   background: var(--surface-1);
+}
+
+/* فوتر عام لكل أقسام الطالب */
+.app-footer {
+  text-align: center;
+  padding: 14.4px 12.8px;
+  margin-top: 20.8px;
+  color: var(--text-muted);
+  font-size: .85rem;
+  border-top: 0.8px solid var(--border-color);
 }
 
 /* =========[ الأزرار العامة ]========= */
 .btn {
-  padding: 12px 25px;
-  border-radius: 8px;
+  padding: 9.6px 20px;
+  border-radius: 6.4px;
   border: none;
   cursor: pointer;
   font-weight: 600;
@@ -961,20 +1010,20 @@ body {
   transition: var(--transition);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 /* إبقاء .btn-primary لهوية الـ Accent (كما في موقعك) */
 .btn-primary {
   background: var(--accent-500);
   color: var(--text-inverse);
-  box-shadow: 0 5px 15px rgba(253, 158, 2, .18);
+  box-shadow: 0 4px 12px rgba(253, 158, 2, .18);
 }
 
 .btn-primary:hover {
   background: var(--accent-600);
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(253, 158, 2, .26);
+  transform: translateY(-2.4px);
+  box-shadow: 0 4.8px 12.8px rgba(253, 158, 2, .26);
 }
 
 .btn-secondary {
@@ -984,17 +1033,17 @@ body {
 
 .btn-secondary:hover {
   background: var(--btn-primary-hover);
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(33, 158, 188, .24);
+  transform: translateY(-2.4px);
+  box-shadow: 0 4px 12px rgba(33, 158, 188, .24);
 }
 
 /* =========[ الشات العائم / المودال ]========= */
 .floating-chatbot {
   position: fixed;
-  bottom: 30px;
-  right: 30px;
-  width: 420px;
-  height: 550px;
+  bottom: 24px;
+  right: 24px;
+  width: 336px;
+  height: 525px;
   border-radius: var(--border-radius);
   background: var(--surface-0);
   box-shadow: var(--shadow-lg);
@@ -1003,10 +1052,10 @@ body {
   overflow: hidden;
   z-index: 1000;
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(16px);
   pointer-events: none;
   transition: opacity .4s ease, transform .4s ease;
-  border: 1px solid var(--border-color);
+  border: 0.8px solid var(--border-color);
 }
 
 .floating-chatbot.active {
@@ -1015,16 +1064,221 @@ body {
   pointer-events: auto;
 }
 
-.new-chat-wrapper {
+.fateen-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4.8px;
+}
+
+/* ===== لوحة سجل المحادثات ===== */
+.fateen-history {
+  display: none;
+  flex-direction: column;
+  background: var(--surface-0);
+  overflow: hidden;
+}
+
+.fateen-history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11.2px 12.8px;
+  border-bottom: 0.8px solid var(--border-color);
+}
+
+.fateen-history-head h3 {
+  font-size: 1.05rem;
+  color: var(--text-strong);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6.4px;
+}
+
+#history-new-btn {
+  background: var(--btn-primary-bg);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 5.6px 9.6px;
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4.8px;
+  transition: var(--transition);
+}
+
+#history-new-btn:hover { background: var(--btn-primary-hover); }
+
+.fateen-history-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6.4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4.8px;
+}
+
+.fh-item {
+  display: flex;
+  align-items: center;
+  gap: 6.4px;
+  padding: 8px 9.6px;
+  border: 0.8px solid var(--border-color);
+  border-radius: 9.6px;
+  cursor: pointer;
+  background: var(--surface-1);
+  transition: var(--transition);
+}
+
+.fh-item:hover { border-color: var(--btn-primary-bg); background: var(--notification-hover); }
+.fh-item.active { border-color: var(--btn-primary-bg); background: var(--info-soft); }
+
+.fh-item-main { flex: 1; min-width: 0; text-align: right; }
+
+.fh-title {
+  display: block;
+  font-weight: 600;
+  color: var(--text-strong);
+  font-size: .9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fh-meta {
+  display: block;
+  font-size: .72rem;
+  color: var(--text-muted);
+  margin-top: 1.6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fh-del {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4.8px;
+  border-radius: 6.4px;
+  flex-shrink: 0;
+}
+
+.fh-del:hover { color: var(--error-500); background: var(--unread-bg); }
+
+.fh-empty { text-align: center; color: var(--text-muted); padding: 24px 9.6px; font-size: .9rem; }
+
+/* إظهار السجل كطبقة فوق الشات في الوضع المصغّر */
+.floating-chatbot.show-history #fateen-history {
+  display: flex;
   position: absolute;
-  top: 90px;
-  left: 20px;
+  inset: 0;
+  z-index: 3;
+}
+
+/* ===== وضع التكبير = صفحة كاملة (كالأقسام) ===== */
+.floating-chatbot.maximized {
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  bottom: 0;
+  right: 0;
+  border-radius: 0;
+}
+
+.floating-chatbot.maximized .chat-container { flex-direction: row; }
+
+.floating-chatbot.maximized #fateen-history {
+  display: flex;
+  position: static;
+  width: 256px;
+  flex-shrink: 0;
+  border-left: 0.8px solid var(--border-color);
+}
+
+.floating-chatbot.maximized .service-selection,
+.floating-chatbot.maximized .chat-area { flex: 1; min-width: 0; }
+
+.floating-chatbot.maximized .chat-messages,
+.floating-chatbot.maximized .service-options { max-width: 720px; margin-inline: auto; width: 100%; }
+
+/* ===== وضع القسم الكامل (data-section مثل بقية الصفحات) ===== */
+.fateen-section-page { width: 100%; }
+
+.fateen-section-host {
+  width: 100%;
+  height: calc(100vh - 120px);
+  min-height: 448px;
+}
+
+.floating-chatbot.in-section {
+  position: static;
+  inset: auto;
+  width: 100%;
+  height: 100%;
+  bottom: auto;
+  right: auto;
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 1;
+  box-shadow: none;
+  border: 0.8px solid var(--border-color);
+  border-radius: var(--border-radius);
+}
+
+.floating-chatbot.in-section .chat-container { flex-direction: row; }
+
+.floating-chatbot.in-section #fateen-history {
+  display: flex;
+  position: static;
+  width: 256px;
+  flex-shrink: 0;
+  border-left: 0.8px solid var(--border-color);
+}
+
+.floating-chatbot.in-section .service-selection,
+.floating-chatbot.in-section .chat-area { flex: 1; min-width: 0; }
+
+.floating-chatbot.in-section .chat-messages,
+.floating-chatbot.in-section .service-options { max-width: 720px; margin-inline: auto; width: 100%; }
+
+/* زر التصغير يظهر فقط داخل القسم الكامل */
+#minimize-btn { display: none; }
+.floating-chatbot.in-section #minimize-btn { display: flex; }
+
+/* داخل القسم لا حاجة لأزرار الطبقة العائمة (نُبقي زر التصغير فقط) */
+.floating-chatbot.in-section #close-btn,
+.floating-chatbot.in-section #maximize-btn,
+.floating-chatbot.in-section #history-btn { display: none; }
+
+@media (max-width: 768px) {
+  .fateen-section-host { height: calc(100vh - 96px); }
+  .floating-chatbot.in-section .chat-container { flex-direction: column; }
+  .floating-chatbot.in-section #fateen-history { width: 100%; border-left: none; border-bottom: 0.8px solid var(--border-color); max-height: 40%; }
+}
+
+/* شريط أدوات الدردشة: زر "محادثة جديدة" + عدّاد الاستخدام في صف واحد */
+.chat-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px 4px;
+}
+
+.new-chat-wrapper {
+  position: static;
+  flex-shrink: 0;
   z-index: 1001;
 }
 
 .new-chat-btn {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   background: var(--primary-200);
   color: var(--primary-900);
   border: none;
@@ -1050,7 +1304,7 @@ body {
 .usage-counter {
   text-align: center;
   font-size: .85rem;
-  margin: .5rem auto;
+  margin: 0;
   max-width: fit-content;
   display: inline-flex;
   align-items: center;
@@ -1058,7 +1312,7 @@ body {
   padding: .4rem .8rem;
   border-radius: 2rem;
   transition: all .3s ease;
-  border: 1px solid transparent;
+  border: 0.8px solid transparent;
 }
 
 .usage-counter.premium {
@@ -1087,7 +1341,7 @@ body {
 .fateen-modal-header {
   background: linear-gradient(135deg, var(--primary-darker), var(--primary-dark));
   color: #fff;
-  padding: 20px;
+  padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1101,7 +1355,7 @@ body {
   font-size: 1.5rem;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .fateen-modal-header h2 i {
@@ -1115,8 +1369,8 @@ body {
   color: #fff;
   font-size: 1.4rem;
   cursor: pointer;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1130,10 +1384,10 @@ body {
 
 .service-indicator {
   background: rgba(255, 255, 255, .2);
-  padding: 5px 15px;
-  border-radius: 20px;
+  padding: 4px 12px;
+  border-radius: 16px;
   font-size: .9rem;
-  margin-top: 5px;
+  margin-top: 4px;
 }
 
 /* محتوى الشات */
@@ -1146,7 +1400,7 @@ body {
 }
 
 .service-selection {
-  padding: 5px 25px;
+  padding: 4px 20px;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -1162,27 +1416,27 @@ body {
 .service-options {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  margin-top: 10px;
+  gap: 12px;
+  margin-top: 8px;
   overflow-y: auto;
   flex: 1;
-  padding: 5px 5px 15px;
+  padding: 4px 4px 12px;
 }
 
 .service-option {
   background: var(--unread-bg);
-  border: 1px solid var(--border-color);
-  padding: 8px;
-  border-radius: 15px;
+  border: 0.8px solid var(--border-color);
+  padding: 6.4px;
+  border-radius: 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
   transition: var(--transition);
 }
 
 .service-option:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2.4px);
   border-color: var(--btn-primary-bg);
   background: var(--notification-hover);
   box-shadow: var(--shadow-sm);
@@ -1191,8 +1445,8 @@ body {
 .service-option i {
   background: var(--btn-primary-bg);
   color: #fff;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1215,7 +1469,7 @@ body {
 .service-option .option-text p {
   color: var(--text-muted);
   font-size: .9rem;
-  margin-top: 5px;
+  margin-top: 4px;
   line-height: 1.5;
 }
 
@@ -1227,24 +1481,24 @@ body {
 
 .chat-messages {
   flex: 1;
-  padding: 20px;
+  padding: 16px;
   overflow-y: auto;
   background: var(--surface-0);
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 12px;
   scroll-behavior: smooth;
-  border-top: 1px solid var(--border-color);
+  border-top: 0.8px solid var(--border-color);
 }
 
 .message {
   max-width: 85%;
-  padding: 12px 18px;
-  border-radius: 18px;
+  padding: 9.6px 14.4px;
+  border-radius: 14.4px;
   animation: fadeIn .3s;
   position: relative;
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
+  border: 0.8px solid var(--border-color);
 }
 
 .received {
@@ -1262,20 +1516,20 @@ body {
 }
 
 .input-container {
-  padding: 15px;
-  border-top: 1px solid var(--border-color);
+  padding: 12px;
+  border-top: 0.8px solid var(--border-color);
   background: var(--surface-0);
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 #user-input {
   flex: 1;
-  padding: 12px 15px;
-  border: 1px solid var(--border-color);
-  border-radius: 15px;
+  padding: 9.6px 12px;
+  border: 0.8px solid var(--border-color);
+  border-radius: 12px;
   resize: none;
-  height: 60px;
+  height: 48px;
   font-size: 1rem;
   transition: border-color .3s, box-shadow .2s;
   background: var(--surface-0);
@@ -1292,8 +1546,8 @@ body {
   background: var(--btn-primary-bg);
   color: #fff;
   border: none;
-  padding: 0 25px;
-  border-radius: 15px;
+  padding: 0 20px;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 1rem;
   transition: var(--transition);
@@ -1311,20 +1565,20 @@ body {
 .typing-indicator {
   display: none;
   background: var(--info-soft);
-  padding: 10px 15px;
-  border-radius: 18px;
+  padding: 8px 12px;
+  border-radius: 14.4px;
   align-self: flex-start;
-  margin: 0 20px 10px;
-  border: 1px solid var(--info-border);
+  margin: 0 16px 8px;
+  border: 0.8px solid var(--info-border);
 }
 
 .typing-indicator span {
-  height: 8px;
-  width: 8px;
+  height: 6.4px;
+  width: 6.4px;
   background: var(--link);
   border-radius: 50%;
   display: inline-block;
-  margin: 0 2px;
+  margin: 0 1.6px;
   animation: bounce 1.3s infinite;
 }
 
@@ -1339,15 +1593,15 @@ body {
 /* زر "اسأل فطين" */
 .fateen-initiator {
   position: fixed;
-  bottom: 30px;
-  right: 30px;
+  bottom: 24px;
+  right: 24px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: var(--btn-primary-bg);
   color: #fff;
-  padding: 10px 15px;
-  border-radius: 40px;
+  padding: 8px 12px;
+  border-radius: 32px;
   box-shadow: var(--shadow-md);
   cursor: pointer;
   z-index: 1001;
@@ -1360,15 +1614,44 @@ body {
 }
 
 .fateen-img {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: #fff;
-  padding: 4px;
+  padding: 3.2px;
+}
+
+/* استضافة SVG فَطين المضمّن (شخصية تفاعلية عبر GSAP) */
+.fateen-svg-host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  box-sizing: border-box;
+}
+.fateen-svg-host svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+  will-change: transform;
+}
+/* محاور التحويل لأجزاء الوجه (لتعمل حركات GSAP بدقّة) */
+#fateen-svg #fateen-eyes,
+#fateen-svg #fateen-eye-r,
+#fateen-svg #fateen-eye-l,
+#fateen-svg #fateen-mouth {
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 .fateen-avatar {
-  height: 40px;
+  height: 32px;
+}
+.fateen-avatar.fateen-svg-host {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
 }
 
 .fateen-text {
@@ -1386,21 +1669,21 @@ body {
 .fateen-icon {
   font-size: 1.2rem;
   color: #fff;
-  margin-top: 3px;
+  margin-top: 2.4px;
 }
 
 .fateen-mistakes {
   display: flex;
   justify-content: space-around;
-  margin-bottom: 5px;
-  margin-top: -10px;
+  margin-bottom: 4px;
+  margin-top: -8px;
   font-size: .6rem;
 }
 
 /* الحركات */
 @keyframes popup {
   from {
-    transform: translateY(20px);
+    transform: translateY(16px);
     opacity: 0;
   }
 
@@ -1413,7 +1696,7 @@ body {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
 
   to {
@@ -1428,7 +1711,7 @@ body {
   }
 
   70% {
-    box-shadow: 0 0 0 15px rgba(2, 48, 71, 0);
+    box-shadow: 0 0 0 12px rgba(2, 48, 71, 0);
   }
 
   100% {
@@ -1444,23 +1727,23 @@ body {
   }
 
   50% {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
   }
 }
 
 /* =========[ Scrollbar ]========= */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6.4px;
 }
 
 ::-webkit-scrollbar-track {
   background: var(--surface-1);
-  border-radius: 4px;
+  border-radius: 3.2px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--primary-300);
-  border-radius: 4px;
+  border-radius: 3.2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -1478,8 +1761,8 @@ body {
   }
 
   .fateen-initiator {
-    bottom: 20px;
-    right: 20px;
+    bottom: 16px;
+    right: 16px;
   }
 
   .fateen-label {
@@ -1487,8 +1770,8 @@ body {
   }
 
   .fateen-img {
-    height: 35px;
-    width: 35px;
+    height: 28px;
+    width: 28px;
   }
 
   .modal-header h2 {
@@ -1498,8 +1781,8 @@ body {
 
 .copy-btn {
   float: left;
-  margin-top: 4px;
-  margin-left: 2px;
+  margin-top: 3.2px;
+  margin-left: 1.6px;
   border: none;
   cursor: pointer;
   font-size: 0.9rem;
@@ -1524,7 +1807,7 @@ body {
 .admin-swal-popup {
   background: var(--surface-1) !important;
   color: var(--text) !important;
-  border: 1px solid var(--border-color) !important;
+  border: 0.8px solid var(--border-color) !important;
   border-radius: var(--border-radius) !important;
   box-shadow: var(--shadow-lg) !important;
 }
@@ -1544,7 +1827,7 @@ body {
   background-color: var(--primary-500) !important;
   color: var(--text-inverse) !important;
   box-shadow: var(--shadow-sm) !important;
-  border-radius: 12px !important;
+  border-radius: 9.6px !important;
   font-weight: 600 !important;
 }
 
@@ -1558,7 +1841,7 @@ body {
   background-color: var(--error-500) !important;
   color: #fff !important;
   box-shadow: var(--shadow-sm) !important;
-  border-radius: 12px !important;
+  border-radius: 9.6px !important;
   font-weight: 600 !important;
 }
 

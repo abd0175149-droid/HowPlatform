@@ -63,12 +63,11 @@ public function index()
             'account',
             'pending_requests',
             'service_chat',
-            'service_requests',
+            'notifications',
             'email_broadcast',
             'library_upload',
             'plans',
             'ocr_upload',
-            'service_requests_new',
         ];
 
         if (! in_array($page, $allowedPages, true)) {

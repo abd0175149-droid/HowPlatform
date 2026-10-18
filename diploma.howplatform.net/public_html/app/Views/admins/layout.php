@@ -13,7 +13,7 @@
 
 
 
-  <?php $JS_VER = '1.10.15'; // ← وحّد رقم الإصدار هنا فقط ?>
+  <?php $JS_VER = '1.10.28'; // ← وحّد رقم الإصدار هنا فقط ?>
 
   <!-- تحسين التحميل المسبق للـ CDNs الشائعة -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -44,15 +44,12 @@
   </noscript>
 
   <!-- CSS الرئيسي (اتركه كما هو إن لم تُبدّل الملف) -->
-  <link rel="stylesheet" href="<?= base_url('assets/css/admin_style.css?v=1.11.5') ?>">
+  <link rel="stylesheet" href="<?= base_url('assets/css/admin_style.css?v=1.12.1') ?>">
 
   <link rel="icon" type="image/png" href="<?= base_url('assets/images/icon.ico') ?>">
 
   <style>
     * { font-family: 'Almarai', -apple-system, BlinkMacSystemFont, sans-serif; }
-    body {
-      zoom: 80%;
-    }
   </style>
 
   <!-- مكتبات عامّة -->
@@ -121,6 +118,23 @@
     window.__SESSION__
   );
 </script>
+
+  <!-- مركز إشعارات الأدمن (جرس الناف بار) -->
+  <script defer src="<?= base_url("assets/js/admins/notifications_center.js?v={$JS_VER}") ?>"></script>
+  <script>
+    window.__FCM__ = {
+      config: {
+        apiKey: '<?= esc(getenv('FIREBASE_API_KEY') ?: '', 'js') ?>',
+        authDomain: '<?= esc(getenv('FIREBASE_AUTH_DOMAIN') ?: '', 'js') ?>',
+        projectId: '<?= esc(getenv('FIREBASE_PROJECT_ID') ?: '', 'js') ?>',
+        storageBucket: '<?= esc(getenv('FIREBASE_STORAGE_BUCKET') ?: '', 'js') ?>',
+        messagingSenderId: '<?= esc(getenv('FIREBASE_MESSAGING_SENDER_ID') ?: '', 'js') ?>',
+        appId: '<?= esc(getenv('FIREBASE_APP_ID') ?: '', 'js') ?>'
+      },
+      vapidKey: '<?= esc(getenv('FIREBASE_VAPID_KEY') ?: '', 'js') ?>'
+    };
+  </script>
+  <script defer src="<?= base_url("assets/js/webpush.js?v=1.0.0") ?>"></script>
 
   <!-- سكربتات عامة -->
   <script defer src="<?= base_url('assets/js/admin-modal-utils.js') ?>"></script>

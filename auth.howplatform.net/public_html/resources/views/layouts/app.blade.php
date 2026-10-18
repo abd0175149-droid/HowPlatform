@@ -515,6 +515,29 @@
 </head>
 <body>
 
+<style>
+/* مُشغّل المنصّات — بجانب الصورة الشخصية في الناف بار */
+.apps-menu{position:relative;}
+.apps-btn{list-style:none;cursor:pointer;width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#eef3f6;color:#013046;border:1.5px solid #dfe7ec;transition:background .15s;}
+.apps-btn::-webkit-details-marker{display:none;}
+.apps-btn:hover,.apps-menu[open] .apps-btn{background:#dbe7ec;}
+.apps-panel{position:absolute;top:calc(100% + 10px);inset-inline-end:0;background:#fff;border-radius:16px;box-shadow:0 16px 40px rgba(1,48,70,.18);padding:.75rem;min-width:280px;z-index:1300;}
+.apps-panel .apps-title{color:#7a8a93;font-weight:700;font-size:.72rem;letter-spacing:.5px;padding:.15rem .35rem .55rem;}
+.apps-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.4rem;}
+.apps-tile{display:flex;flex-direction:column;align-items:center;gap:.45rem;padding:.85rem .4rem;border-radius:12px;color:#013046;text-align:center;border:1.5px solid transparent;text-decoration:none;transition:all .16s;}
+.apps-tile:hover{background:#eaf3f6;border-color:#cfe6ee;transform:translateY(-2px);}
+.apps-tile .ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;color:#fff;background:linear-gradient(135deg,#219ebc,#156683);}
+.apps-tile span:last-child{font-size:.74rem;font-weight:700;line-height:1.2;}
+@media (max-width:400px){.apps-panel{min-width:240px;}}
+</style>
+<script>
+document.addEventListener('click',function(e){
+  document.querySelectorAll('details.apps-menu[open]').forEach(function(d){
+    if(!d.contains(e.target)) d.removeAttribute('open');
+  });
+});
+</script>
+
 <div class="site-header">
   <div class="container-custom">
     <nav class="site-nav">
@@ -525,39 +548,23 @@
         <span class="nav-brand-text">HOW Platform</span>
       </a>
 
-      {{-- ===== Desktop Links ===== --}}
-      <ul class="nav-links">
-        <li class="nav-item">
-          <a href="https://www.howplatform.net/" class="nav-link">
-            <i class="fa fa-house"></i> الرئيسية
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="https://diploma.howplatform.net/auth/redirect" class="nav-link">
-            <i class="fa fa-graduation-cap"></i> منصة الدبلوم
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="https://library.howplatform.net/" class="nav-link">
-            <i class="fa fa-book-open"></i> المكتبة
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="https://tools.howplatform.net/" class="nav-link">
-            <i class="fa fa-wand-magic-sparkles"></i> الأدوات
-          </a>
-        </li>
-        @auth
-          <li class="nav-item">
-            <a href="{{ route('profile.index') }}" class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}">
-              <i class="fa fa-user-circle"></i> الملف الشخصي
-            </a>
-          </li>
-        @endauth
-      </ul>
+      {{-- روابط المنصّات نُقلت إلى مُشغّل المنصّات بجانب الصورة الشخصية (ناف بار نظيف) --}}
 
       {{-- ===== Desktop Actions ===== --}}
       <div class="nav-actions">
+        {{-- مُشغّل المنصّات (بجانب الصورة الشخصية) --}}
+        <details class="apps-menu">
+          <summary class="apps-btn" title="المنصّات"><i class="fa fa-table-cells-large"></i></summary>
+          <div class="apps-panel">
+            <div class="apps-title">منصّات HOW</div>
+            <div class="apps-grid">
+              <a href="https://diploma.howplatform.net/auth/redirect" class="apps-tile" target="_blank" rel="noopener"><span class="ic"><i class="fa fa-graduation-cap"></i></span><span>الدبلوم</span></a>
+              <a href="https://library.howplatform.net/" class="apps-tile" target="_blank" rel="noopener"><span class="ic"><i class="fa fa-book-open"></i></span><span>المكتبة</span></a>
+              <a href="https://tools.howplatform.net/" class="apps-tile" target="_blank" rel="noopener"><span class="ic"><i class="fa fa-wand-magic-sparkles"></i></span><span>الأدوات</span></a>
+              <a href="https://www.howplatform.net/" class="apps-tile" target="_blank" rel="noopener"><span class="ic"><i class="fa fa-house"></i></span><span>الرئيسية</span></a>
+            </div>
+          </div>
+        </details>
         @auth
           @php
             $authUser   = auth()->user();

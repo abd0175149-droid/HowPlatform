@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HOW — تفاصيل المهمة v2 (إعادة تنظيم كاملة)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal-50:#e8f5fb;--teal-100:#d2ebf7;--teal-300:#8ecae6;--teal-500:#219ebc;--teal-600:#1b81a0;--teal-700:#156683;--teal-900:#0a3247;
+  --amber-100:#fff3d6;--amber-500:#fd9e02;--amber-600:#d38202;
+  --ink:#0a3247;--text:#1f2933;--muted:#6b7280;--bg:#f7f8fb;--surface:#fff;--surface-2:#f4f6f9;
+  --border:#e7eaee;--border-strong:#d8dde3;--ok:#15803d;--ok-bg:#e7f7ee;--pill:999px;--font:'Almarai',sans-serif;
+}
+[data-theme="dark"]{--ink:#e8eef5;--text:#e2e8f0;--muted:#94a3b8;--bg:#0b1220;--surface:#111a2b;--surface-2:#0f1827;--border:#1e2a3d;--border-strong:#27374f;--teal-50:#0e2230;--amber-100:#2a2310;--ok-bg:#0f2a1c;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6}
+.muted{color:var(--muted)}
+.bar{position:sticky;top:0;z-index:20;height:60px;display:flex;align-items:center;gap:12px;padding:0 20px;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+.back,.nav{width:38px;height:38px;border-radius:var(--pill);border:1px solid var(--border);background:var(--surface);color:var(--muted);display:grid;place-items:center;cursor:pointer}
+.bar h1{font-size:1.02rem;color:var(--ink);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spacer{flex:1}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.76rem;font-weight:700;padding:5px 11px;border-radius:var(--pill);background:var(--surface-2);color:var(--muted)}
+.chip.type{background:var(--teal-50);color:var(--teal-700)} .chip.due{background:#fdeaea;color:#b91c1c} .chip.cost{background:var(--amber-100);color:var(--amber-600)} .chip.on{background:var(--ok-bg);color:var(--ok)} .chip.week{background:var(--amber-100);color:var(--amber-600)}
+.wrap{display:grid;grid-template-columns:1fr 330px;gap:18px;max-width:1320px;margin:0 auto;padding:20px}
+.col{display:flex;flex-direction:column;gap:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:18px}
+.ch{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border)}
+.ch .t{font-size:1.02rem;color:var(--ink);font-weight:800;flex:1} .ch .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--teal-50);color:var(--teal-600);font-size:.95rem}
+.ch .count{font-size:.78rem;color:var(--muted);background:var(--surface-2);padding:3px 10px;border-radius:var(--pill)}
+.cb{padding:18px}
+.btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--font);font-weight:700;font-size:.86rem;border-radius:var(--pill);padding:9px 16px;cursor:pointer;border:1px solid transparent;transition:.16s}
+.btn-primary{background:var(--teal-500);color:#fff}.btn-primary:hover{background:var(--teal-600)} .btn-tonal{background:var(--teal-50);color:var(--teal-700)} .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border-strong)} .btn-sm{padding:7px 13px;font-size:.8rem}
+
+/* ===== الأدوات: شبكة → اختيار → لوحة + نتيجة داخلية ===== */
+.tools{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.tool{border:1px solid var(--border);border-radius:14px;padding:15px;cursor:pointer;transition:.16s;background:var(--surface);display:flex;gap:12px;align-items:flex-start}
+.tool:hover{border-color:var(--teal-300)} .tool.sel{border-color:var(--teal-500);box-shadow:0 0 0 3px var(--teal-50)}
+.tool .ic{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:1.1rem;background:var(--teal-50);color:var(--teal-600);flex-shrink:0}
+.tool.amber .ic{background:var(--amber-100);color:var(--amber-600)}
+.tool h3{font-size:.92rem;color:var(--ink);margin-bottom:2px} .tool p{font-size:.78rem;color:var(--muted);margin-bottom:8px} .tool .foot{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.panel{margin-top:16px;border-top:1px dashed var(--border);padding-top:16px}
+.drop{border:1.5px dashed var(--border-strong);border-radius:14px;padding:22px;text-align:center;color:var(--muted);background:var(--surface-2)}
+.drop .d-ic{font-size:1.5rem;color:var(--teal-500)}
+.result{display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:14px;margin-top:14px}
+.thumb{width:150px;height:96px;border-radius:11px;border:1px solid var(--border);background:linear-gradient(135deg,var(--teal-50),var(--surface) 60%);display:grid;place-items:center;color:var(--teal-600);font-size:1.5rem}
+
+/* ===== الرِّيل: مهام الأسبوع + المرفقات + المواعيد ===== */
+.road{display:flex;flex-direction:column;gap:2px;position:relative}
+.road .step{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;cursor:pointer;transition:.14s;font-size:.88rem;font-weight:700;color:var(--text)}
+.road .step:hover{background:var(--surface-2)} .road .step.active{background:var(--teal-50);color:var(--teal-700)}
+.road .dot{width:11px;height:11px;border-radius:50%;border:2px solid var(--border-strong);flex-shrink:0}
+.road .step.active .dot{border-color:var(--teal-500);background:var(--teal-500)} .road .step.done .dot{border-color:var(--ok);background:var(--ok)}
+.src{display:flex;align-items:center;gap:11px;padding:10px;border:1px solid var(--border);border-radius:12px;margin-bottom:9px;background:var(--surface)}
+.src .s-ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--surface-2);color:var(--teal-600);flex-shrink:0}
+.src .s-t{flex:1;min-width:0} .src .s-t b{font-size:.84rem;color:var(--ink);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .src .s-t span{font-size:.73rem;color:var(--muted)}
+.minibtn{width:32px;height:32px;border-radius:var(--pill);border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer}
+.dates li{list-style:none;padding:11px 13px;border:1px solid var(--border);border-radius:12px;margin-bottom:9px;display:flex;flex-direction:column;gap:2px}
+.dates li b{font-size:.78rem;color:var(--muted)} .dates li span{font-size:1rem;font-weight:800;color:var(--ink)}
+.desc{font-size:.92rem;line-height:1.9;color:var(--text)}
+@media(max-width:1000px){.wrap{grid-template-columns:1fr}.tools{grid-template-columns:1fr}}
+</style>
+</head>
+<body data-theme="light">
+  <div class="bar">
+    <button class="back">→</button>
+    <h1>تصميم موقف تقييمي وفق GRASPS</h1>
+    <span class="chip type">موقف تقييمي</span><span class="chip week">الأسبوع 7</span><span class="chip due">يومان</span>
+    <div class="spacer"></div>
+    <button class="nav" disabled>‹</button><button class="nav">›</button>
+    <button class="nav" id="themeBtn" title="داكن">◐</button>
+  </div>
+
+  <div class="wrap">
+    <!-- ===== Main: tools + results + description ===== -->
+    <div class="col">
+      <div class="card">
+        <div class="ch"><div class="ic">✦</div><div class="t">أدوات الذكاء الاصطناعي</div><span class="count">أداتان</span></div>
+        <div class="cb">
+          <div class="tools">
+            <div class="tool sel" onclick="sel(this)"><div class="ic">🖼️</div><div><h3>بوستر البحث الاستقصائي</h3><p>مخطط بحثك → إنفوجرافيك.</p><div class="foot"><span class="chip cost">٣٠٠ نقطة</span><span class="chip on">جاهزة</span></div></div></div>
+            <div class="tool amber" onclick="sel(this)"><div class="ic">📝</div><div><h3>مُقيّم المقالة</h3><p>تغذية راجعة + تعليقات.</p><div class="foot"><span class="chip cost">١٠٠ نقطة</span></div></div></div>
+          </div>
+
+          <!-- selected tool: inline panel + inline result -->
+          <div class="panel">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:1.1rem">🖼️</span><b style="color:var(--ink)">بوستر البحث الاستقصائي</b><span class="chip cost">٣٠٠ نقطة</span></div>
+            <div class="drop"><div class="d-ic">⬆</div><div style="margin-top:6px;font-weight:700;color:var(--ink)">اسحب الملف هنا أو اختر</div><div style="font-size:.76rem">PDF · DOCX · PNG · JPG</div></div>
+            <div style="display:flex;gap:8px;margin-top:14px"><button class="btn btn-primary">رفع وإنشاء</button><button class="btn btn-ghost">سجل الطلبات</button></div>
+
+            <!-- result INLINE (not in a hidden modal) -->
+            <div class="result">
+              <div class="thumb">🖼️</div>
+              <div style="flex:1;min-width:180px"><b style="color:var(--ink)">بوستر البحث الاستقصائي.png</b><div class="muted" style="font-size:.8rem;margin:3px 0 10px">2026-06-22 · 1.2MB</div>
+              <div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn btn-primary btn-sm">معاينة</button><button class="btn btn-tonal btn-sm">تنزيل</button><button class="btn btn-ghost btn-sm">إعادة</button></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ch"><div class="ic">📄</div><div class="t">وصف المهمة</div></div>
+        <div class="cb"><div class="desc">صمّم موقفاً تقييمياً أصيلاً وفق نموذج GRASPS لوحدة من اختيارك، يراعي تمايز المتعلمين ويوظّف أدوات التقويم الحديثة… <a href="#" style="color:var(--teal-600);font-weight:700"> عرض المزيد</a></div></div>
+      </div>
+    </div>
+
+    <!-- ===== Rail: week tasks + attachments + dates ===== -->
+    <div class="col">
+      <div class="card">
+        <div class="ch"><div class="ic">🗺️</div><div class="t">مهام الأسبوع</div></div>
+        <div class="cb"><div class="road">
+          <div class="step done"><span class="dot"></span> مقدمة الوحدة</div>
+          <div class="step done"><span class="dot"></span> ورقة عمل تمهيدية</div>
+          <div class="step active"><span class="dot"></span> تصميم موقف تقييمي</div>
+          <div class="step"><span class="dot"></span> التأمل الختامي</div>
+        </div></div>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ic">📎</div><div class="t">المرفقات</div><span class="count">٣</span></div>
+        <div class="cb">
+          <div class="src"><div class="s-ic">📄</div><div class="s-t"><b>نموذج_GRASPS.pdf</b><span>PDF · 240KB</span></div><button class="minibtn">↓</button></div>
+          <div class="src"><div class="s-ic">🎬</div><div class="s-t"><b>شرح_الموقف.mp4</b><span>فيديو · 18MB</span></div><button class="minibtn">▷</button></div>
+          <div class="src"><div class="s-ic">📝</div><div class="s-t"><b>قالب_التسليم.docx</b><span>Word · 64KB</span></div><button class="minibtn">↓</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><div class="ic">📅</div><div class="t">المواعيد</div></div>
+        <div class="cb"><ul class="dates"><li><b>متاح من</b><span>2026-06-15</span></li><li><b>التسليم</b><span>2026-06-24</span></li></ul></div>
+      </div>
+    </div>
+  </div>
+<script>
+  document.getElementById('themeBtn').addEventListener('click',()=>{const b=document.body;b.dataset.theme=b.dataset.theme==='dark'?'light':'dark';});
+  function sel(el){document.querySelectorAll('.tool').forEach(t=>t.classList.remove('sel'));el.classList.add('sel');}
+  document.querySelectorAll('.road .step').forEach(s=>s.addEventListener('click',()=>{document.querySelectorAll('.road .step').forEach(x=>x.classList.remove('active'));s.classList.add('active');}));
+</script>
+</body>
+</html>

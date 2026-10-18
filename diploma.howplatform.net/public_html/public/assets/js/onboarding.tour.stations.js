@@ -143,7 +143,7 @@
     sideWelcome:   '.menu-link[data-section="welcome"]',
     sideDashboard: '.menu-link[data-section="dashboard"]',
     sideService:   '.menu-item.service-item > a.menu-link[data-section="service"], .menu-link[data-section="service"]',
-    sideUpgrade:   '.menu-link[data-section="upgrade"]',
+    sideUpgrade:   '.menu-item.upgrade-item > a.menu-link, .menu-link[data-section="upgrade"]',
     sideAccount:   'li.menu-item > a.menu-link[href*="auth.howplatform.net/profile?active=diploma"]',
 
     sectionNav:  'nav.section-nav',

@@ -89,7 +89,7 @@ $routes->group('auth', static function (RouteCollection $routes) {
 
 
 
-$routes->group('admins', ['namespace' => 'App\Controllers\Admins', 'filter' => 'auth'], static function (RouteCollection $routes)
+$routes->group('admins', ['namespace' => 'App\Controllers\Admins', 'filter' => 'admin'], static function (RouteCollection $routes)
 {
     // صفحات تُحقن ديناميكيًا داخل #contentArea
     $routes->group('pages', static function (RouteCollection $routes) {
@@ -105,8 +105,31 @@ $routes->group('admins', ['namespace' => 'App\Controllers\Admins', 'filter' => '
         $routes->get('(:segment)', 'PagesController::page/$1');  // عام: /admins/pages/<slug>
     });
 
+    // ====== مركز الإشعارات (الجرس في الناف بار — أدمن) ======
+    $routes->group('notifications', static function (RouteCollection $routes) {
+        $routes->get ('list',              'NotificationsController::list');
+        $routes->get ('unread-count',      'NotificationsController::unreadCount');
+        $routes->post('mark-read/(:num)',  'NotificationsController::markRead/$1');
+        $routes->post('mark-all-read',     'NotificationsController::markAllRead');
+        $routes->post('delete/(:num)',     'NotificationsController::delete/$1');
+        $routes->post('clear-all',         'NotificationsController::clearAll');
+        $routes->post('register-device',   'NotificationsController::registerDevice');
+    });
+
     // ===== API الموحد تحت /admins/api =====
     $routes->group('api', static function (RouteCollection $routes) {
+
+        // AI Tools management (إدارة أدوات الذكاء الاصطناعي) — أدمن فقط (حارس role==1 داخل المتحكّم)
+        $routes->group('ai-tools', static function (RouteCollection $routes) {
+            $routes->get   ('tools',                  'AiToolsMeta::tools');
+            $routes->get   ('tools/(:num)',           'AiToolsMeta::toolDetail/$1');
+            $routes->post  ('tools/(:num)',           'AiToolsMeta::updateTool/$1');
+            $routes->get   ('task-types',             'AiToolsMeta::taskTypes');
+            $routes->get   ('placements',             'AiToolsMeta::placements');
+            $routes->post  ('placements',             'AiToolsMeta::createPlacement');
+            $routes->post  ('placements/(:num)',      'AiToolsMeta::updatePlacement/$1');
+            $routes->delete('placements/(:num)',      'AiToolsMeta::deletePlacement/$1');
+        });
 
         // Courses
         $routes->group('courses', static function (RouteCollection $routes) {
@@ -154,26 +177,11 @@ $routes->group('admins', ['namespace' => 'App\Controllers\Admins', 'filter' => '
         });
 
         /*──────────────────────── جدول طلبات الخدمة (أدمن) ─────────────────────*/
-        $routes->group('service-requests-table', ['namespace' => 'App\Controllers\Admins'], static function (RouteCollection $routes) {
-            
-            $routes->post('(:num)/messages/(:num)/delete', '\App\Controllers\Admins\ServiceMessages::delete/$1/$2');
-
-            // واجهة الصفحة (Partial)
-            $routes->get('/', 'AdminServiceRequestsTableController::index');
-
-            // Endpoints
-            $routes->get('health', 'AdminServiceRequestsTableController::health');
-            $routes->get('list',   'AdminServiceRequestsTableController::getRequestsList');
-            $routes->get('admins', 'AdminServiceRequestsTableController::getAdminsList');
-            $routes->get('stats',  'AdminServiceRequestsTableController::getStats');
-            $routes->post('status/(:num)', 'AdminServiceRequestsTableController::updateStatus/$1');
-            $routes->post('assign/(:num)', 'AdminServiceRequestsTableController::assignRequest/$1');
-            // ملاحظة: إبقاء هذا الراوت لا يضر، لكن التحديث الأساسي صار ضمن مجموعة service-requests أدناه.
-            // $routes->post('(:num)/status', 'ServiceChatController::updateStatus/$1');
-        });
-
         /*──────────────────────── محادثة طلبات الخدمة (أدمن) ─────────────────────*/
         $routes->group('service-requests', static function (RouteCollection $routes) {
+
+            // توكن Firebase للشات اللحظي (آدمن)
+            $routes->get('firebase-token', 'ServiceChatController::firebaseToken');
 
             // أعلى الصفحة (الخطة/الأولوية/الصوت)
             $routes->get('top-meta', 'ServiceChatController::topMeta');
@@ -192,6 +200,9 @@ $routes->group('admins', ['namespace' => 'App\Controllers\Admins', 'filter' => '
 
             // إلغاء الطلب — CSRF
             $routes->post('(:num)/cancel', 'ServiceChatController::cancelRequest/$1');
+
+            // حذف الطلب نهائياً (أدمن role=1 فقط) — CSRF
+            $routes->post('(:num)/delete', 'ServiceChatController::deleteRequest/$1');
 
             // تحديث حالة الطلب — CSRF  ✅ جديد
             $routes->post('(:num)/status', 'ServiceChatController::updateStatus/$1');
@@ -335,12 +346,18 @@ $routes->group('admins', ['namespace' => 'App\Controllers\Admins', 'filter' => '
     });
 
 
-    $routes->group('manage_users', ['namespace' => 'App\Controllers\Admins', 'filter' => 'auth'], static function (RouteCollection $routes) {
+    $routes->group('manage_users', ['namespace' => 'App\Controllers\Admins', 'filter' => 'admin'], static function (RouteCollection $routes) {
     $routes->get ('list',            'ManageUsers::list');          // GET  /manage_users/list
     $routes->get ('options',         'ManageUsers::options');       // GET  /manage_users/options
     $routes->get ('stats',           'ManageUsers::stats');         // GET  /manage_users/stats
+    $routes->get ('dashboard',       'ManageUsers::dashboard');     // GET  /manage_users/dashboard
+    $routes->get ('activity/(:num)', 'ManageUsers::userActivity/$1'); // GET /manage_users/activity/{id}
+    $routes->get ('export',          'ManageUsers::exportCsv');     // GET  /manage_users/export
     $routes->post('update_account',  'ManageUsers::updateAccount'); // POST /manage_users/update_account
     $routes->post('delete',          'ManageUsers::delete');        // POST /manage_users/delete
+    $routes->post('bulk_delete',     'ManageUsers::bulkDelete');    // POST /manage_users/bulk_delete
+    $routes->post('schedule_deletion','ManageUsers::scheduleDeletion'); // POST /manage_users/schedule_deletion
+    $routes->post('cancel_deletion', 'ManageUsers::cancelDeletion'); // POST /manage_users/cancel_deletion
 });
 
 // مسار عام سابق (لا مانع من بقائه)
@@ -366,37 +383,13 @@ $routes->group('admins', ['namespace' => 'App\Controllers\Admins', 'filter' => '
 
 
 /*──────────────────────── طلبات الخدمة - جديد (جدول + دردشة) ─────────────────────*/
-$routes->group('admins/service-requests-new', static function (RouteCollection $routes) {
-    // صفحة الواجهة
-    $routes->get ('/',                     'AdminServiceRequestsNewController::index');
-
-    // قائمة الطلبات
-    $routes->get ('list',                  'AdminServiceRequestsNewController::getRequestsList');
-
-    // تفاصيل رأس الطلب + الرسائل
-    $routes->get ('details/(:num)',        'AdminServiceRequestsNewController::getRequestDetails/$1');
-    $routes->get ('new-messages/(:num)',   'AdminServiceRequestsNewController::getNewMessages/$1');
-
-    // المراسلة والملفات
-    $routes->post('message/(:num)',        'AdminServiceRequestsNewController::sendMessage/$1');
-    $routes->get ('file/(:num)',           'AdminServiceRequestsNewController::downloadFile/$1');
-
-    // تعليم كمقروء
-    $routes->post('mark-read/(:num)',      'AdminServiceRequestsNewController::markAsRead/$1');
-
-    // تحديث الحالة والتكليف
-    $routes->post('status/(:num)',         'AdminServiceRequestsNewController::updateStatus/$1');
-    $routes->post('status',                'AdminServiceRequestsNewController::updateStatus');
-    $routes->post('assign/(:num)',         'AdminServiceRequestsNewController::assignRequest/$1');
-    $routes->get ('admins',                'AdminServiceRequestsNewController::getAdminsList');
-});
-
 // ======================================================================
 //                           بقية المسارات (غير الأدمن)
 // ======================================================================
 
 /*──────────────────────── API: الدورات ──────────────────────*/
-$routes->group('api/courses', static function (RouteCollection $routes) {
+// 🔒 تكرار إداري لـ /admins/api/courses — محصور بدور الإدارة كنظيره.
+$routes->group('api/courses', ['filter' => 'admin'], static function (RouteCollection $routes) {
     $routes->get ('meta',                '\App\Controllers\Admins\CoursesMeta::index');
     $routes->get ('universities/(:num)', '\App\Controllers\Admins\CoursesMeta::getUniversities/$1');
     $routes->get ('semesters/(:num)',    '\App\Controllers\Admins\CoursesMeta::getSemesters/$1');
@@ -409,7 +402,8 @@ $routes->group('api/courses', static function (RouteCollection $routes) {
 });
 
 /*──────────────────────── API: الأسابيع ─────────────────────*/
-$routes->group('api/weeks', static function (RouteCollection $routes) {
+// 🔒 تكرار إداري لـ /admins/api/weeks (فيه store/update/delete) — محصور بدور الإدارة.
+$routes->group('api/weeks', ['filter' => 'admin'], static function (RouteCollection $routes) {
     $routes->get ('meta',                'WeeksMeta::index');
     $routes->get ('universities/(:num)', 'WeeksMeta::getUniversities/$1');
     $routes->get ('semesters/(:num)',    'WeeksMeta::getSemesters/$1');
@@ -422,7 +416,8 @@ $routes->group('api/weeks', static function (RouteCollection $routes) {
 });
 
 /*──────────────────────── API: المهام ───────────────────────*/
-$routes->group('task', static function (RouteCollection $routes) {
+// 🔒 تكرار إداري لـ /admins/api/task (فيه createOrUpdateTask/deleteTask) — محصور بدور الإدارة.
+$routes->group('task', ['filter' => 'admin'], static function (RouteCollection $routes) {
     $routes->get('/',                         'TasksMeta::index');
     $routes->get('getAcademicYears',          'TasksMeta::getAcademicYears');
     $routes->get('getTaskTypes',              'TasksMeta::getTaskTypes');
@@ -441,7 +436,8 @@ $routes->group('task', static function (RouteCollection $routes) {
 });
 
 /*────────────────── API: الأعوام والفصول (إداري) ───────────*/
-$routes->group('api/academic-years', static function (RouteCollection $routes) {
+// 🔒 تكرار إداري (store/update/delete/link/unlink) — محصور بدور الإدارة.
+$routes->group('api/academic-years', ['filter' => 'admin'], static function (RouteCollection $routes) {
     $routes->get   ('summary',                           'Api\AcademicYearController::summary');
     $routes->post  ('store',                             'Api\AcademicYearController::create');
     $routes->put   ('update/(:num)',                     'Api\AcademicYearController::update/$1');
@@ -458,7 +454,8 @@ $routes->group('api/academic-years', static function (RouteCollection $routes) {
 });
 
 /*────────────── API: الجامعات والتخصّصات (إداري) ───────────*/
-$routes->group('api/universities', static function (RouteCollection $routes) {
+// 🔒 تكرار إداري (store/delete/specialties link-unlink) — محصور بدور الإدارة.
+$routes->group('api/universities', ['filter' => 'admin'], static function (RouteCollection $routes) {
     $routes->get   ('summary',                           'UniversityOptions::summary');
     $routes->post  ('store',                             'UniversityOptions::createUniversity');
     $routes->delete('delete/(:num)',                     'UniversityOptions::delete/$1');
@@ -472,7 +469,8 @@ $routes->group('api/universities', static function (RouteCollection $routes) {
 });
 
 /*────────────────────── API: أنواع المهام ───────────────────*/
-$routes->group('api/task-types', static function (RouteCollection $routes) {
+// 🔒 تكرار إداري (store/delete) — محصور بدور الإدارة.
+$routes->group('api/task-types', ['filter' => 'admin'], static function (RouteCollection $routes) {
     $routes->get   ('summary',       'TaskTypeOptions::summary');
     $routes->post  ('store',         'TaskTypeOptions::create');
     $routes->delete('delete/(:num)', 'TaskTypeOptions::delete/$1');
@@ -482,8 +480,8 @@ $routes->group('api/task-types', static function (RouteCollection $routes) {
 $routes->post('/submit-request', 'SupportController::submit');
 $routes->get('download', 'DownloadController::index', ['as' => 'download']);
 
-// (Route عام لحذف رسالة — غير أدمن)
-$routes->post('message/(:num)/delete', '\App\Controllers\ServiceRequestController::deleteMessage/$1');
+// (Route لحذف رسالة) 🔒 يتطلّب مصادقة (كان مفتوحاً للجميع).
+$routes->post('message/(:num)/delete', '\App\Controllers\ServiceRequestController::deleteMessage/$1', ['filter' => 'auth']);
 
 
 // ───────────────────── واجهة الطلاب (plural) ─────────────────────
@@ -513,6 +511,17 @@ $routes->group('students', ['filter' => 'auth'], static function ($routes) {
     // صفحة خدمة (تعريف صريح قبل الـ catch-all)
     $routes->get('pages/service',                   '\App\Controllers\Students\ServiceRequestController::index'); // CHANGED
 
+    // ====== مركز الإشعارات (الجرس في الناف بار) ======
+    $routes->group('notifications', static function ($routes) {
+        $routes->get ('list',              '\App\Controllers\Students\NotificationsController::list');
+        $routes->get ('unread-count',      '\App\Controllers\Students\NotificationsController::unreadCount');
+        $routes->post('mark-read/(:num)',  '\App\Controllers\Students\NotificationsController::markRead/$1');
+        $routes->post('mark-all-read',     '\App\Controllers\Students\NotificationsController::markAllRead');
+        $routes->post('delete/(:num)',     '\App\Controllers\Students\NotificationsController::delete/$1');
+        $routes->post('clear-all',         '\App\Controllers\Students\NotificationsController::clearAll');
+        $routes->post('register-device',   '\App\Controllers\Students\NotificationsController::registerDevice');
+    });
+
     // ====== خدمة الطلبات — نسخة الطلاب الجديدة ======
     $routes->group('service-requests', static function ($routes) {
         // الميتا الخاصة بالمودال القديم
@@ -520,6 +529,9 @@ $routes->group('students', ['filter' => 'auth'], static function ($routes) {
 
         // إنشاء طلب خدمة (FormData)
         $routes->post('', '\App\Controllers\Students\ServiceRequestsController::store');
+
+        // توكن Firebase للشات اللحظي
+        $routes->get ('firebase-token',            '\App\Controllers\Students\ServiceChatController::firebaseToken');
 
         // واجهات المحادثة
         $routes->get ('top-meta',                  '\App\Controllers\Students\ServiceChatController::topMeta');
@@ -578,6 +590,8 @@ $routes->group('students', ['filter' => 'auth'], static function ($routes) {
     // Dashboard API
     $routes->group('dashboard', static function (RouteCollection $routes) {
         $routes->get('upcoming-tasks',              '\App\Controllers\Students\StuDashboard::upcomingTasks');
+        $routes->get('all-tasks',                   '\App\Controllers\Students\StuDashboard::allTasksBySemester');
+        $routes->get('semesters',                   '\App\Controllers\Students\StuDashboard::semestersList');
         $routes->get('getTaskForView/(:num)',       '\App\Controllers\Students\StuDashboard::getTaskForView/$1');
         $routes->get('download/(:num)',             '\App\Controllers\Students\StuDashboard::download/$1');
     });
@@ -714,9 +728,12 @@ $routes->group('students/ai-tools', [
     $routes->post('job-update-payload/(:num)', 'AiToolsController::jobUpdatePayload/$1'); // POST /students/ai-tools/job-update-payload/:jobId
     $routes->post('job-reset/(:num)', 'AiToolsController::jobReset/$1'); // POST /students/ai-tools/job-reset/:jobId
     $routes->post('request', 'AiToolsController::request');   // POST /students/ai-tools/request
+    $routes->post('request-file', 'AiToolsController::requestFile'); // POST multipart (.docx) لأداة formative_essay_evaluator_v1
+    $routes->post('request-poster', 'AiToolsController::requestPosterFile'); // POST multipart (مخطط البحث) لأداة inquiry_poster_v1
     $routes->get('status', 'AiToolsController::status');     // GET  /students/ai-tools/status?type_key=...&task_id=...
     $routes->get('result', 'AiToolsController::result');     // GET  /students/ai-tools/result?type_key=...&task_id=...
     $routes->get('download/(:num)', 'AiToolsController::download/$1'); // GET /students/ai-tools/download/:fileId
+    $routes->get('download-attach/(:num)', 'AiToolsController::downloadAttach/$1'); // GET تنزيل بترويسة إرفاق (Word/PDF التكويني)
     $routes->post('comment-reply', 'AiToolsController::commentReply'); // POST /students/ai-tools/comment-reply
     $routes->get('comments', 'AiToolsController::comments'); // GET /students/ai-tools/comments?task_id=...
     $routes->post('retry', 'AiToolsController::retry');     // POST /students/ai-tools/retry
@@ -725,20 +742,23 @@ $routes->group('students/ai-tools', [
     $routes->post('debug-rag', 'AiToolsController::debugRag'); // POST /students/ai-tools/debug-rag (للتشخيص)
     $routes->get('get-task-prompt', 'AiToolsController::getTaskPrompt'); // GET /students/ai-tools/get-task-prompt?task_id=...
     $routes->post('approve-evaluation', 'AiToolsController::approveEvaluation'); // POST /students/ai-tools/approve-evaluation
+    $routes->post('approve-formative', 'AiToolsController::approveFormativeEvaluation'); // POST اعتماد التقييم التكويني → بناء الملفّين
     $routes->post('regenerate-feedback', 'AiToolsController::regenerateFeedback'); // POST /students/ai-tools/regenerate-feedback
 });
 
 
 $routes->get('cron/ai-jobs/run', 'Cron\AiJobsRunner::run'); // استخدم ?key=SECRET
 $routes->get('cron/rewards/process', 'Cron\RewardsProcessor::process'); // استخدم ?key=SECRET
+$routes->get('cron/account-deletion/run', 'Cron\AccountDeletionRunner::run'); // استخدم ?key=SECRET — حذف الحسابات المجدولة بعد 30 يوماً
+$routes->get('cron/downloads-cleanup/run', 'Cron\DownloadsCleanupRunner::run'); // ?key=SECRET[&days=45][&dry=1] — حذف ملفات downloads الأقدم من 45 يوماً + تنظيف DB
 
 // Route للتشخيص بدون auth (محمي بمفتاح سري)
 $routes->post('debug/rag', 'Students\AiToolsController::debugRagPublic'); // POST /debug/rag?key=SECRET
 
 $routes->get('api/subscription/plan', 'Api\SubscriptionController::plan');
 
-// Notifications API
-$routes->group('api/notifications', ['namespace' => 'App\Controllers\Api'], static function (RouteCollection $routes) {
+// Notifications API 🔒 (إرسال إشعارات جماعية) — محصور بدور الإدارة.
+$routes->group('api/notifications', ['namespace' => 'App\Controllers\Api', 'filter' => 'admin'], static function (RouteCollection $routes) {
     $routes->post('send-task',   'NotificationApiController::sendTaskNotification');
     $routes->post('send-custom', 'NotificationApiController::sendCustomNotification');
 });

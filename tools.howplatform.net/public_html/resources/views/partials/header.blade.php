@@ -25,6 +25,17 @@
 
             </div>
                     <a class="user-name">{{ $authUser['name'] }}</a>
+            @if(!empty($plansBadge))
+            <a href="https://auth.howplatform.net/profile?active=points" title="النقاط والاشتراك"
+               style="display:inline-flex;align-items:center;gap:.4rem;background:#eef6f9;border:1.5px solid #cfe6ee;border-radius:999px;padding:.28rem .8rem;color:#0a3247;font-weight:700;font-size:.8rem;text-decoration:none;margin-inline:.4rem;white-space:nowrap;">
+                <i class="fas fa-coins" style="color:#fd9e02;"></i> {{ number_format($plansBadge['points']) }}
+                <span style="opacity:.4;">|</span>
+                <i class="fas fa-crown" style="color:#fd9e02;"></i> {{ !empty($plansBadge['has_plan']) ? ($plansBadge['plan_name'] ?? 'مشترك') : 'ترقية' }}
+            </a>
+            @endif
+            @if((int)($authUser['is_admin'] ?? 0) === 1)
+             <a href="{{ route('admin.tools.index') }}" class="btn btn-outline" style="margin-inline:.4rem;"><i class="fas fa-screwdriver-wrench"></i> الأدوات</a>
+            @endif
              <a href="https://auth.howplatform.net/logout-everywhere?redirect={{ urlencode(url()->current()) }}">
               تسجيل الخروج
             </a>

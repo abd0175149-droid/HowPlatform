@@ -61,6 +61,7 @@ class PlansMeta extends BaseController
     /** ✅ إنشاء خطة + (اختياري) ميزات متعددة */
     public function store(): ResponseInterface
     {
+        return $this->managedInPlans();
         $json = $this->request->getJSON(true) ?? [];
 
         $data = [
@@ -128,6 +129,7 @@ class PlansMeta extends BaseController
 
     public function update(int $id): ResponseInterface
     {
+        return $this->managedInPlans();
         $json = $this->request->getJSON(true) ?? [];
         $data = array_filter([
             'name'                  => isset($json['name']) ? trim((string) $json['name']) : null,
@@ -147,6 +149,7 @@ class PlansMeta extends BaseController
 
     public function delete(int $id): ResponseInterface
     {
+        return $this->managedInPlans();
         $m = new PlanModel();
         if (!$m->delete($id)) return $this->fail('تعذّر حذف الخطة');
         return $this->response->setJSON(['status' => 'ok']);
@@ -154,6 +157,7 @@ class PlansMeta extends BaseController
 
     public function addFeature(int $planId): ResponseInterface
     {
+        return $this->managedInPlans();
         $json = $this->request->getJSON(true) ?? [];
         $db   = Database::connect();
 
@@ -202,6 +206,7 @@ class PlansMeta extends BaseController
 
     public function updateFeature(int $featureId): ResponseInterface
     {
+        return $this->managedInPlans();
         $json = $this->request->getJSON(true) ?? [];
         $data = [];
 
@@ -235,6 +240,7 @@ class PlansMeta extends BaseController
 
     public function deleteFeature(int $featureId): ResponseInterface
     {
+        return $this->managedInPlans();
         $db = Database::connect();
         $ok = $db->table('plan_features')->where('id', $featureId)->delete();
         if (!$ok) return $this->fail('تعذّر حذف الميزة');
@@ -245,5 +251,14 @@ class PlansMeta extends BaseController
     private function fail(string $msg, int $code = 400): ResponseInterface
     {
         return $this->response->setStatusCode($code)->setJSON(['status' => 'fail', 'message' => $msg]);
+    }
+
+    /** الخطط تُدار مركزيًا من منصّة Plans؛ تعطيل الكتابة من الدبلوما (القراءة تبقى للعرض). */
+    private function managedInPlans(): ResponseInterface
+    {
+        return $this->response->setStatusCode(409)->setJSON([
+            'status'  => 'fail',
+            'message' => 'تُدار الخطط والمزايا الآن مركزيًا من منصّة Plans (plans.howplatform.net). التعديل من لوحة الدبلوما معطّل.',
+        ]);
     }
 }

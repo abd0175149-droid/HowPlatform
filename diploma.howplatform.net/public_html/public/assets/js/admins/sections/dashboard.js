@@ -122,18 +122,15 @@ function renderToolCards(toolsSection, items){
     const uniqueNum = Number(item?.unique_users_count ?? 0);
     const uniqueTxt = Number.isFinite(uniqueNum) ? uniqueNum.toLocaleString('ar-JO') : '—';
 
-    const repeated  = Math.max(usesNum - uniqueNum, 0);
     const rateRaw   = item?.rating_avg;
     const rateNum   = (rateRaw === null || rateRaw === undefined) ? null : Number(rateRaw);
-    const ratingText= Number.isFinite(rateNum) ? rateNum.toFixed(2) : '—';
+    const ratingText= Number.isFinite(rateNum) ? rateNum.toFixed(1) : '—';
 
     const last      = item?.last_used_display ?? item?.last_used_at_local_short ?? '—';
-
-    const miniId = `toolMini-${toolId}-${idx}`;
-    const pieId  = `toolPie-${toolId}-${idx}`;
+    const percent   = safeTotal ? Math.round((usesNum / safeTotal) * 100) : 0;
 
     const card = document.createElement('div');
-    card.className = 'stat-card';
+    card.className = 'stat-card tool-card';
     card.setAttribute('data-tool-id', String(toolId));
     card.innerHTML = `
       <div class="stat-header">
@@ -141,65 +138,32 @@ function renderToolCards(toolsSection, items){
         <div class="stat-icon"><i class="fas fa-toolbox"></i></div>
       </div>
 
-      <div class="tool-top" style="display:flex; gap:12px; align-items:center; margin-bottom:8px;">
-        <div class="chart-container is-pie mini-pie" style="--chart-pie-size: 96px; flex:0 0 auto;">
-          <canvas id="${miniId}" width="96" height="96" aria-label="فريدون مقابل مكرّر لـ ${escapeHtml(name)}" role="img"></canvas>
+      <div class="tool-kpis">
+        <div class="tool-kpi">
+          <span class="tk-val">${usesTxt}</span>
+          <span class="tk-lbl">استخدام</span>
         </div>
-        <div class="tool-metrics" style="display:grid; gap:4px;">
-          <div class="stat">عدد الاستخدامات: <b>${usesTxt}</b></div>
-          <div class="stat">المستخدمون الفريدون: <b>${uniqueTxt}</b></div>
-          <div class="stat">تقييم الأداة: <b>${ratingText}</b></div>
-          <div class="stat">آخر استخدام: <b>${escapeHtml(last)}</b></div>
+        <div class="tool-kpi">
+          <span class="tk-val">${uniqueTxt}</span>
+          <span class="tk-lbl">مستخدم فريد</span>
+        </div>
+        <div class="tool-kpi">
+          <span class="tk-val">${ratingText}<i class="fas fa-star" aria-hidden="true"></i></span>
+          <span class="tk-lbl">التقييم</span>
         </div>
       </div>
 
-      <div class="chart-container is-pie" style="margin-top:6px; position:relative;">
-        <canvas id="${pieId}" width="180" height="180" aria-label="نسبة استخدام ${escapeHtml(name)} من إجمالي الأدوات" role="img"></canvas>
-        <div class="donut-center" aria-hidden="true"></div>
+      <div class="tool-share">
+        <div class="tool-share-head">
+          <span>حصة من إجمالي الاستخدام</span>
+          <b>${percent}%</b>
+        </div>
+        <div class="tool-share-bar"><span style="width:${percent}%"></span></div>
       </div>
+
+      <div class="tool-foot"><i class="far fa-clock" aria-hidden="true"></i> آخر استخدام: ${escapeHtml(last)}</div>
     `;
     toolsSection.appendChild(card);
-
-    const miniCanvas = card.querySelector(`#${CSS.escape(miniId)}`);
-    if (miniCanvas) {
-      const miniChart = new Chart(miniCanvas.getContext('2d'), {
-        type: 'doughnut',
-        data: {
-          labels: ['مستخدمون فريدون', 'استخدامات مكرّرة'],
-          datasets: [{ data: [uniqueNum, repeated], backgroundColor: ['rgba(16,185,129,.9)','rgba(0,0,0,.12)'], borderWidth: 0 }]
-        },
-        options: {
-          responsive:true, maintainAspectRatio:false, cutout:'60%',
-          plugins:{ legend:{display:false}, tooltip:{ callbacks:{
-            label:(ctx)=>{ const v=ctx.parsed, total=uniqueNum+repeated||1, p=((v/total)*100).toFixed(1); return `${ctx.label||''}: ${v.toLocaleString('ar-JO')} (${p}%)`; }
-          }}}
-        }
-      });
-      toolCharts.set(miniId, miniChart);
-    }
-
-    const others  = Math.max(0, safeTotal - usesNum);
-    const pieCanvas  = card.querySelector(`#${CSS.escape(pieId)}`);
-    if (pieCanvas) {
-      const pieChart = new Chart(pieCanvas.getContext('2d'), {
-        type: 'doughnut',
-        data: {
-          labels: ['هذه الأداة', 'بقية الأدوات'],
-          datasets: [{ data:[usesNum, others], backgroundColor:['rgba(59,130,246,.9)','rgba(0,0,0,.08)'], borderWidth:0 }]
-        },
-        options: {
-          responsive:true, maintainAspectRatio:false, cutout:'65%',
-          plugins:{ legend:{display:false}, tooltip:{ callbacks:{
-            label:(ctx)=>{ const v=ctx.parsed, total=v+(ctx.dataset.data[0]===v?others:usesNum), p=((v/total)*100).toFixed(1); return `${ctx.label||''}: ${v.toLocaleString('ar-JO')} (${p}%)`; }
-          }}}
-        }
-      });
-      toolCharts.set(pieId, pieChart);
-
-      const center = card.querySelector('.donut-center');
-      const percent = safeTotal ? Math.round((usesNum / safeTotal) * 100) : 0;
-      if (center) { center.textContent = `${percent}%`; }
-    }
   });
 }
 

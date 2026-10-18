@@ -170,7 +170,7 @@ class StudentViewController extends BaseController
         return $this->respond([
             'success' => true,
             'message' => 'تم بدء الاستعراض بنجاح',
-            'redirect' => site_url('students/'),
+            'redirect' => site_url('students'),
         ]);
     }
 
@@ -198,7 +198,7 @@ class StudentViewController extends BaseController
         return $this->respond([
             'success' => true,
             'message' => 'تم إنهاء الاستعراض بنجاح',
-            'redirect' => site_url('admins/'),
+            'redirect' => site_url('admins'),
         ]);
     }
 

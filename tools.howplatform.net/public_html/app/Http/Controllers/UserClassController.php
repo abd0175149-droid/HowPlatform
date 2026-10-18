@@ -339,6 +339,78 @@ class UserClassController extends Controller
     }
 
     /* ===========================
+     * ملفات الاستيراد المؤقتة
+     * =========================== */
+
+    /** الامتدادات المسموح بها لاستيراد الطلاب */
+    private const IMPORT_ALLOWED_EXT = ['csv', 'txt', 'xlsx', 'xls'];
+
+    /** الحد الأقصى لحجم ملف الاستيراد (5 ميجابايت) */
+    private const IMPORT_MAX_BYTES = 5_242_880;
+
+    /** مجلد الملفات المؤقتة داخل قرص local (storage/app/private) */
+    private const IMPORT_TMP_DIR = 'tmp/class-imports';
+
+    /**
+     * يخزّن ملفًا مرفوعًا في موقع مؤقت آمن ويُعيد توكِنًا (الاسم المخزّن) يحمل الامتداد.
+     * يتحقق من الامتداد والحجم، وينظّف الملفات القديمة (أقدم من يوم).
+     */
+    private function storeTempFile(\Illuminate\Http\UploadedFile $file): string
+    {
+        $ext = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: '');
+        abort_unless(
+            in_array($ext, self::IMPORT_ALLOWED_EXT, true),
+            422,
+            'صيغة الملف غير مدعومة. المسموح: CSV أو TXT أو XLSX أو XLS.'
+        );
+        abort_if($file->getSize() > self::IMPORT_MAX_BYTES, 422, 'حجم الملف كبير جدًا (الحد الأقصى 5 ميجابايت).');
+
+        $this->pruneTempFiles();
+
+        $token = Str::random(40) . '.' . $ext;
+        $file->storeAs(self::IMPORT_TMP_DIR, $token, 'local');
+
+        return $token;
+    }
+
+    /**
+     * يحوّل توكِن ملف مؤقت إلى [المسار الكامل، الامتداد].
+     * يرفض أي توكِن لا يطابق النمط الآمن (يمنع path traversal).
+     * يُعيد [null, null] إن لم يوجد الملف أو كان التوكِن غير صالح.
+     */
+    private function readTempFile(?string $token): array
+    {
+        $token = (string) $token;
+        if (!preg_match('/^[A-Za-z0-9]{10,64}\.(csv|txt|xlsx|xls)$/i', $token)) {
+            return [null, null];
+        }
+
+        $rel  = self::IMPORT_TMP_DIR . '/' . $token;
+        $disk = Storage::disk('local');
+        if (!$disk->exists($rel)) {
+            return [null, null];
+        }
+
+        return [$disk->path($rel), strtolower(pathinfo($token, PATHINFO_EXTENSION))];
+    }
+
+    /** يحذف ملفات الاستيراد المؤقتة الأقدم من 24 ساعة لمنع تراكمها. */
+    private function pruneTempFiles(): void
+    {
+        try {
+            $disk    = Storage::disk('local');
+            $cutoff  = now()->subDay()->timestamp;
+            foreach ($disk->files(self::IMPORT_TMP_DIR) as $path) {
+                if ($disk->lastModified($path) < $cutoff) {
+                    $disk->delete($path);
+                }
+            }
+        } catch (\Throwable $e) {
+            // التنظيف اختياري — لا تُسقط الطلب إن فشل
+        }
+    }
+
+    /* ===========================
      * إدارة طلاب الصف
      * =========================== */
 

@@ -16,7 +16,7 @@ class AiJobTypeModel extends Model
     protected $returnType       = 'array';
     protected $allowedFields    = [
         'type_key', 'title', 'description', 'provider', 'model_name',
-        'system_prompt', 'template_path', 'output_schema', 'is_enabled',
+        'system_prompt', 'template_path', 'output_schema', 'is_enabled', 'is_admin_only',
         'points_cost', 'needs_task_context', 'needs_specialty', 'task_prompt_mode',
         'created_at', 'updated_at',
     ];

@@ -43,6 +43,7 @@ class AssignmentFormV2Controller extends Controller
     /** DDL + Defaults */
     public function meta(Request $r){
         $uid = $this->currentUserId();
+        abort_if(!$uid, 401, 'غير مصرح.');
         $defaults = UserFormProfile::forUser($uid)->where('scope','global')->first()?->values ?? [];
 
         $universities = University::orderBy('name')->get(['id','name']);

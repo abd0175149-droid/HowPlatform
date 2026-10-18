@@ -14,6 +14,46 @@ class apiplans extends ResourceController
 
     public function index(): ResponseInterface
     {
+        // وضع api: قائمة الخطط من Plans (المصدر الموثوق) مع fail-open للقراءة المحلّية.
+        try {
+            $client = new \App\Libraries\PlansClient();
+            if ($client->plansEnabled()) {
+                $res = $client->plansList('diploma');
+                if (is_array($res) && ($res['ok'] ?? false) && is_array($res['plans'] ?? null)) {
+                    $out = [];
+                    foreach ($res['plans'] as $p) {
+                        $price = (float) ($p['price'] ?? 0);
+                        $dur   = (int) ($p['duration_days'] ?? 0);
+                        $features = array_map(static function (array $f): array {
+                            return [
+                                'feature_key' => (string) ($f['feature_key'] ?? ''),
+                                'limits_json' => $f['limits_json'] ?? null,
+                            ];
+                        }, is_array($p['features'] ?? null) ? $p['features'] : []);
+
+                        $out[] = [
+                            'id'                    => (int) ($p['id'] ?? 0),
+                            'name'                  => (string) ($p['name'] ?? ''),
+                            'level'                 => (int) ($p['level'] ?? 0),
+                            'price'                 => $price,
+                            'amount'                => $price,
+                            'duration_days'         => $dur,
+                            'default_duration_days' => $dur,
+                            'features'              => $features,
+                        ];
+                    }
+
+                    return $this->respond([
+                        'status' => 'ok',
+                        'data'   => $out,
+                    ]);
+                }
+                // Plans غير متاح → تابع للقراءة المحلّية (fail-open)
+            }
+        } catch (Throwable $e) {
+            log_message('warning', 'apiplans::index Plans failed: ' . $e->getMessage());
+        }
+
         try {
             $db = Database::connect();
 

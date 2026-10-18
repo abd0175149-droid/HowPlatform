@@ -95,22 +95,22 @@ if (!empty($prefs['diploma_type_id'])) {
   z-index: 10000;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  padding: 2px 20px;
+  box-shadow: 0 3.2px 9.6px rgba(0,0,0,0.15);
+  padding: 1.6px 16px;
 }
 
 .banner-content {
-  max-width: 1400px;
+  max-width: 1120px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12.8px;
 }
 
 .banner-header {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 9.6px;
   justify-content: space-between;
   cursor: pointer;
   user-select: none;
@@ -118,10 +118,10 @@ if (!empty($prefs['diploma_type_id'])) {
 
 .banner-toggle-btn {
   background: rgba(255,255,255,0.2);
-  border: 1px solid rgba(255,255,255,0.3);
+  border: 0.8px solid rgba(255,255,255,0.3);
   color: #fff;
-  width: 36px;
-  height: 36px;
+  width: 28.8px;
+  height: 28.8px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -134,8 +134,8 @@ if (!empty($prefs['diploma_type_id'])) {
 }
 
 .banner-toggle-btn:focus {
-  outline: 2px solid rgba(255,255,255,0.5);
-  outline-offset: 2px;
+  outline: 1.6px solid rgba(255,255,255,0.5);
+  outline-offset: 1.6px;
 }
 
 .banner-toggle-btn:hover {
@@ -154,7 +154,7 @@ if (!empty($prefs['diploma_type_id'])) {
 .banner-body {
   transition: max-height 0.3s ease, opacity 0.3s ease;
   overflow: hidden;
-  max-height: 500px;
+  max-height: 400px;
   opacity: 1;
 }
 
@@ -166,73 +166,73 @@ if (!empty($prefs['diploma_type_id'])) {
 }
 
 .banner-icon {
-  font-size: 24px;
+  font-size: 19.2px;
   opacity: 0.9;
 }
 
 .banner-title h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: 14.4px;
   font-weight: 700;
 }
 
 .banner-subtitle {
-  margin: 4px 0 0 0;
-  font-size: 13px;
+  margin: 3.2px 0 0 0;
+  font-size: 10.4px;
   opacity: 0.9;
 }
 
 .banner-settings {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px;
-  padding: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 9.6px;
+  padding: 9.6px;
   background: rgba(255,255,255,0.1);
-  border-radius: 8px;
-  backdrop-filter: blur(10px);
+  border-radius: 6.4px;
+  backdrop-filter: blur(8px);
 }
 
 .setting-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3.2px;
 }
 
 .setting-label {
-  font-size: 12px;
+  font-size: 9.6px;
   opacity: 0.8;
   font-weight: 500;
 }
 
 .setting-value {
-  font-size: 14px;
+  font-size: 11.2px;
   font-weight: 600;
 }
 
 .banner-actions {
   display: flex;
-  gap: 12px;
+  gap: 9.6px;
   justify-content: flex-end;
 }
 
 .btn-edit,
 .btn-stop {
-  padding: 10px 20px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 6.4px;
+  font-size: 11.2px;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6.4px;
   transition: all 0.2s;
 }
 
 .btn-edit {
   background: rgba(255,255,255,0.2);
   color: #fff;
-  border: 1px solid rgba(255,255,255,0.3);
+  border: 0.8px solid rgba(255,255,255,0.3);
 }
 
 .btn-edit:hover {

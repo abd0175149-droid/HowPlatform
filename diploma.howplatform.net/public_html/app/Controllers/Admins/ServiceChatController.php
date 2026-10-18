@@ -101,6 +101,34 @@ class ServiceChatController extends BaseController
         return $this->json(['success' => false, 'message' => $msg] + $extra, $status);
     }
 
+    /** Firebase custom token + إعداد الويب (للشات اللحظي في لوحة الآدمن). */
+    public function firebaseToken(): ResponseInterface
+    {
+        $uid = $this->currentUserId();
+        if ($uid <= 0) {
+            return $this->fail('Unauthorized', 401);
+        }
+        try {
+            $fb    = new \App\Libraries\FirebaseAdmin();
+            $token = $fb->createCustomToken(\App\Libraries\ChatSignal::uid($uid), ['role' => 'admin']);
+        } catch (\Throwable $e) {
+            log_message('error', 'firebaseToken(admin) failed: ' . $e->getMessage());
+            return $this->fail('Realtime unavailable.', 503);
+        }
+        return $this->ok([
+            'token'  => $token,
+            'uid'    => \App\Libraries\ChatSignal::uid($uid),
+            'config' => [
+                'apiKey'            => getenv('FIREBASE_API_KEY') ?: '',
+                'authDomain'        => getenv('FIREBASE_AUTH_DOMAIN') ?: '',
+                'projectId'         => getenv('FIREBASE_PROJECT_ID') ?: '',
+                'storageBucket'     => getenv('FIREBASE_STORAGE_BUCKET') ?: '',
+                'messagingSenderId' => getenv('FIREBASE_MESSAGING_SENDER_ID') ?: '',
+                'appId'             => getenv('FIREBASE_APP_ID') ?: '',
+            ],
+        ]);
+    }
+
     private function mkRef(): string
     {
         return bin2hex(random_bytes(6));
@@ -245,6 +273,17 @@ class ServiceChatController extends BaseController
                 return $this->fail('Request not found', 404, ['ref' => $ref]);
             }
 
+            // اسم الطالب صاحب الطلب (لعرضه في ترويسة الشات)
+            $req['student_name'] = '';
+            try {
+                $sid = (int) ($req['user_id'] ?? 0);
+                if ($sid > 0) {
+                    $sd = $this->remoteUsers->resolveMany([$sid]);
+                    $req['student_name'] = trim((string) ($sd[$sid]['name'] ?? ''));
+                }
+            } catch (\Throwable $e) {
+            }
+
             $files = $this->db->table('service_request_files srf')
                 ->select(
                     'f.id AS file_id, f.file_name, f.file_path, f.mime_type, f.file_size_bytes,' .
@@ -286,7 +325,7 @@ class ServiceChatController extends BaseController
         $beforeId = (int) ($this->request->getGet('before_id') ?? 0);
         $limit    = min(50, max(1, (int) ($this->request->getGet('limit') ?? self::PAGE_MSG_LIMIT)));
 
-        $select = 'sm.id, sm.body, sm.sender_user_id, sm.created_at';
+        $select = 'sm.id, sm.body, sm.sender_user_id, sm.sender_role, sm.created_at';
         if ($this->readsEnabled()) {
             $escUid = (int) $uid;
             $select .= ", EXISTS(SELECT 1 FROM service_message_reads r WHERE r.message_id = sm.id AND r.reader_user_id = {$escUid}) AS is_read";
@@ -350,13 +389,14 @@ class ServiceChatController extends BaseController
             $mid = (int) ($row['id'] ?? 0);
             $row['files'] = $filesByMsg[$mid] ?? [];
             $senderId = (int) ($row['sender_user_id'] ?? 0);
-            $row['is_me'] = ($senderId === $uid) ? 1 : 0;
+            $isAi = (($row['sender_role'] ?? '') === 'ai');
+            $row['is_me'] = (!$isAi && $senderId === $uid) ? 1 : 0;
             $info = $senderData[$senderId] ?? [];
             $name = trim((string) ($info['name'] ?? ''));
             if ($name === '') {
-                $name = $row['is_me'] ? ($sessionName !== '' ? $sessionName : 'Me') : 'Support team';
+                $name = $row['is_me'] ? ($sessionName !== '' ? $sessionName : 'Me') : 'الطالب';
             }
-            $row['sender_name']  = $name;
+            $row['sender_name']  = $isAi ? 'فَطين' : $name;
             $row['sender_email'] = $info['email'] ?? null;
             $row['is_read']      = (int) ($row['is_read'] ?? 0);
         }
@@ -368,12 +408,136 @@ class ServiceChatController extends BaseController
             $nextBeforeId = $hasMore ? $minId : null;
         }
 
+        // ✅ أول رسالة أرسلها الطالب = نصّ الطلب نفسه (الموضوع + التفاصيل + مرفقاته الأولية).
+        // تُضاف حين نبلغ أقدم دفعة رسائل (!hasMore) كي تتصدّر المحادثة دائمًا.
+        if (!$hasMore) {
+            $reqRow = $this->db->table('service_requests')
+                ->select('subject, description, created_at, user_id')
+                ->where('id', $reqId)->get()->getRowArray();
+            if ($reqRow) {
+                $sid   = (int) ($reqRow['user_id'] ?? 0);
+                $sname = 'الطالب';
+                try {
+                    $sd = $this->remoteUsers->resolveMany([$sid]);
+                    $sname = trim((string) ($sd[$sid]['name'] ?? '')) ?: 'الطالب';
+                } catch (\Throwable $e) {
+                }
+                $origFiles = $this->db->table('service_request_files srf')
+                    ->select('f.id AS file_id, f.file_name, f.file_path, f.mime_type, f.file_size_bytes, srf.file_type')
+                    ->join('files f', 'f.id = srf.file_id')
+                    ->where('srf.service_request_id', $reqId)
+                    ->where('srf.message_id IS NULL', null, false)
+                    ->orderBy('srf.display_order', 'ASC')->get()->getResultArray();
+
+                $subjectTxt = trim((string) ($reqRow['subject'] ?? ''));
+                $descTxt    = trim((string) ($reqRow['description'] ?? ''));
+                $originBody = ($subjectTxt !== '' ? ('📌 ' . $subjectTxt . "\n\n") : '') . $descTxt;
+
+                array_unshift($rowsAsc, [
+                    'id'             => 0,
+                    'body'           => $originBody,
+                    'sender_user_id' => $sid,
+                    'sender_role'    => 'student',
+                    'created_at'     => $reqRow['created_at'] ?? null,
+                    'files'          => $origFiles,
+                    'is_me'          => 0,
+                    'sender_name'    => $sname,
+                    'is_read'        => 1,
+                    'is_origin'      => 1,
+                ]);
+            }
+        }
+
         return $this->ok([
             'items'          => $rowsAsc,
             'limit'          => $limit,
             'has_more'       => $hasMore,
             'next_before_id' => $nextBeforeId,
         ]);
+    }
+
+    /**
+     * حذف طلب خدمة نهائياً (للأدمن role=1 فقط) — لمسح التجارب أو المخالفات.
+     * يحذف: قراءات الرسائل، روابط الملفات، سجلات files، الرسائل، الطلب، والملفات الفيزيائية.
+     */
+    public function deleteRequest(int $reqId): ResponseInterface
+    {
+        $ref = $this->mkRef();
+        try {
+            $uid  = $this->currentUserId();
+            $role = $this->currentRole();
+            if ($uid <= 0) {
+                return $this->fail('Unauthorized', 401, ['ref' => $ref]);
+            }
+            if ($role !== 1) {
+                return $this->fail('الحذف النهائي مخصّص للأدمن فقط.', 403, ['ref' => $ref]);
+            }
+
+            $req = $this->db->table('service_requests')->where('id', $reqId)->get()->getRowArray();
+            if (!$req) {
+                return $this->fail('Request not found', 404, ['ref' => $ref]);
+            }
+
+            $fileRows = $this->db->table('service_request_files srf')
+                ->select('f.id AS file_id, f.file_path')
+                ->join('files f', 'f.id = srf.file_id', 'left')
+                ->where('srf.service_request_id', $reqId)->get()->getResultArray();
+            $fileIds = array_values(array_filter(array_map(static fn ($r) => (int) ($r['file_id'] ?? 0), $fileRows)));
+            $msgIds  = array_column(
+                $this->db->table('service_messages')->select('id')->where('service_request_id', $reqId)->get()->getResultArray(),
+                'id'
+            );
+
+            $this->db->transStart();
+            if (!empty($msgIds) && $this->tableExists('service_message_reads')) {
+                $this->db->table('service_message_reads')->whereIn('message_id', $msgIds)->delete();
+            }
+            $this->db->table('service_request_files')->where('service_request_id', $reqId)->delete();
+            if (!empty($fileIds)) {
+                $this->db->table('files')->whereIn('id', $fileIds)->delete();
+            }
+            $this->db->table('service_messages')->where('service_request_id', $reqId)->delete();
+            $this->db->table('service_requests')->where('id', $reqId)->delete();
+            $this->db->transComplete();
+            if (!$this->db->transStatus()) {
+                return $this->fail('Failed to delete request', 500, ['ref' => $ref]);
+            }
+
+            // حذف الملفات الفيزيائية + مجلد الطلب (best-effort)
+            foreach ($fileRows as $fr) {
+                $p = (string) ($fr['file_path'] ?? '');
+                if ($p !== '' && is_file($p)) {
+                    @unlink($p);
+                }
+            }
+            $this->rrmdir(WRITEPATH . 'uploads/service_requests/' . $reqId);
+
+            log_message('info', "[admin.svc.delete] request {$reqId} purged by uid {$uid}");
+            return $this->ok(['ref' => $ref], 'تم حذف الطلب نهائياً.');
+        } catch (\Throwable $e) {
+            log_message('error', '[admin.svc.delete][' . $ref . '] ' . $e->getMessage());
+            return $this->fail('Failed to delete request', 500, ['ref' => $ref]);
+        }
+    }
+
+    /** حذف مجلد وما فيه (best-effort). */
+    private function rrmdir(string $dir): void
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+        try {
+            $items = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::CHILD_FIRST
+            );
+            foreach ($items as $item) {
+                $item->isDir() ? @rmdir($item->getPathname()) : @unlink($item->getPathname());
+            }
+            @rmdir($dir);
+        } catch (\Throwable $e) {
+            // غير قاتل
+        }
     }
 
     public function readUpTo(int $reqId): ResponseInterface
@@ -545,6 +709,26 @@ class ServiceChatController extends BaseController
             $this->db->transComplete();
             if (!$this->db->transStatus()) {
                 return $this->fail('Failed to send message (transaction error)', 500, ['ref' => $ref]);
+            }
+
+            // إسناد ضمني للآدمن إن لم يكن مُسنَداً
+            $reqRow    = $this->db->table('service_requests')->select('user_id, assigned_to')->where('id', $reqId)->get()->getRowArray();
+            $studentId = (int) ($reqRow['user_id'] ?? 0);
+            $assigned  = (int) ($reqRow['assigned_to'] ?? 0);
+            if ($assigned <= 0) {
+                $this->db->table('service_requests')->where('id', $reqId)->update(['assigned_to' => $uid]);
+                $assigned = $uid;
+            }
+
+            // إشارة لحظية + إشعار الطالب بردّ الفريق
+            \App\Libraries\ChatSignal::bump($reqId, $msgId, 'admin', $studentId, $assigned ?: null);
+            if ($studentId > 0) {
+                \App\Libraries\NotificationService::push(
+                    $studentId,
+                    'رد جديد من فريق الدعم',
+                    \App\Libraries\NotificationService::snippet($body),
+                    '#/service'
+                );
             }
 
             return $this->ok(['message_id' => $msgId, 'ref' => $ref], 'Message sent.');

@@ -73,7 +73,9 @@ class TasksMeta extends BaseController
 
     public function index(): string
     {
-        return view('tasks/index');
+        // كانت تشير إلى view('tasks/index') غير الموجود → 500.
+        // الصفحة الفعلية لإدارة المهام هي admins/pages/tasks (تُحقن داخل #contentArea).
+        return view('admins/pages/tasks');
     }
 
     public function getAcademicYears(): ResponseInterface

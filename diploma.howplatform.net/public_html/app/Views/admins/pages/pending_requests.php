@@ -185,57 +185,58 @@
 
 /* حاوية الصفحة */
 .container2 {
-  max-width: 1400px;
+  max-width: 1120px;
   margin: 0 auto;
 }
 
 /* header الصفحة */
 header {
   background: var(--surface-0);
-  padding: 20px 0 16px;
-  margin-bottom: 20px;
-  border-bottom: 1px solid var(--border-color);
+  padding: 16px 0 12.8px;
+  margin-bottom: 16px;
+  border-bottom: 0.8px solid var(--border-color);
 }
 header h1 {
   font-size: 1.5rem;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   color: var(--text-strong);
 }
 header p {
   font-size: .875rem;
   color: var(--text-muted);
-  margin-top: 4px;
+  margin-top: 3.2px;
 }
 
 /* بطاقات الإحصاءات */
 .dashboard {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(176px, 1fr));
+  gap: 12.8px;
+  margin-bottom: 16px;
 }
 .dashboard-card {
   background: var(--surface-0);
-  padding: 18px;
-  border-radius: 10px;
-  border: 1px solid var(--border-color);
-  border-top: 3px solid var(--primary-500);
+  padding: 14.4px;
+  border-radius: 8px;
+  border: 0.8px solid var(--border-color);
+  border-top: 2.4px solid var(--primary-500);
   text-align: center;
   transition: box-shadow .18s ease;
 }
 .dashboard-card:hover {
-  box-shadow: 0 2px 10px rgba(32,33,36,.12);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--primary-300);
 }
 .dashboard-card i {
   font-size: 1.8rem;
   color: var(--primary-500);
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 6.4px;
 }
 .dashboard-card h3 {
-  margin-bottom: 6px;
+  margin-bottom: 4.8px;
   font-size: 1rem;
   color: var(--text-muted);
   font-weight: 500;
@@ -249,19 +250,19 @@ header p {
 /* فلاتر البحث */
 .filters-container {
   background: var(--surface-0);
-  padding: 16px;
-  border-radius: 10px;
-  border: 1px solid var(--border-color);
-  margin-bottom: 20px;
+  padding: 12.8px;
+  border-radius: 8px;
+  border: 0.8px solid var(--border-color);
+  margin-bottom: 16px;
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 9.6px;
 }
 .filter-group {
-  flex: 1 1 220px;
+  flex: 1 1 176px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3.2px;
 }
 .filter-group label {
   font-weight: 600;
@@ -269,16 +270,16 @@ header p {
   color: var(--text-muted);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4.8px;
   text-transform: uppercase;
   letter-spacing: .02em;
 }
 .filter-control {
-  padding: 9px 12px;
-  border: 1.5px solid var(--border-color);
+  padding: 7.2px 9.6px;
+  border: 1.2px solid var(--border-color);
   background: var(--surface-0);
   font-size: .875rem;
-  border-radius: 8px;
+  border-radius: 6.4px;
   transition: border-color .15s ease, box-shadow .15s ease;
   color: var(--text-strong);
   font-family: inherit;
@@ -292,29 +293,29 @@ header p {
 /* جدول الطلبات */
 .requests-table-container {
   background: var(--surface-0);
-  border-radius: 10px;
-  border: 1px solid var(--border-color);
-  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 0.8px solid var(--border-color);
+  margin-bottom: 16px;
   overflow-x: auto;
 }
 .requests-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 900px;
+  min-width: 720px;
   font-size: .875rem;
 }
 .requests-table th {
   background: var(--surface-1);
   color: var(--text-strong);
   font-weight: 700;
-  padding: 10px 12px;
+  padding: 8px 9.6px;
   text-align: right;
-  border-bottom: 1.5px solid var(--border-color);
+  border-bottom: 1.2px solid var(--border-color);
   font-size: .8rem;
 }
 .requests-table td {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border-color);
+  padding: 8px 9.6px;
+  border-bottom: 0.8px solid var(--border-color);
   text-align: right;
   color: var(--text);
 }
@@ -323,8 +324,8 @@ header p {
 
 /* شارات الحالة */
 .status-badge {
-  padding: 3px 10px;
-  border-radius: 20px;
+  padding: 2.4px 8px;
+  border-radius: 16px;
   font-weight: 600;
   font-size: .8rem;
   white-space: nowrap;
@@ -335,15 +336,15 @@ header p {
 
 /* خلية الملاحظات */
 .notes-cell {
-  min-width: 120px;
-  max-width: 180px;
+  min-width: 96px;
+  max-width: 144px;
   font-size: .85rem;
   position: relative;
 }
 .notes-cell.pending {
-  border: 1px dashed var(--border-color);
-  border-radius: 6px;
-  padding: 4px 6px;
+  border: 0.8px dashed var(--border-color);
+  border-radius: 4.8px;
+  padding: 3.2px 4.8px;
   cursor: text;
 }
 .notes-cell.pending:focus {
@@ -359,16 +360,16 @@ header p {
 /* أزرار الإجراءات — فريدة لهذه الصفحة */
 .action-btn {
   border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 4.8px 9.6px;
+  border-radius: 4.8px;
   cursor: pointer;
   font-size: .8rem;
   transition: background .15s ease, transform .12s ease;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   font-weight: 600;
-  margin: 2px;
+  margin: 1.6px;
   font-family: inherit;
 }
 .btn-reject  { background: var(--error-100);   color: var(--error-600); }
@@ -381,7 +382,7 @@ header p {
 .btn-review:hover  { background: var(--primary-500); color: #fff; }
 
 /* مودال التواصل — عرض خاص */
-#contact-modal .modal-content { max-width: 580px; }
+#contact-modal .modal-content { max-width: 464px; }
 .btn-whatsapp {
   background: #25D366;
   color: #fff;
@@ -398,20 +399,20 @@ header p {
 /* نموذج الشبكة داخل المودال */
 .grid-form {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(192px, 1fr));
+  gap: 12.8px;
 }
 .full-width { grid-column: 1 / -1; }
 
 /* scrollbar للـ modal-body */
 .modal-content .modal-body {
-  max-height: calc(90vh - 140px);
+  max-height: calc(90vh - 112px);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
-.modal-content .modal-body::-webkit-scrollbar { width: 6px; }
+.modal-content .modal-body::-webkit-scrollbar { width: 4.8px; }
 .modal-content .modal-body::-webkit-scrollbar-thumb {
   background: var(--primary-200);
-  border-radius: 3px;
+  border-radius: 2.4px;
 }
 </style>

@@ -15,7 +15,7 @@
     --upg-bronze: #cd7f32;
     --upg-silver: #a1a1a1;
     --upg-gold: #e6be8a;
-    --upg-card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    --upg-card-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     --upg-transition: all 0.3s ease;
   }
   
@@ -25,7 +25,7 @@
     z-index: 10000;
     inset: 0;
     background-color: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(4.8px);
     font-family: "Almarai", sans-serif;
     animation: upg-fadeIn 0.3s ease;
   }
@@ -38,13 +38,13 @@
   
   #upgradeModal .upgrade-modal-content {
     background: var(--upg-surface-0);
-    border-radius: 24px;
+    border-radius: 19.2px;
     width: 90%;
-    max-width: 1200px;
+    max-width: 960px;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-    transform: translateY(30px) scale(0.96);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.2);
+    transform: translateY(24px) scale(0.96);
     opacity: 0;
     transition: transform 0.4s ease, opacity 0.4s ease;
   }
@@ -57,12 +57,12 @@
   #upgradeModal .upgrade-modal-header {
     background: linear-gradient(135deg, var(--upg-primary-darker), var(--upg-primary-dark));
     color: #fff;
-    padding: 28px 32px;
+    padding: 22.4px 25.6px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-top-left-radius: 24px;
-    border-top-right-radius: 24px;
+    border-top-left-radius: 19.2px;
+    border-top-right-radius: 19.2px;
     position: relative;
     overflow: hidden;
   }
@@ -78,9 +78,9 @@
   
   #upgradeModal .upgrade-modal-header h2 {
     margin: 0;
-    font-size: 28px;
+    font-size: 22.4px;
     display: flex;
-    gap: 16px;
+    gap: 12.8px;
     align-items: center;
     font-weight: 800;
   }
@@ -89,8 +89,8 @@
     background: rgba(255, 255, 255, 0.2);
     border: none;
     color: #fff;
-    width: 48px;
-    height: 48px;
+    width: 38.4px;
+    height: 38.4px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -106,32 +106,32 @@
   }
   
   #upgradeModal .upgrade-modal-body {
-    padding: 32px;
+    padding: 25.6px;
     background: var(--upg-surface-1);
-    max-height: calc(90vh - 150px);
+    max-height: calc(90vh - 120px);
     overflow-y: auto;
   }
   
   #upgradeModal .upgrade-modal-body::-webkit-scrollbar {
-    width: 10px;
+    width: 8px;
   }
   
   #upgradeModal .upgrade-modal-body::-webkit-scrollbar-thumb {
     background: var(--upg-primary);
-    border-radius: 5px;
+    border-radius: 4px;
   }
   
   #upgradeModal .upg-plans {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    margin-bottom: 40px;
+    gap: 19.2px;
+    margin-bottom: 32px;
   }
   
   #upgradeModal .upg-card {
     background: linear-gradient(145deg, #ffffff 0%, #f9f9f9 100%);
-    border-radius: 20px;
-    padding: 32px;
+    border-radius: 16px;
+    padding: 25.6px;
     box-shadow: var(--upg-card-shadow);
     transition: var(--upg-transition);
     display: flex;
@@ -139,29 +139,29 @@
     height: 100%;
     position: relative;
     overflow: hidden;
-    border: 1px solid transparent;
+    border: 0.8px solid transparent;
   }
   
   #upgradeModal .upg-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    transform: translateY(-6.4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
   }
   
   #upgradeModal .upg-card.bronze {
-    border-top: 5px solid var(--upg-bronze);
+    border-top: 4px solid var(--upg-bronze);
   }
   
   #upgradeModal .upg-card.silver {
-    border-top: 5px solid var(--upg-silver);
+    border-top: 4px solid var(--upg-silver);
   }
   
   #upgradeModal .upg-card.gold {
-    border-top: 5px solid var(--upg-gold);
+    border-top: 4px solid var(--upg-gold);
   }
   
   #upgradeModal .upg-header {
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: 19.2px;
     position: relative;
   }
   
@@ -171,7 +171,7 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 80px;
+    height: 64px;
     opacity: 0.1;
     z-index: 0;
   }
@@ -189,9 +189,9 @@
   }
   
   #upgradeModal .upg-name {
-    font-size: 24px;
+    font-size: 19.2px;
     font-weight: 800;
-    margin-bottom: 8px;
+    margin-bottom: 6.4px;
     color: var(--upg-primary-darker);
     position: relative;
     z-index: 1;
@@ -199,37 +199,37 @@
   
   #upgradeModal .upg-duration {
     color: #666;
-    font-size: 16px;
+    font-size: 12.8px;
     position: relative;
     z-index: 1;
   }
   
   #upgradeModal .upg-price {
     text-align: center;
-    margin-bottom: 28px;
-    padding: 16px;
+    margin-bottom: 22.4px;
+    padding: 12.8px;
     background: rgba(33, 158, 188, 0.05);
-    border-radius: 16px;
+    border-radius: 12.8px;
     position: relative;
     z-index: 1;
   }
   
   #upgradeModal .upg-price-amt {
-    font-size: 42px;
+    font-size: 33.6px;
     font-weight: 800;
     line-height: 1;
     color: var(--upg-primary-darker);
   }
   
   #upgradeModal .upg-price-cur {
-    font-size: 18px;
+    font-size: 14.4px;
     font-weight: 600;
     color: #666;
   }
   
   #upgradeModal .upg-features {
     flex-grow: 1;
-    margin-bottom: 28px;
+    margin-bottom: 22.4px;
     position: relative;
     z-index: 1;
   }
@@ -237,10 +237,10 @@
   #upgradeModal .upg-feature {
     display: flex;
     align-items: center;
-    margin-bottom: 16px;
-    font-size: 16px;
-    padding: 8px 0;
-    border-bottom: 1px dashed #eee;
+    margin-bottom: 12.8px;
+    font-size: 12.8px;
+    padding: 6.4px 0;
+    border-bottom: 0.8px dashed #eee;
   }
   
   #upgradeModal .upg-feature:last-child {
@@ -248,9 +248,9 @@
   }
   
   #upgradeModal .upg-feature i {
-    margin-left: 12px;
-    font-size: 18px;
-    width: 24px;
+    margin-left: 9.6px;
+    font-size: 14.4px;
+    width: 19.2px;
     text-align: center;
   }
   
@@ -276,19 +276,19 @@
   #upgradeModal .upg-btn {
     color: white;
     border: none;
-    padding: 16px 32px;
-    border-radius: 12px;
+    padding: 12.8px 25.6px;
+    border-radius: 9.6px;
     font-weight: 700;
-    font-size: 16px;
+    font-size: 12.8px;
     cursor: pointer;
     width: 100%;
     transition: var(--upg-transition);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 3.2px 12px rgba(0, 0, 0, 0.15);
   }
   
   #upgradeModal .upg-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2.4px);
+    box-shadow: 0 6.4px 16px rgba(0, 0, 0, 0.2);
   }
   
   #upgradeModal .bronze .upg-btn {
@@ -305,20 +305,20 @@
   
   #upgradeModal .features-section {
     background: var(--upg-surface-0);
-    border-radius: 20px;
-    padding: 32px;
-    margin-bottom: 32px;
+    border-radius: 16px;
+    padding: 25.6px;
+    margin-bottom: 25.6px;
     box-shadow: var(--upg-card-shadow);
   }
   
   #upgradeModal .section-title {
-    font-size: 24px;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 2px solid var(--upg-surface-2);
+    font-size: 19.2px;
+    margin-bottom: 19.2px;
+    padding-bottom: 12.8px;
+    border-bottom: 1.6px solid var(--upg-surface-2);
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 9.6px;
     color: var(--upg-primary-darker);
     font-weight: 700;
   }
@@ -326,29 +326,29 @@
   #upgradeModal .features-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
+    gap: 19.2px;
   }
   
   #upgradeModal .feature-card {
     display: flex;
     align-items: flex-start;
-    gap: 16px;
-    padding: 20px;
+    gap: 12.8px;
+    padding: 16px;
     background: var(--upg-surface-1);
-    border-radius: 16px;
+    border-radius: 12.8px;
     transition: var(--upg-transition);
   }
   
   #upgradeModal .feature-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
     box-shadow: var(--upg-card-shadow);
   }
   
   #upgradeModal .feature-icon {
     background: rgba(33, 158, 188, 0.1);
-    width: 60px;
-    height: 60px;
-    border-radius: 16px;
+    width: 48px;
+    height: 48px;
+    border-radius: 12.8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -357,27 +357,27 @@
   
   #upgradeModal .feature-icon i {
     color: var(--upg-primary);
-    font-size: 28px;
+    font-size: 22.4px;
   }
   
   #upgradeModal .feature-content h4 {
-    margin-bottom: 8px;
-    font-size: 18px;
+    margin-bottom: 6.4px;
+    font-size: 14.4px;
     color: var(--upg-primary-darker);
   }
   
   #upgradeModal .feature-content p {
-    font-size: 16px;
+    font-size: 12.8px;
     color: #666;
     line-height: 1.5;
   }
   
   #upgradeModal .upgrade-modal-footer {
-    padding: 24px 32px;
+    padding: 19.2px 25.6px;
     background: var(--upg-surface-0);
-    border-top: 1px solid var(--upg-surface-2);
-    border-bottom-left-radius: 24px;
-    border-bottom-right-radius: 24px;
+    border-top: 0.8px solid var(--upg-surface-2);
+    border-bottom-left-radius: 19.2px;
+    border-bottom-right-radius: 19.2px;
     display: flex;
     justify-content: flex-end;
   }
@@ -386,12 +386,12 @@
     background: var(--upg-surface-2);
     color: var(--upg-text);
     border: none;
-    padding: 12px 24px;
-    border-radius: 12px;
+    padding: 9.6px 19.2px;
+    border-radius: 9.6px;
     font-weight: 600;
-    font-size: 16px;
+    font-size: 12.8px;
     cursor: pointer;
-    margin-left: 16px;
+    margin-left: 12.8px;
     transition: var(--upg-transition);
   }
   
@@ -409,7 +409,7 @@
   @media (max-width: 992px) {
     #upgradeModal .upg-plans {
       grid-template-columns: 1fr;
-      max-width: 600px;
+      max-width: 480px;
       margin-left: auto;
       margin-right: auto;
     }
@@ -422,31 +422,31 @@
   @media (max-width: 768px) {
     #upgradeModal .upgrade-modal-content {
       width: 95%;
-      margin: 10px;
+      margin: 8px;
     }
     
     #upgradeModal .upgrade-modal-header {
-      padding: 24px;
+      padding: 19.2px;
     }
     
     #upgradeModal .upgrade-modal-header h2 {
-      font-size: 24px;
+      font-size: 19.2px;
     }
     
     #upgradeModal .upgrade-modal-body {
-      padding: 24px;
+      padding: 19.2px;
     }
     
     #upgradeModal .upg-card {
-      padding: 24px;
+      padding: 19.2px;
     }
     
     #upgradeModal .upg-price-amt {
-      font-size: 36px;
+      font-size: 28.8px;
     }
     
     #upgradeModal .features-section {
-      padding: 24px;
+      padding: 19.2px;
     }
   }
 </style>

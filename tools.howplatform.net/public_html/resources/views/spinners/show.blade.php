@@ -256,7 +256,7 @@
 /* ──── Config ──── */
 const CFG = {
   csrf:       @json(csrf_token()),
-  spinMs:     3000,
+  spinMs:     {{ (int)($spinMs ?? 8000) }},
   removeRule: @json($removeRule),
   soundOn:    {{ (int)$soundOn }},
   shareUrl:   @json(url('/my/spinners/'.$session->id)),

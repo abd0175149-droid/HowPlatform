@@ -188,24 +188,24 @@ $currentStreak = (int) ($currentStreak ?? ($stats['current_streak'] ?? 0));
 
                     <div
                         style="background: var(--surface-1); border: 1px solid var(--border-color); border-radius: var(--p-radius-sm); padding: 24px;">
+                        <?php $fillFrac = max(0, min(4, $currentStreak - 1)) / 4; ?>
                         <div
-                            style="display: flex; justify-content: space-between; margin-bottom: 24px; position: relative;">
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; position: relative;">
+                            <!-- خط الخلفية (من مركز أول نقطة إلى مركز آخر نقطة) -->
+                            <div
+                                style="position: absolute; z-index: 0; top: 50%; transform: translateY(-50%); right: 18px; left: 18px; height: 4px; border-radius: 2px; background: var(--border-color);">
+                            </div>
+                            <!-- خط التقدّم (يتطابق تماماً مع مراكز النقاط) -->
+                            <div
+                                style="position: absolute; z-index: 1; top: 50%; transform: translateY(-50%); right: 18px; width: calc((100% - 36px) * <?= $fillFrac ?>); height: 4px; border-radius: 2px; background: var(--blue-primary); transition: width .4s ease;">
+                            </div>
                             <?php for ($i = 1; $i <= 5; $i++):
                                 $isActive = $currentStreak >= $i; ?>
                                 <div
-                                    style="position: relative; z-index: 2; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; background: <?= $isActive ? 'var(--blue-primary)' : 'var(--surface-0)' ?>; color: <?= $isActive ? '#fff' : 'var(--text-muted)' ?>; border: 2px solid <?= $isActive ? 'var(--blue-primary)' : 'var(--border-color)' ?>; box-shadow: <?= $isActive ? '0 4px 10px rgba(33, 158, 188, 0.3)' : 'none' ?>;">
-                                    <?= $isActive ? '<i class="fas fa-check"></i>' : $i ?>
+                                    style="position: relative; z-index: 2; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.95rem; background: <?= $isActive ? 'var(--blue-primary)' : 'var(--surface-0)' ?>; color: <?= $isActive ? '#fff' : 'var(--text-muted)' ?>; border: 2px solid <?= $isActive ? 'var(--blue-primary)' : 'var(--border-color)' ?>; box-shadow: <?= $isActive ? '0 3px 8px rgba(33, 158, 188, 0.25)' : 'none' ?>;">
+                                    <?= $i ?>
                                 </div>
-                                <?php if ($i < 5): ?>
-                                    <div
-                                        style="position: absolute; z-index: 1; top: 50%; transform: translateY(-50%); height: 4px; border-radius: 2px; right: <?= ($i - 1) * 25 + 10 ?>%; left: <?= 100 - ($i * 25) + 10 ?>%; background: <?= ($currentStreak > $i) ? 'var(--blue-primary)' : 'var(--border-color)' ?>;">
-                                    </div>
-                                <?php endif; ?>
                             <?php endfor; ?>
-                            <!-- Background line placeholder for empty space -->
-                            <div
-                                style="position: absolute; z-index: 0; top: 50%; transform: translateY(-50%); height: 4px; border-radius: 2px; right: 18px; left: 18px; background: var(--border-color);">
-                            </div>
                         </div>
 
                         <div style="text-align: center;">
@@ -530,8 +530,8 @@ $currentStreak = (int) ($currentStreak ?? ($stats['current_streak'] ?? 0));
 <style>
     /* CSS Variables & Layout definitions (extracted from task details to match aesthetic) */
     :root {
-        --p-radius: 12px;
-        --p-radius-sm: 8px;
+        --p-radius: 9.6px;
+        --p-radius-sm: 6.4px;
         --blue-primary: #219ebc;
         --blue-dark: #023047;
         --header-bg: linear-gradient(135deg, #219ebc 0%, #023047 100%);
@@ -554,45 +554,51 @@ $currentStreak = (int) ($currentStreak ?? ($stats['current_streak'] ?? 0));
     .task-details-page {
         display: flex;
         flex-direction: column;
-        gap: 24px;
-        padding: 24px;
+        gap: 19.2px;
+        padding: 19.2px;
     }
 
     /* 🛰️ Blue Header */
     .td-header-compact-blue {
-        background: var(--header-bg);
+        background: var(--blue-primary);
         color: #fff;
         border-radius: var(--p-radius);
-        padding: 14px 20px;
+        padding: 11.2px 16px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 4px 12px rgba(2, 48, 71, 0.15);
+        box-shadow: none;
+    }
+
+    /* الدارك مود: خلفية كحلية داكنة تناسب الثيم (النص الداخلي أبيض) */
+    [data-theme="dark"] .td-header-compact-blue {
+        background: var(--blue-dark);
+        border: 0.8px solid var(--border-color);
     }
 
     .td-header-main {
         display: flex;
         align-items: center;
-        gap: 20px;
+        gap: 16px;
     }
 
     .btn-compact-back-blue {
         background: rgba(255, 255, 255, 0.15);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border: 0.8px solid rgba(255, 255, 255, 0.2);
         color: #fff;
-        padding: 8px 16px;
-        border-radius: 8px;
+        padding: 6.4px 12.8px;
+        border-radius: 6.4px;
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6.4px;
         font-weight: 700;
         transition: all 0.2s ease;
     }
 
     .btn-compact-back-blue:hover {
         background: rgba(255, 255, 255, 0.25);
-        transform: translateY(-2px);
+        transform: none;
     }
 
     .td-compact-title {
@@ -608,61 +614,61 @@ $currentStreak = (int) ($currentStreak ?? ($stats['current_streak'] ?? 0));
 
     .td-header-nav {
         display: flex;
-        gap: 8px;
+        gap: 6.4px;
     }
 
     /* 🏗️ Grid & Layout - Expanded Dimensions */
     .td-workspace-grid {
         display: grid;
-        grid-template-columns: 1fr 420px;
-        gap: 40px;
+        grid-template-columns: 1fr 336px;
+        gap: 32px;
         align-items: start;
     }
 
     .td-content-area {
         display: flex;
         flex-direction: column;
-        gap: 30px;
+        gap: 24px;
     }
 
     .td-sidebar-modern {
         display: flex;
         flex-direction: column;
-        gap: 40px;
+        gap: 32px;
     }
 
     .premium-card {
         background: var(--surface-0);
-        border: 1px solid var(--border-color);
+        border: 0.8px solid var(--border-color);
         border-radius: var(--p-radius);
-        padding: 24px;
+        padding: 19.2px;
     }
 
     .sidebar-widget {
-        padding: 24px;
+        padding: 19.2px;
     }
 
     .card-header-premium {
         display: flex;
         align-items: center;
-        gap: 15px;
-        margin-bottom: 24px;
+        gap: 12px;
+        margin-bottom: 19.2px;
     }
 
     /* Roadmap & Files styling */
     .roadmap-list-modern {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 9.6px;
     }
 
     .td-file {
         display: flex;
         align-items: center;
-        gap: 16px;
-        padding: 16px 20px;
+        gap: 12.8px;
+        padding: 12.8px 16px;
         background: var(--surface-1);
-        border: 1px solid var(--border-color);
+        border: 0.8px solid var(--border-color);
         border-radius: var(--p-radius-sm);
         transition: all 0.2s ease;
     }
@@ -670,20 +676,21 @@ $currentStreak = (int) ($currentStreak ?? ($stats['current_streak'] ?? 0));
     .td-file:hover {
         background: var(--surface-0);
         border-color: var(--blue-primary);
-        transform: translateX(-5px);
+        transform: translateY(-1.6px);
+        box-shadow: var(--shadow-sm);
     }
 
     .td-file .icon {
         font-size: 1.4rem;
         color: var(--blue-primary);
         background: #fff;
-        width: 48px;
-        height: 48px;
+        width: 38.4px;
+        height: 38.4px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        border-radius: 9.6px;
+        box-shadow: none;
     }
 
     .td-file .grow {
@@ -725,7 +732,7 @@ $currentStreak = (int) ($currentStreak ?? ($stats['current_streak'] ?? 0));
         position: absolute;
         inset: 0;
         background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(8px);
+        backdrop-filter: blur(6.4px);
     }
 
     .modal-content-wrap {
@@ -739,8 +746,8 @@ $currentStreak = (int) ($currentStreak ?? ($stats['current_streak'] ?? 0));
     }
 
     .modal-header {
-        padding: 20px;
-        border-bottom: 1px solid var(--border-color);
+        padding: 16px;
+        border-bottom: 0.8px solid var(--border-color);
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -753,8 +760,8 @@ $currentStreak = (int) ($currentStreak ?? ($stats['current_streak'] ?? 0));
     }
 
     .pulse-loader {
-        width: 40px;
-        height: 40px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         background: var(--blue-primary);
         animation: pulse 1.5s infinite ease-in-out;

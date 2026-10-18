@@ -258,11 +258,16 @@ class Student extends BaseController
     public function pages($page)
     {
         // صفحات ثابتة مدعومة
-        $staticPages = ['dashboard', 'account', 'service', 'welcome', 'notifications', 'upgrade', 'rewards', 'rag-debug', ];
+        $staticPages = ['dashboard', 'account', 'service', 'welcome', 'notifications', 'upgrade', 'rewards', 'rag-debug', 'tasks', ];
 
         // ✅ دعم المسار الذي يطلبه الراوتر لصفحة المساق HTML
         if ($page === 'course_content' || $page === 'course-content') {
             return view('students/pages/course_content');
+        }
+
+        // ✅ صفحة فَطين الكاملة (قسم SPA يستضيف نافذة فَطين)
+        if ($page === 'fateen-chat' || $page === 'fateen_chat') {
+            return view('students/pages/fateen_chat');
         }
 
         if (in_array($page, $staticPages, true)) {
@@ -345,7 +350,11 @@ class Student extends BaseController
         $uid      = (int)($authUser['id'] ?? 0);
         if ($uid <= 0) return [];
 
-        return ['stats' => $this->getUserStats($uid)];
+        return [
+            'stats'    => $this->getUserStats($uid),
+            // الأدوات التعليمية تُجلب ديناميكيًا من منصّة الأدوات (مع كاش) بدل الترميز اليدوي
+            'eduTools' => \App\Libraries\ToolsCatalog::fetch(),
+        ];
     }
 
     private function getAccountData()
@@ -361,6 +370,22 @@ class Student extends BaseController
             ->where('u.id', $uid)
             ->get()
             ->getRowArray();
+
+        // مستخدمو SSO (user_id عالمي بلا صفّ users محلّي): ابنِ من diploma_users + auth_user.
+        if (! $user) {
+            $du = $db->table('diploma_users du')
+                ->select('du.*, uni.name as university_name')
+                ->join('universities uni', 'uni.id = du.university_id', 'left')
+                ->where('du.user_id', $uid)
+                ->get()
+                ->getRowArray();
+            if ($du) {
+                $du['id']    = $uid;
+                $du['name']  = $authUser['name'] ?? '';
+                $du['email'] = $authUser['email'] ?? '';
+                $user = $du;
+            }
+        }
 
         return ['user' => $user];
     }
@@ -395,6 +420,20 @@ class Student extends BaseController
             ->where('id', $uid)
             ->get()
             ->getRowArray();
+
+        // مستخدمو SSO: الاسم من auth_user، is_complete/created_at من diploma_users.
+        if (! $user) {
+            $du = $db->table('diploma_users')
+                ->select('is_complete, created_at')
+                ->where('user_id', $uid)
+                ->get()
+                ->getRowArray();
+            $user = [
+                'name'        => $authUser['name'] ?? '',
+                'is_complete' => $du['is_complete'] ?? 0,
+                'created_at'  => $du['created_at'] ?? null,
+            ];
+        }
 
         return ['user' => $user];
     }
@@ -586,7 +625,7 @@ class Student extends BaseController
         }
 
         // ✅ صفحات ثابتة (HTML فقط) — لاحظ أننا أخرجنا 'service' من هذه القائمة
-        $staticPages = ['dashboard', 'account', 'welcome', 'notifications', 'upgrade', 'rewards', 'task-details', 'task_details', 'rag-debug'];
+        $staticPages = ['dashboard', 'account', 'welcome', 'notifications', 'upgrade', 'rewards', 'task-details', 'task_details', 'rag-debug', 'tasks'];
         if (in_array($section, $staticPages, true)) {
             return $this->jsonNoStore(['valid' => true, 'type' => 'static']);
         }
@@ -597,6 +636,15 @@ class Student extends BaseController
                 'valid'  => true,
                 'type'   => 'dynamic',   // مهم ليعرف الراوتر أنها تحتاج استيراد موديول
                 'module' => 'service',   // مساعدة للراوتر لاختيار /public/assets/js/students/service.js
+            ]);
+        }
+
+        // ✅ صفحة فَطين الكاملة ديناميكية (تنقل نافذة فَطين إلى منطقة المحتوى)
+        if ($section === 'fateen-chat') {
+            return $this->jsonNoStore([
+                'valid'  => true,
+                'type'   => 'dynamic',
+                'module' => 'fateen-chat',
             ]);
         }
 

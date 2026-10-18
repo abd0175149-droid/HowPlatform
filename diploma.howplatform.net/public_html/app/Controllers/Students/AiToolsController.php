@@ -309,6 +309,9 @@ class AiToolsController extends BaseController
                     if ($typeKey === 'inquiry_report_evaluator_v1') {
                         $jobData['student_name'] = $payload['student_name'] ?? '';
                         $jobData['student_id'] = $payload['student_id'] ?? '';
+                    } elseif ($typeKey === 'formative_essay_evaluator_v1' || $typeKey === 'final_essay_evaluator_v1') {
+                        $jobData['student_name'] = $payload['student_name'] ?? '';
+                        $jobData['student_id'] = $payload['ministry_number'] ?? $payload['student_id'] ?? '';
                     } elseif ($typeKey === 'article_evaluator_v1' || $typeKey === 'inquiry_plan_evaluator_v1') {
                         $jobData['teacher_name'] = $payload['teacher_name'] ?? '';
                         $jobData['student_number'] = $payload['student_number'] ?? '';
@@ -317,7 +320,7 @@ class AiToolsController extends BaseController
                     // تصفية النتائج بناءً على البحث
                     if (!empty($search)) {
                         $searchLower = mb_strtolower($search, 'UTF-8');
-                        if ($typeKey === 'inquiry_report_evaluator_v1') {
+                        if ($typeKey === 'inquiry_report_evaluator_v1' || $typeKey === 'final_essay_evaluator_v1') {
                             $studentName = mb_strtolower($jobData['student_name'] ?? '', 'UTF-8');
                             $studentIdVal = mb_strtolower($jobData['student_id'] ?? '', 'UTF-8');
                             if (strpos($studentName, $searchLower) === false && 
@@ -362,14 +365,19 @@ class AiToolsController extends BaseController
                             }
                         }
 
-                        // تقييم البحث الاستقصائي: ملفان
-                        if ($typeKey === 'inquiry_report_evaluator_v1') {
+                        // تقييم البحث الاستقصائي / المقالة التأملية الختامية: ملفان
+                        if ($typeKey === 'inquiry_report_evaluator_v1' || $typeKey === 'final_essay_evaluator_v1') {
                             if (!empty($decodedResult['file_feedback_id'])) {
                                 $files[] = ['name' => 'تقرير التغذية الراجعة (Word)', 'url' => $service->getDownloadUrl($userId, (int)$decodedResult['file_feedback_id'])];
                             }
                             if (!empty($decodedResult['file_rubric_id'])) {
                                 $files[] = ['name' => 'جدول معايير التقييم (Word)', 'url' => $service->getDownloadUrl($userId, (int)$decodedResult['file_rubric_id'])];
                             }
+                        }
+
+                        // التقييم التكويني للمقالة: 4 ملفات (تقرير Word/PDF + مقالة مُعلَّقة Word/PDF)
+                        if ($typeKey === 'formative_essay_evaluator_v1') {
+                            $files = $service->buildFormativeFiles($decodedResult);
                         }
 
                         if (!empty($files)) {
@@ -388,7 +396,7 @@ class AiToolsController extends BaseController
         }
 
         // إعادة حساب العدد الإجمالي بعد التصفية بالبحث
-        if (in_array($typeKey, ['article_evaluator_v1', 'inquiry_report_evaluator_v1', 'inquiry_plan_evaluator_v1'], true) && !empty($search)) {
+        if (in_array($typeKey, ['article_evaluator_v1', 'inquiry_report_evaluator_v1', 'inquiry_plan_evaluator_v1', 'final_essay_evaluator_v1'], true) && !empty($search)) {
             // جلب جميع jobs للبحث الكامل
             $allJobsBuilder = $db->table('ai_jobs')
                 ->where('user_id', $userId)
@@ -404,7 +412,7 @@ class AiToolsController extends BaseController
                     $payload = json_decode($job['payload_json'], true);
                     if (is_array($payload)) {
                         $searchLower = mb_strtolower($search, 'UTF-8');
-                        if ($typeKey === 'inquiry_report_evaluator_v1') {
+                        if ($typeKey === 'inquiry_report_evaluator_v1' || $typeKey === 'final_essay_evaluator_v1') {
                             $studentName = mb_strtolower($payload['student_name'] ?? '', 'UTF-8');
                             $studentIdVal = mb_strtolower($payload['student_id'] ?? '', 'UTF-8');
                             if (strpos($studentName, $searchLower) !== false || 
@@ -645,6 +653,9 @@ class AiToolsController extends BaseController
         $taskId = $this->request->getGet('task_id');
         $taskId = ($taskId === null || $taskId === '') ? null : (int) $taskId;
 
+        // المستخدم الفعّال — لإخفاء الأدوات المقيّدة env عن غير المصرّح (وعن الجلسات المجهولة)
+        $userId = (int) ($this->userId() ?? 0);
+
         $placementsModel = new AiToolPlacementModel();
         $placements = $placementsModel->findMatching($taskTypeId, $universityId, $courseId);
 
@@ -674,6 +685,10 @@ class AiToolsController extends BaseController
                 ]];
             } else {
                 $placements[0]['type_key'] = $taskOverrideTool;
+                // عند override صريح للأداة عبر tasks.ai_tool_version، استخدم عنوان/أيقونة الأداة الجديدة
+                // (لا تَرِث تسمية placement أداة أخرى لنفس نوع المهمة).
+                $placements[0]['button_label'] = null;
+                $placements[0]['button_icon'] = null;
             }
         }
 
@@ -681,6 +696,12 @@ class AiToolsController extends BaseController
         foreach ($placements as $placement) {
             $tool = AiToolRegistry::getTool((string) $placement['type_key']);
             if (!$tool || !$tool->isEnabled) {
+                continue;
+            }
+
+            // بوابة الوصول env-only: أخفِ الأداة المقيّدة عن غير المصرّح والمجهول.
+            // isArticleEvaluatorAllowed يُرجع true للأدوات غير المقيّدة، وfalse للمقيّدة+غير المسموح (userId=0 للمجهول).
+            if (!$this->isArticleEvaluatorAllowed($userId, (string) $placement['type_key'])) {
                 continue;
             }
 
@@ -848,28 +869,60 @@ class AiToolsController extends BaseController
         $studentId = $payload['student_id'] ?? $userId;
         $taskId = (int)$job['task_id'];
 
+        // تحديد نوع الأداة من المهمة (تقييم البحث الاستقصائي أم المقالة التأملية الختامية)
+        $jobTypeRow = $db->table('ai_job_types')->select('type_key')->where('id', (int)$job['job_type_id'])->get()->getRowArray();
+        $jobTypeKey = (string)($jobTypeRow['type_key'] ?? 'inquiry_report_evaluator_v1');
+        $isFinalEssay = ($jobTypeKey === 'final_essay_evaluator_v1');
+
+        // بوابة الوصول env للأداة الجديدة (دفاع إضافي على غرار approve-formative)
+        if ($isFinalEssay && !$this->isArticleEvaluatorAllowed($userId, $jobTypeKey)) {
+            return $this->failForbidden('ليس لديك صلاحية الوصول لهذه الأداة');
+        }
+
         try {
             // تمرير payload عبر global
             global $_inquiry_report_evaluator_payload;
             $_inquiry_report_evaluator_payload = $payload;
 
             $runner = new \App\Controllers\Cron\AiJobsRunner();
-            $tplData = $runner->makeTemplateDataForDocx($originalResult, 'inquiry_report_evaluator_v1');
+            $tplData = $runner->makeTemplateDataForDocx($originalResult, $isFinalEssay ? 'final_essay_evaluator_v1' : 'inquiry_report_evaluator_v1');
             $tplData['rubric_grades_raw'] = $originalResult['rubric_grades'] ?? [];
 
             $docx = new \App\Libraries\DocxService();
 
-            // بناء ملف التغذية الراجعة
-            $rel1 = 'downloads/inquiry_evaluations/' . $studentId . '_Inquiry_SF_AA.docx';
-            $built1 = $docx->buildFeedbackReport($tplData, $rel1);
-            $fileId1 = $runner->insertFileRowSmart($built1['rel_path'], $userId, (int)$built1['bytes']);
-            $runner->linkTaskFileSafe($taskId, $fileId1);
+            if ($isFinalEssay) {
+                // ✅ المقالة التأملية الختامية: التسمية وفق الاتفاقية المعتمدة
+                // ×××_Final_RE_SF_حرفا-المصحح (تقرير التغذية الراجعة) و ×××_Final_RE_GC_حرفا-المصحح (الروبريك)
+                $safeOwner = (string)($payload['safe_owner'] ?? preg_replace('/[^0-9A-Za-z_-]/', '', (string)$studentId));
+                if ($safeOwner === '') { $safeOwner = (string)$userId; }
+                $initials = strtoupper((string)($payload['te_initials'] ?? ''));
+                if (!preg_match('/^[A-Z]{1,6}$/', $initials)) { $initials = 'TE'; }
+                $baseRel = 'downloads/final_essay_evaluations/' . (int)$job['id'] . '/';
 
-            // بناء ملف الروبريك
-            $rel2 = 'downloads/inquiry_evaluations/' . $studentId . '_Inquiry_GC_AA.docx';
-            $built2 = $docx->buildRubricReport($tplData, $rel2);
-            $fileId2 = $runner->insertFileRowSmart($built2['rel_path'], $userId, (int)$built2['bytes']);
-            $runner->linkTaskFileSafe($taskId, $fileId2);
+                // بناء ملف التغذية الراجعة الختامي
+                $rel1 = $baseRel . $safeOwner . '_Final_RE_SF_' . $initials . '.docx';
+                $built1 = $docx->buildFinalEssayFeedbackReport($tplData, $rel1);
+                $fileId1 = $runner->insertFileRowSmart($built1['rel_path'], $userId, (int)$built1['bytes']);
+                $runner->linkTaskFileSafe($taskId, $fileId1);
+
+                // بناء ملف مقاييس الدرجة (روبريك) بقالب المقالة التأملية
+                $rel2 = $baseRel . $safeOwner . '_Final_RE_GC_' . $initials . '.docx';
+                $built2 = $docx->buildRubricReport($tplData, $rel2, 'RE_R_template.docx');
+                $fileId2 = $runner->insertFileRowSmart($built2['rel_path'], $userId, (int)$built2['bytes']);
+                $runner->linkTaskFileSafe($taskId, $fileId2);
+            } else {
+                // بناء ملف التغذية الراجعة (البحث الاستقصائي)
+                $rel1 = 'downloads/inquiry_evaluations/' . $studentId . '_Inquiry_SF_AA.docx';
+                $built1 = $docx->buildFeedbackReport($tplData, $rel1);
+                $fileId1 = $runner->insertFileRowSmart($built1['rel_path'], $userId, (int)$built1['bytes']);
+                $runner->linkTaskFileSafe($taskId, $fileId1);
+
+                // بناء ملف الروبريك
+                $rel2 = 'downloads/inquiry_evaluations/' . $studentId . '_Inquiry_GC_AA.docx';
+                $built2 = $docx->buildRubricReport($tplData, $rel2);
+                $fileId2 = $runner->insertFileRowSmart($built2['rel_path'], $userId, (int)$built2['bytes']);
+                $runner->linkTaskFileSafe($taskId, $fileId2);
+            }
 
             // تحديث سجل المهمة
             $db->table('ai_jobs')->where('id', $jobId)->update([
@@ -899,6 +952,341 @@ class AiToolsController extends BaseController
             ]);
         } catch (\Throwable $e) {
             log_message('error', 'approveEvaluation failed: ' . $e->getMessage());
+            return $this->fail('فشل بناء الملفات: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * POST /students/ai-tools/request-file
+     * رفع ملف مقالة .docx لأداتي formative_essay_evaluator_v1 و final_essay_evaluator_v1
+     * (غير متزامن → كرون → review).
+     * يحفظ الأصل دائماً (لا يُحذف)، يستخرج النصّ خادمياً، ويُدرج المهمة مع تنظيف اليتيم.
+     */
+    public function requestFile()
+    {
+        $userId = $this->userId();
+        if (!$userId) {
+            return $this->failUnauthorized('يجب تسجيل الدخول');
+        }
+
+        // نوع الأداة: افتراضياً الأداة البنائية (توافق عكسي)، مع دعم مقيّم المقالة الختامية
+        $typeKey = trim((string) $this->request->getPost('type_key'));
+        if ($typeKey === '') {
+            $typeKey = 'formative_essay_evaluator_v1';
+        }
+        if (!in_array($typeKey, ['formative_essay_evaluator_v1', 'final_essay_evaluator_v1'], true)) {
+            return $this->failValidationErrors('type_key غير مدعوم لهذا المسار');
+        }
+        $isFinal = ($typeKey === 'final_essay_evaluator_v1');
+
+        // بوابة الوصول env-only (إلزامية قبل أي شيء)
+        if (!$this->isArticleEvaluatorAllowed($userId, $typeKey)) {
+            return $this->failForbidden('ليس لديك صلاحية الوصول لهذه الأداة');
+        }
+
+        $file = $this->request->getFile('file');
+        if (!$file || !$file->isValid()) {
+            return $this->failValidationErrors('الملف غير صالح');
+        }
+        if (strtolower((string) $file->getClientExtension()) !== 'docx') {
+            return $this->failValidationErrors('يجب أن يكون الملف بصيغة Word (.docx)');
+        }
+
+        $taskId = (int) $this->request->getPost('task_id');
+        if ($taskId <= 0) {
+            return $this->failValidationErrors('task_id مطلوب');
+        }
+
+        // بيانات المعلم الطالب (إلزامية — تظهر في ترويسة تقرير التغذية الراجعة)
+        $studentName    = trim((string) $this->request->getPost('student_name'));
+        $ministryNumber = trim((string) $this->request->getPost('ministry_number'));
+        if ($studentName === '' || $ministryNumber === '') {
+            return $this->failValidationErrors('اسم المعلم الطالب والرقم الوزاري مطلوبان');
+        }
+
+        // حقول إضافية لمقيّم المقالة الختامية: مدرس المعلمين + حرفا المصحح (للتسمية)
+        $teacherSupervisor = '';
+        $teInitials        = '';
+        if ($isFinal) {
+            $teacherSupervisor = trim((string) $this->request->getPost('teacher_supervisor'));
+            $teInitials        = strtoupper(trim((string) $this->request->getPost('te_initials')));
+            if ($teacherSupervisor === '') {
+                return $this->failValidationErrors('اسم مدرس المعلمين مطلوب');
+            }
+            if (!preg_match('/^[A-Z]{1,6}$/', $teInitials)) {
+                return $this->failValidationErrors('حرفا المصحح (TE Initials) مطلوبان بأحرف إنجليزية فقط (مثال: AK)');
+            }
+        }
+
+        // معرّف الطالب = الرقم الوزاري (للـ dedup وتسمية الملفات)؛ نسخة آمنة للاسم في الملف
+        $ownerStudentId = $ministryNumber;
+        $safeOwner = preg_replace('/[^0-9A-Za-z_-]/', '', $ministryNumber);
+        if ($safeOwner === '') { $safeOwner = (string) $userId; }
+
+        // حفظ الأصل في مجلد دائم (لا يُحذف على المسار الناجح) — مجلد مستقل لكل أداة
+        $originalsRelDir = $isFinal
+            ? 'downloads/final_essay_evaluations/originals/'
+            : 'downloads/formative_evaluations/originals/';
+        $dir = rtrim(FCPATH, '/\\') . DIRECTORY_SEPARATOR . $originalsRelDir;
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+        $name = $safeOwner . '_' . date('Ymd_His') . '_' . bin2hex(random_bytes(3)) . '_original.docx';
+        $file->move($dir, $name, true);
+        $absOriginal = $dir . $name;
+        $relOriginal = $originalsRelDir . $name;
+
+        // استخراج نصّ المقالة + خريطة runs (خادمياً، لا inlineData ولا PhpWord lossy)
+        $docx = new \App\Libraries\FormativeEvaluatorDocx();
+        [$essayText, $runMap] = $docx->extractEssayRuns($absOriginal);
+        if ($essayText === '') {
+            @unlink($absOriginal); // لا نترك أصلاً يتيماً عند فشل الاستخراج
+            return $this->failValidationErrors('تعذّر استخراج نصّ المقالة من الملف');
+        }
+
+        $payload = [
+            'essay_text'        => $essayText,
+            'original_docx_rel' => $relOriginal,
+            'run_map'           => $runMap,       // تشخيصي فقط (لا يُرسَل للنموذج، لا يُعتمَد في الجراحة)
+            'student_id'        => $ownerStudentId,   // = الرقم الوزاري
+            'student_name'      => $studentName,
+            'ministry_number'   => $ministryNumber,
+            'safe_owner'        => $safeOwner,
+        ];
+        if ($isFinal) {
+            $payload['teacher_supervisor'] = $teacherSupervisor;
+            $payload['te_initials']        = $teInitials;
+        }
+
+        $service = new AiToolService();
+        $res = $service->createJob($userId, $typeKey, $taskId, $payload);
+
+        // تنظيف اليتيم: لا job جديد (نشِط مسبقاً أو فشل/نقاط) ⇒ احذف الأصل المرفوع
+        if (($res['status'] ?? '') === 'already_active' || ($res['ok'] ?? false) === false) {
+            @unlink($absOriginal);
+            return $this->respond($res);
+        }
+
+        return $this->respond([
+            'ok'     => true,
+            'status' => 'accepted',
+            'state'  => 'queued',
+            'job_id' => $res['job_id'] ?? null,
+        ]);
+    }
+
+    /**
+     * POST /students/ai-tools/request-poster
+     * رفع ملف «البحث الاستقصائي» لأداة بوستر البحث الاستقصائي (inquiry_poster_v1) — غير متزامن → كرون → صورة PNG.
+     * يحفظ الأصل، يبني الحمولة بمسار الملف المصدر، ويُدرج المهمة مع تنظيف اليتيم.
+     */
+    public function requestPosterFile()
+    {
+        $userId = $this->userId();
+        if (!$userId) {
+            return $this->failUnauthorized('يجب تسجيل الدخول');
+        }
+
+        // بوابة الوصول (تُرجع true لهذه الأداة غير المقيّدة)
+        if (!$this->isArticleEvaluatorAllowed($userId, 'inquiry_poster_v1')) {
+            return $this->failForbidden('ليس لديك صلاحية الوصول لهذه الأداة');
+        }
+
+        $file = $this->request->getFile('file');
+        // احتياط: التقط أول ملف مرفوع إن لم يصل باسم 'file'
+        if (!$file) {
+            $all = $this->request->getFiles();
+            if (is_array($all) && $all) {
+                $file = $all['file'] ?? reset($all);
+            }
+        }
+        if (!$file) {
+            return $this->respond(['ok' => false, 'message' => 'لم يتم إرفاق ملف.'], 400);
+        }
+        if (!$file->isValid()) {
+            $err = $file->getError();
+            // 1=UPLOAD_ERR_INI_SIZE, 2=UPLOAD_ERR_FORM_SIZE
+            $msg = in_array($err, [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)
+                ? 'حجم الملف كبير جداً (الحد الأقصى ' . ini_get('upload_max_filesize') . '). يرجى رفع ملف أصغر.'
+                : 'تعذّر استلام الملف (رمز ' . $err . '). حاول مجدداً.';
+            log_message('error', 'requestPosterFile invalid: err=' . $err . ' name=' . $file->getName());
+            return $this->respond(['ok' => false, 'message' => $msg], 400);
+        }
+
+        $allowedExt = ['pdf', 'docx', 'png', 'jpg', 'jpeg', 'webp'];
+        $ext = strtolower((string) ($file->getClientExtension() ?: pathinfo((string) $file->getName(), PATHINFO_EXTENSION)));
+        if (!in_array($ext, $allowedExt, true)) {
+            return $this->respond(['ok' => false, 'message' => 'صيغة الملف غير مدعومة (' . ($ext ?: 'غير معروفة') . '). المسموح: PDF أو Word (.docx) أو صورة (PNG/JPG).'], 400);
+        }
+
+        $taskId = (int) $this->request->getPost('task_id');
+        if ($taskId <= 0) {
+            return $this->respond(['ok' => false, 'message' => 'لم يُحدَّد رقم المهمة.'], 400);
+        }
+
+        // حفظ الأصل في مجلد دائم تحت public/ ليبقى متاحاً للكرون عند توليد الصورة
+        $dir = rtrim(FCPATH, '/\\') . DIRECTORY_SEPARATOR . 'downloads/inquiry_posters/originals/';
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+        $name = (string) $userId . '_' . date('Ymd_His') . '_' . bin2hex(random_bytes(3)) . '.' . $ext;
+        $file->move($dir, $name, true);
+        $absOriginal = $dir . $name;
+        $relOriginal = 'downloads/inquiry_posters/originals/' . $name;
+
+        $payload = [
+            'source_file_rel' => $relOriginal,
+            'source_mime'     => (string) ($file->getClientMimeType() ?: ''),
+            'source_ext'      => $ext,
+        ];
+
+        $service = new AiToolService();
+        $res = $service->createJob($userId, 'inquiry_poster_v1', $taskId, $payload);
+
+        // طلب نشط مسبقاً ⇒ 409 (لتطابق الواجهة وإظهار رسالة واضحة، لا "فشل")؛ والأصل المرفوع يتيم ⇒ احذفه
+        if (($res['status'] ?? '') === 'already_active') {
+            @unlink($absOriginal);
+            return $this->respond($res, 409);
+        }
+        // فشل فعلي (نقاط/أداة غير موجودة…) ⇒ احذف الأصل وأعد الكود المناسب
+        if (($res['ok'] ?? false) === false) {
+            @unlink($absOriginal);
+            $code = is_int($res['status'] ?? null) ? (int) $res['status'] : 400;
+            return $this->respond($res, $code);
+        }
+
+        return $this->respond([
+            'ok'     => true,
+            'status' => 'accepted',
+            'state'  => 'queued',
+            'job_id' => $res['job_id'] ?? null,
+        ]);
+    }
+
+    /**
+     * POST /students/ai-tools/approve-formative
+     * اعتماد التقييم التكويني وبناء الملفّين (التقرير + الأصل المُعلَّق) → status=done.
+     * endpoint منفصل بحارس env صريح (لا fork لـ approveEvaluation عديم الحارس).
+     */
+    public function approveFormativeEvaluation()
+    {
+        $userId = $this->userId();
+        if (!$userId) {
+            return $this->failUnauthorized('يجب تسجيل الدخول');
+        }
+        if (!$this->isArticleEvaluatorAllowed($userId, 'formative_essay_evaluator_v1')) {
+            return $this->failForbidden('ليس لديك صلاحية الوصول لهذه الأداة');
+        }
+
+        $json  = $this->request->getJSON(true) ?? [];
+        $jobId = (int) ($json['job_id'] ?? 0);
+        if ($jobId <= 0) {
+            return $this->failValidationErrors('job_id مطلوب');
+        }
+
+        $db  = \Config\Database::connect();
+        $job = $db->table('ai_jobs')->where('id', $jobId)->get()->getRowArray();
+        if (!$job) {
+            return $this->failNotFound('المهمة غير موجودة');
+        }
+        if ((int) $job['user_id'] !== $userId) {
+            return $this->failForbidden('غير مصرح');
+        }
+        if ($job['status'] !== 'review') {
+            return $this->fail('المهمة ليست في حالة مراجعة', 400);
+        }
+
+        $result = json_decode((string) $job['result_json'], true) ?? [];
+        // دمج تعديلات المراجع (إن وُجدت)
+        if (isset($json['report']) && is_array($json['report'])) {
+            $result['report'] = $json['report'];
+        }
+        if (isset($json['annotations']) && is_array($json['annotations'])) {
+            $result['annotations'] = $json['annotations'];
+        }
+
+        $payload = json_decode((string) $job['payload_json'], true) ?? [];
+        $owner   = (string) ($payload['safe_owner'] ?? $payload['student_id'] ?? $userId); // اسم آمن للملف
+        $taskId  = (int) $job['task_id'];
+
+        try {
+            $runner  = new \App\Controllers\Cron\AiJobsRunner();
+            $svc     = new \App\Libraries\FormativeEvaluatorDocx();
+            $service = new AiToolService();
+
+            $name    = $owner; // الرقم الوزاري المُعقَّم (XXXXXX) المُدخَل في الواجهة
+            $baseRel = 'downloads/formative_evaluations/' . $jobId . '/'; // مجلّد لكل مهمة لضمان عدم التعارض
+
+            // (1) تقرير التغذية الراجعة البنائي (Word) — supervisor/date ثابتان داخل الخدمة (عبدالرزاق الخطيب / 22-6-2026)
+            $meta = [
+                'student_name' => (string) ($payload['student_name'] ?? ''),
+                'student_id'   => (string) ($payload['ministry_number'] ?? $payload['student_id'] ?? ''),
+            ];
+            $relReport    = $baseRel . $name . '_RE1_FF_AA.docx';
+            $builtReport  = $svc->buildFormativeReport((array) ($result['report'] ?? []), $meta, $relReport);
+            $fileReportId = $runner->insertFileRowSmart($builtReport['rel_path'], $userId, (int) $builtReport['bytes']);
+            $runner->linkTaskFileSafe($taskId, $fileReportId);
+
+            // (1ب) نسخة PDF للتقرير
+            $fileReportPdfId = null;
+            $relReportPdf = $svc->convertDocxToPdf($builtReport['rel_path'], false);
+            if ($relReportPdf) {
+                $absRepPdf = rtrim(FCPATH, '/\\') . DIRECTORY_SEPARATOR . $relReportPdf;
+                $fileReportPdfId = $runner->insertFileRowSmart($relReportPdf, $userId, is_file($absRepPdf) ? (int) filesize($absRepPdf) : 0);
+                $runner->linkTaskFileSafe($taskId, $fileReportPdfId);
+            }
+
+            // (2) النسخة الأصلية مُعلَّقة (Word) — حقن تعليقات Word مع حارس إلغاء-إلى-الأصل
+            // ملاحظة: تحويل هذا الملف إلى PDF أُلغي بطلب المستخدم (يُنفَّذ يدوياً عبر Word لاحقاً).
+            $fileAnnotatedId = null;
+            $unmatched       = [];
+            $aborted         = false;
+            $absOriginal     = rtrim(FCPATH, '/\\') . DIRECTORY_SEPARATOR . ltrim((string) ($payload['original_docx_rel'] ?? ''), '/\\');
+            if (is_file($absOriginal)) {
+                $relAnnotated = $baseRel . $name . '_RE1_Annotated_AA.docx';
+                $annot        = $svc->annotateDocxWithComments($absOriginal, (array) ($result['annotations'] ?? []), $relAnnotated);
+                $unmatched    = $annot['unmatched'] ?? [];
+                $aborted      = (bool) ($annot['aborted'] ?? false);
+
+                // مزامنة: التعليقات المعروضة في الواجهة = التعليقات المُطبَّقة فعلاً في ملف Word (لا تعارض في العدد)
+                if (!$aborted) {
+                    $result['annotations'] = (array) ($annot['applied_annotations'] ?? []);
+                }
+
+                if (!empty($annot['rel_path'])) {
+                    $fileAnnotatedId = $runner->insertFileRowSmart($annot['rel_path'], $userId, (int) ($annot['bytes'] ?? 0));
+                    $runner->linkTaskFileSafe($taskId, $fileAnnotatedId);
+                }
+            }
+
+            $merge = [
+                'file_report_id'     => $fileReportId,
+                'file_report_pdf_id' => $fileReportPdfId,
+                'file_annotated_id'  => $fileAnnotatedId,
+                'unmatched_anchors'  => $unmatched,
+                'annotation_aborted' => $aborted,
+            ];
+            $db->table('ai_jobs')->where('id', $jobId)->update([
+                'result_json' => json_encode(array_merge($result, $merge), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                'file_id'     => $fileReportId,
+                'status'      => 'done',
+                'updated_at'  => date('Y-m-d H:i:s'),
+            ]);
+
+            $files = $service->buildFormativeFiles($merge);
+
+            return $this->respond([
+                'ok'             => true,
+                'state'          => 'done',
+                'message'        => $aborted
+                    ? 'تم الاعتماد وبناء التقرير؛ تعذّر حقن التعليقات فعُرضت النسخة الأصلية سليمة.'
+                    : 'تم اعتماد التقييم وبناء الملفات بنجاح',
+                'files'          => $files,
+                'download_url'   => $files[0]['url'] ?? null,
+                'unmatched_count' => count($unmatched),
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', 'approveFormativeEvaluation failed: ' . $e->getMessage());
             return $this->fail('فشل بناء الملفات: ' . $e->getMessage(), 500);
         }
     }
@@ -1108,6 +1496,37 @@ PROMPT;
         }
 
         return redirect()->to($url);
+    }
+
+    /**
+     * GET /students/ai-tools/download-attach/{fileId}
+     * يبثّ الملف بترويسة إرفاق (Content-Disposition: attachment) لإجبار التنزيل بالاسم الصحيح
+     * — يُستخدم لأداة التقييم التكويني (تنزيل Word وPDF دفعةً واحدة).
+     */
+    public function downloadAttach(int $fileId)
+    {
+        $userId = $this->userId();
+        if (!$userId) {
+            return $this->failUnauthorized('يجب تسجيل الدخول');
+        }
+
+        $service = new AiToolService();
+        // التحقق من الملكية عبر getDownloadUrl (يُعيد null إن لم يكن الملف للمستخدم)
+        if (!$service->getDownloadUrl($userId, $fileId)) {
+            return $this->failNotFound('الملف غير موجود');
+        }
+
+        $db   = \Config\Database::connect();
+        $file = $db->table('files')->where('id', $fileId)->get()->getRowArray();
+        if (!$file || empty($file['file_path'])) {
+            return $this->failNotFound('الملف غير موجود');
+        }
+        $abs = rtrim(FCPATH, '/\\') . DIRECTORY_SEPARATOR . ltrim((string) $file['file_path'], '/\\');
+        if (!is_file($abs)) {
+            return $this->failNotFound('الملف غير موجود على القرص');
+        }
+
+        return $this->response->download($abs, null)->setFileName(basename((string) $file['file_path']));
     }
 
     /**
@@ -1783,9 +2202,11 @@ PROMPT;
     {
         // خريطة type_key → متغير .env
         $restrictions = [
-            'article_evaluator_v1'        => 'ARTICLE_EVALUATOR_ALLOWED_USERS',
-            'inquiry_plan_evaluator_v1'   => 'ARTICLE_EVALUATOR_ALLOWED_USERS',
-            'inquiry_report_evaluator_v1' => 'ARTICLE_EVALUATOR_ALLOWED_USERS',
+            'article_evaluator_v1'           => 'ARTICLE_EVALUATOR_ALLOWED_USERS',
+            'inquiry_plan_evaluator_v1'      => 'ARTICLE_EVALUATOR_ALLOWED_USERS',
+            'inquiry_report_evaluator_v1'    => 'ARTICLE_EVALUATOR_ALLOWED_USERS',
+            'formative_essay_evaluator_v1'   => 'FORMATIVE_ESSAY_EVALUATOR_ALLOWED_USERS',
+            'final_essay_evaluator_v1'       => 'ARTICLE_EVALUATOR_ALLOWED_USERS',
         ];
 
         // إذا لم تكن الأداة مقيدة → السماح لجميع المستخدمين

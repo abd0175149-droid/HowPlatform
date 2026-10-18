@@ -151,7 +151,9 @@ class TasksMeta extends BaseController
 
     public function index(): string
     {
-        return view('tasks/index');
+        // كانت تشير إلى view('tasks/index') غير الموجود → 500.
+        // الصفحة الفعلية لإدارة المهام هي admins/pages/tasks (تُحقن داخل #contentArea).
+        return view('admins/pages/tasks');
     }
 
     public function getAcademicYears(): ResponseInterface
@@ -492,6 +494,20 @@ class TasksMeta extends BaseController
             ]);
         }
 
+        // أداة المهمة (type_key) — لتحديد ما إذا كانت المهمة خاصّة بالأدمن
+        $aiToolVersion = (!empty($post['aiToolVersion'])) ? (string) $post['aiToolVersion'] : null;
+
+        // المهمة تكون خاصّة بالأدمن إذا كانت أداتها مُعلَّمة admin-only
+        // ⇒ تُخفى عن الطلاب ولا تُرسَل لهم إشعارات.
+        $isAdminOnly = 0;
+        if ($aiToolVersion !== null && $aiToolVersion !== '') {
+            $toolRow = \Config\Database::connect()->table('ai_job_types')
+                ->select('is_admin_only')
+                ->where('type_key', $aiToolVersion)
+                ->get()->getRowArray();
+            $isAdminOnly = (int) (($toolRow['is_admin_only'] ?? 0)) === 1 ? 1 : 0;
+        }
+
         // بيانات المهمة
         $data = [
             'weekly_content_id'      => (int) ($post['weekId'] ?? 0),
@@ -499,7 +515,8 @@ class TasksMeta extends BaseController
             'title'                  => (string) ($post['taskTitle']       ?? ''),
             'description'            => (string) ($post['taskDescription'] ?? ''),
             'task_prompt'            => (string) ($post['taskPrompt']     ?? ''),
-            'ai_tool_version'        => (!empty($post['aiToolVersion'])) ? (string)$post['aiToolVersion'] : null,
+            'ai_tool_version'        => $aiToolVersion,
+            'is_admin_only'          => $isAdminOnly,
             'is_for_all_specialties' => in_array('all', json_decode((string)($post['specialties'] ?? '[]'), true) ?: [], true) ? 1 : 0,
             'visible_from_date'      => $post['publishDate'] ?? null,
             'due_date'               => $post['dueDate']     ?? null,
@@ -526,6 +543,23 @@ class TasksMeta extends BaseController
                     'task_id'      => $taskId,
                     'specialty_id' => (int) $sid,
                 ]);
+            }
+        }
+
+        // إشعار الطلاب المستهدفين بإضافة/تعديل المهمة (غير قاتل)
+        // ⛔ المهام الخاصّة بالأدمن لا تُشعِر الطلاب إطلاقًا.
+        if ($isAdminOnly !== 1) {
+            try {
+                $isUpdate  = ! empty($post['taskId']);
+                $taskTitle = trim((string) ($data['title'] ?? ''));
+                \App\Libraries\NotificationService::pushToTaskStudents(
+                    $taskId,
+                    $isUpdate ? 'تم تعديل مهمة' : 'مهمة جديدة',
+                    ($isUpdate ? 'تم تحديث المهمة: ' : 'أُضيفت مهمة جديدة: ') . ($taskTitle !== '' ? $taskTitle : 'مهمة'),
+                    '#/tasks'
+                );
+            } catch (\Throwable $e) {
+                log_message('error', 'task notify failed: ' . $e->getMessage());
             }
         }
 
@@ -700,7 +734,8 @@ class TasksMeta extends BaseController
         }
 
         // ============ إرسال إشعارات FCM عند إنشاء مهمة جديدة ============ //
-        if (empty($post['taskId'])) { // مهمة جديدة فقط
+        // ⛔ المهام الخاصّة بالأدمن لا تُرسِل أي إشعار للطلاب.
+        if (empty($post['taskId']) && $isAdminOnly !== 1) { // مهمة جديدة فقط
             try {
                 $this->sendTaskNotification($taskId, $data['title']);
             } catch (\Throwable $notifEx) {

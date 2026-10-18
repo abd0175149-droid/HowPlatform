@@ -19,6 +19,12 @@ class GroupingController extends Controller
         return null;
     }
 
+    /** بذرة توزيع فريدة (طابع زمني + عشوائي يمنع التصادم داخل نفس الميلّي-ثانية) */
+    private function newSeed(): string
+    {
+        return 'seed-'.(string) round(microtime(true) * 1000).'-'.random_int(1000, 9999);
+    }
+
     private function ensureOwnedSession(int $uid, int $sessionId)
     {
         $row = DB::table('grouping_sessions as gs')
@@ -622,7 +628,8 @@ public function pdf(\Illuminate\Http\Request $request, int $id)
             $majorSelectedJson = json_encode($ms, JSON_UNESCAPED_UNICODE);
         }
 
-        $seed = !empty($data['keep_seed']) ? ('seed-'.(string)round(microtime(true)*1000)) : ('seed-'.(string)round(microtime(true)*1000));
+        // جلسة جديدة دائمًا تبدأ ببذرة جديدة (keep_seed غير ذي معنى عند الإنشاء الأول)
+        $seed = $this->newSeed();
 
         // أنشئ جلسة فورًا
         $sessionId = DB::table('grouping_sessions')->insertGetId([
@@ -870,13 +877,13 @@ public function pdf(\Illuminate\Http\Request $request, int $id)
     
         $keep     = !empty($data['keep_seed']);
         $forceNew = !empty($data['reshuffle']);
-    
-        if ($forceNew) {
-            $effectiveSeed = 'seed-'.(string)round(microtime(true)*1000);
-        } else if ($keep && !empty($session->seed)) {
+
+        // إعادة الخلط (reshuffle) تُجبر بذرة جديدة = توزيع مختلف.
+        // غير ذلك: نُبقي البذرة الحالية فقط عند طلب keep_seed صراحةً (لإعادة إنتاج نفس التوزيع، مثل تطبيق الأسماء/الألوان).
+        if (!$forceNew && $keep && !empty($session->seed)) {
             $effectiveSeed = $session->seed;
         } else {
-            $effectiveSeed = 'seed-'.(string)round(microtime(true)*1000);
+            $effectiveSeed = $this->newSeed();
         }
     
         // بناء المعاينة
@@ -967,7 +974,9 @@ public function pdf(\Illuminate\Http\Request $request, int $id)
         
         $session = $this->ensureOwnedSession($uid, $id);
 
-        $request->merge(['reshuffle' => '1', 'keep_seed' => $request->input('keep_seed','1')]);
+        // إعادة الخلط = توزيع جديد دائمًا؛ لا نمرّر keep_seed المتناقض.
+        $request->merge(['reshuffle' => '1']);
+        $request->request->remove('keep_seed');
         return $this->finalize($request, $id);
     }
 /*

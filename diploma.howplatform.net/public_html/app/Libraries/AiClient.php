@@ -97,6 +97,91 @@ class AiClient
         }
     }
 
+    /**
+     * توليد صورة عبر نموذج صور Gemini (مثل gemini-2.5-flash-image).
+     * منخفض المستوى: يستقبل توجيهاً جاهزاً ومرفقات اختيارية (inlineData) ويعيد الصورة.
+     *
+     * @param string $prompt      توجيه إنشاء الصورة (جاهز).
+     * @param array  $attachments مرفقات كـ [['mime'=>..,'data'=>base64], ...] (صورة/PDF مصدر).
+     * @return array{mime:string,data:string} mimeType وبيانات base64 للصورة الناتجة.
+     */
+    public function generateImage(string $prompt, array $attachments = []): array
+    {
+        $apiKey = getenv('AI_GEMINI_API_KEY') ?: $this->apiKey;
+        if (!$apiKey) {
+            throw new \RuntimeException('Missing AI_GEMINI_API_KEY (image generation)');
+        }
+
+        // اختيار نموذج الصور: env > model الحالي (إن كان نموذج صور) > الافتراضي.
+        $model = (string) (getenv('AI_GEMINI_IMAGE_MODEL') ?: $this->model);
+        if ($model === '' || stripos($model, 'image') === false) {
+            $model = 'gemini-2.5-flash-image';
+        }
+        $this->model = $model;
+
+        $url = 'https://generativelanguage.googleapis.com/v1beta/models/'
+             . rawurlencode($model) . ':generateContent?key=' . urlencode($apiKey);
+
+        $parts = [['text' => $prompt]];
+        foreach ($attachments as $att) {
+            if (!empty($att['mime']) && !empty($att['data'])) {
+                $parts[] = ['inlineData' => ['mimeType' => $att['mime'], 'data' => $att['data']]];
+            }
+        }
+
+        $requestBody = [
+            'contents'         => [['role' => 'user', 'parts' => $parts]],
+            'generationConfig' => ['responseModalities' => ['TEXT', 'IMAGE']],
+            'safetySettings'   => $this->buildSafetySettings(),
+        ];
+
+        $this->lastMergedPrompt = $prompt;
+
+        $resp = $this->curlJson($url, $requestBody);
+        $img  = $this->extractImageFromGemini($resp, $reason);
+
+        if ($img === null) {
+            throw new \RuntimeException('AI image empty response (Gemini): ' . ($reason ?: 'no image part'));
+        }
+        return $img;
+    }
+
+    /**
+     * استخراج أوّل جزء صورة (inlineData) من رد Gemini + سبب الفشل إن وُجد.
+     *
+     * @return array{mime:string,data:string}|null
+     */
+    protected function extractImageFromGemini(array $resp, ?string &$reason = null): ?array
+    {
+        $reason = null;
+
+        if (!empty($resp['promptFeedback']['blockReason'])) {
+            $reason = 'blockReason=' . $resp['promptFeedback']['blockReason'];
+        }
+
+        if (!empty($resp['candidates']) && is_array($resp['candidates'])) {
+            foreach ($resp['candidates'] as $cand) {
+                if (isset($cand['finishReason']) && $cand['finishReason'] !== 'STOP' && $reason === null) {
+                    $reason = 'finishReason=' . $cand['finishReason'];
+                }
+                $parts = $cand['content']['parts'] ?? [];
+                if (is_array($parts)) {
+                    foreach ($parts as $part) {
+                        $inline = $part['inlineData'] ?? $part['inline_data'] ?? null;
+                        if (is_array($inline) && !empty($inline['data'])) {
+                            return [
+                                'mime' => (string) ($inline['mimeType'] ?? $inline['mime_type'] ?? 'image/png'),
+                                'data' => (string) $inline['data'],
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
 
     /**
      * تحويل مدخلات المستخدم إلى نص متسلسل — يُستخدم فقط كسقوط احتياطي لغير lesson_plan_v1.

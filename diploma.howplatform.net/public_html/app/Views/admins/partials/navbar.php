@@ -39,41 +39,23 @@ $adminId      = $__ses['user_id']            ?? ($__auth['id']     ?? null);
             <span class="admin-name"><?= esc($adminName) ?></span>
         </a>
 
-        <!-- الإشعارات -->
-        <div class="notifications-container">
-            <button class="action-btn-nav notifications-btn js-notif-toggle" title="الإشعارات" aria-haspopup="true" aria-expanded="false">
+        <!-- الإشعارات (مربوطة بنقاط /admins/notifications/*) -->
+        <div class="nav-notif notifications-container" id="navNotif" style="position:relative;">
+            <button class="action-btn-nav notifications-btn" id="notifBellBtn" title="الإشعارات" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-bell"></i>
-                <span class="notification-badge">4</span>
+                <span class="notification-badge" id="notifBadge" style="display:none;">0</span>
             </button>
-            <div class="notifications-dropdown" role="menu" aria-label="Notifications">
+            <div class="notifications-dropdown" id="notifDropdown" role="menu" aria-label="Notifications">
                 <div class="notifications-header">
                     <h3 class="notifications-title">الإشعارات</h3>
-                    <button class="mark-all-read">تعيين الكل كمقروء</button>
+                    <button type="button" class="mark-all-read" id="notifMarkAll">تعيين الكل كمقروء</button>
                 </div>
 
-                <div class="notifications-list">
-                    <div class="notification-item unread">
-                        <div class="notification-icon" style="background: linear-gradient(135deg, var(--primary-300), var(--primary-600)); color: white;">
-                            <i class="fas fa-user-plus"></i>
-                        </div>
-                        <div class="notification-info">
-                            <div class="notification-title">
-                                <span class="unread-badge"></span>
-                                طلب ترقية جديد
-                            </div>
-                            <p class="notification-desc">قدم المستخدم أحمد محمد طلب ترقية إلى مدرب</p>
-                            <div class="notification-time">
-                                <i class="far fa-clock"></i> منذ 10 دقائق
-                            </div>
-                        </div>
-                    </div>
+                <div class="notifications-list" id="notifList">
+                    <div class="notif-state" style="padding:26px 18px;text-align:center;color:var(--text-muted);">جارٍ التحميل…</div>
                 </div>
-
-                <div class="notifications-footer">
-                    <a href="#" class="view-all-link">
-                        عرض جميع الإشعارات
-                        <i class="fas fa-arrow-left"></i>
-                    </a>
+                <div class="notifications-footer" style="padding:10px 16px;border-top:1px solid var(--border-color);text-align:center;">
+                    <a href="#notifications" id="notifViewAll" style="color:var(--primary-600);font-weight:700;font-size:.88rem;text-decoration:none;cursor:pointer;">عرض كل الإشعارات</a>
                 </div>
             </div>
         </div>

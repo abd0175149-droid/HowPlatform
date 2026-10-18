@@ -24,6 +24,14 @@
             @endphp
             
             @if ($authUser)
+                @if(!empty($plansBadge))
+                <a href="https://auth.howplatform.net/profile?active=points" title="النقاط والاشتراك"
+                   style="display:inline-flex;align-items:center;gap:.45rem;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.28);border-radius:999px;padding:.3rem .85rem;color:#fff;font-weight:700;font-size:.82rem;text-decoration:none;">
+                    <i class="fa-solid fa-coins" style="color:#ffbe34;"></i> {{ number_format($plansBadge['points']) }}
+                    <span style="opacity:.5;">|</span>
+                    <i class="fa-solid fa-crown" style="color:#ffbe34;"></i> {{ !empty($plansBadge['has_plan']) ? ($plansBadge['plan_name'] ?? 'مشترك') : 'ترقية' }}
+                </a>
+                @endif
                 <div class="user-dropdown">
                     <button class="user-name" onclick="this.parentElement.classList.toggle('open')">
                         {{ $authUser['name'] }}

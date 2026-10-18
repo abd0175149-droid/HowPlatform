@@ -152,6 +152,14 @@ class ProfileController extends Controller
         }
         $avatarUrl = $this->avatarUrlFor($user->avatar ?? null);
 
+        // بيانات النقاط/المحفظة/الاشتراكات/الخطط من منصّة النقاط (قراءة متوازية، تفشل بأمان)
+        $plans = null;
+        try {
+            $plans = app(\App\Services\PlansClient::class)->profileData((int) $user->id);
+        } catch (\Throwable $e) {
+            \Log::warning('ProfileController::index - Plans data failed: ' . $e->getMessage());
+        }
+
         return view('profile.index', compact(
             'user',
             'du',
@@ -163,7 +171,8 @@ class ProfileController extends Controller
             'isDiplomaComplete',
             'safeRedirect',
             'redirectCountdown',
-            'avatarUrl'
+            'avatarUrl',
+            'plans'
         ));
     }
 
@@ -444,6 +453,49 @@ class ProfileController extends Controller
         ];
     }
 
+
+    /** استبدال بطاقة (نقاط/اشتراك) عبر منصّة النقاط للمستخدم المسجّل */
+    public function redeemCard(Request $request)
+    {
+        $v = $request->validate([
+            'code' => ['required', 'string', 'max:60'],
+        ]);
+
+        $uid = (int) $request->user()->id;
+        $res = app(\App\Services\PlansClient::class)->redeemCard($uid, $v['code']);
+
+        if (!empty($res['ok'])) {
+            $msg = 'تم استبدال البطاقة بنجاح.';
+            if (!empty($res['subscription_id'])) {
+                $msg .= ' فُعّل اشتراكك';
+                if (!empty($res['end_at'])) {
+                    $msg .= ' حتى ' . \Carbon\Carbon::parse($res['end_at'])->translatedFormat('Y-m-d');
+                }
+                $msg .= '.';
+            }
+            if (!empty($res['points_granted'])) {
+                $msg .= ' أُضيفت ' . $res['points_granted'] . ' نقطة إلى محفظتك.';
+            }
+            return Redirect::route('profile.index')->with('ok', $msg)->with('active', 'points');
+        }
+
+        return Redirect::route('profile.index')
+            ->with('err', 'تعذّر استبدال البطاقة: ' . $this->redeemErrLabel($res['error'] ?? 'unknown'))
+            ->with('active', 'points');
+    }
+
+    private function redeemErrLabel(string $err): string
+    {
+        return [
+            'card_not_found'   => 'الكود غير موجود',
+            'already_redeemed' => 'البطاقة مستبدَلة مسبقًا',
+            'card_disabled'    => 'البطاقة معطّلة',
+            'card_expired'     => 'انتهت صلاحية البطاقة',
+            'invalid_input'    => 'مدخلات غير صحيحة',
+            'connection'       => 'تعذّر الاتصال بخدمة النقاط، حاول لاحقًا',
+            'unavailable'      => 'خدمة النقاط غير متاحة حاليًا',
+        ][$err] ?? $err;
+    }
 
     /** تحديث كلمة المرور */
     public function updatePassword(Request $request)

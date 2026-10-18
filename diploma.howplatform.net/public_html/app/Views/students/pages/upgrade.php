@@ -152,10 +152,10 @@
   /* ================== Upgrade Page — Modern, Clean, RTL ================== */
 /* ألوان/توكنز (يمكنها الاستفادة من :root العامة إن وُجدت) */
 .upg-page{
-  --radius:16px;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
-  --shadow-md: 0 6px 18px rgba(0,0,0,.10);
-  --shadow-lg: 0 16px 44px rgba(0,0,0,.16);
+  --radius:12.8px;
+  --shadow-sm: 0 0.8px 2.4px rgba(0,0,0,.08);
+  --shadow-md: 0 4.8px 14.4px rgba(0,0,0,.10);
+  --shadow-lg: 0 12.8px 35.2px rgba(0,0,0,.16);
   --transition: .22s ease;
 
   /* لوحة مُحسَّنة */
@@ -178,41 +178,41 @@
   --warn-bg:#fff7e6; --warn-br:#ffe0ad; --warn-ink:#a05a00;
 
   background: var(--bg);
-  padding: 24px 16px;
+  padding: 19.2px 12.8px;
   display: grid;
-  gap: 18px;
+  gap: 14.4px;
 }
 
 /* رأس الصفحة */
 .upg-head{
-  background: linear-gradient(135deg, var(--primary-600), var(--primary-400));
-  color: #fff;
+  background: var(--surface);
+  color: var(--text);
+  border: 0.8px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
-  padding: 22px 20px;
-  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  box-shadow: none;
+  padding: 17.6px 16px;
+  display:flex; align-items:center; justify-content:space-between; gap:9.6px;
   position:relative; overflow:hidden;
 }
 .upg-head::before{
   content:""; position:absolute; inset:-60% auto auto -60%;
   width:200%; height:200%;
-  background: radial-gradient(transparent 50%, rgba(255,255,255,.1)),
-              repeating-linear-gradient(45deg, rgba(255,255,255,.06) 0 10px, transparent 10px 20px);
-  animation: upgFloat 22s linear infinite;
+  background: none;
+  animation: none;
 }
-@keyframes upgFloat{ from{transform:translate(0,0)} to{transform:translate(120px,120px)} }
-.upg-title{ display:flex; align-items:center; gap:10px; position:relative; z-index:1; }
+@keyframes upgFloat{ from{transform:translate(0,0)} to{transform:translate(96px,96px)} }
+.upg-title{ display:flex; align-items:center; gap:8px; position:relative; z-index:1; }
 .upg-title h2{ margin:0; font-size:1.6rem; font-weight:800; }
 .upg-badge{
-  background: rgba(255,255,255,.18);
-  border:1px solid rgba(255,255,255,.35);
-  color:#fff; border-radius:999px; font-size:.72rem; padding:2px 8px; font-weight:800; backdrop-filter: blur(6px);
+  background: var(--primary-50);
+  border:0.8px solid var(--primary-200);
+  color: var(--primary-700); border-radius:799.2px; font-size:.72rem; padding:1.6px 6.4px; font-weight:800; backdrop-filter: none;
 }
 .upg-hello{ position:relative; z-index:1; opacity:.95; }
 
 /* شبكة علوية: بطاقتان جنبًا لجنب */
 .upg-grid{
-  display:grid; gap:12px;
+  display:grid; gap:9.6px;
   grid-template-columns: repeat(2, minmax(0,1fr));
 }
 @media (max-width: 900px){
@@ -222,84 +222,84 @@
 /* البطاقات */
 .upg-card{
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 0.8px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
   transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
 }
-.upg-card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--primary-200); }
+.upg-card:hover{ transform: translateY(-1.6px); box-shadow: var(--shadow-sm); border-color: var(--primary-400); }
 .upg-card__head{
-  display:flex; align-items:center; gap:8px;
-  padding:14px 16px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:6.4px;
+  padding:11.2px 12.8px; border-bottom:0.8px solid var(--border);
 }
 .upg-card__head h3{ margin:0; font-size:1.12rem; font-weight:800; color:var(--text); }
 .upg-card__head i{ color: var(--primary-600); }
-.upg-card__body{ padding:16px; color:var(--text); }
+.upg-card__body{ padding:12.8px; color:var(--text); }
 .upg-muted{ color: var(--muted); }
 
 /* بطاقة الخطط */
-.upg-plans-card{ margin-top: 4px; }
+.upg-plans-card{ margin-top: 3.2px; }
 
 /* شبكة بطاقات الخطط */
 .upg-plans{
-  display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:12px;
+  display:grid; grid-template-columns: repeat(auto-fill, minmax(208px, 1fr)); gap:9.6px;
 }
 .upg-plan{
   background: var(--surface);
-  border:1px solid var(--border);
-  border-radius:12px; padding:14px;
-  box-shadow: var(--shadow-sm);
+  border:0.8px solid var(--border);
+  border-radius: var(--radius); padding:11.2px;
+  box-shadow: none;
   transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
   outline: none;
 }
-.upg-plan:hover{ transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--primary-200); }
-.upg-plan:focus{ box-shadow: 0 0 0 3px rgba(26,167,255,.25); }
+.upg-plan:hover{ transform: translateY(-1.6px); box-shadow: var(--shadow-sm); border-color: var(--primary-400); }
+.upg-plan:focus{ box-shadow: 0 0 0 2.4px rgba(26,167,255,.25); }
 .upg-plan.is-selected{
   background: var(--primary-50);
-  border-color: var(--primary-500);
-  box-shadow: inset 0 0 0 1px var(--primary-200);
+  border: 1.6px solid var(--primary-500);
+  box-shadow: none;
 }
-.upg-plan__head{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+.upg-plan__head{ display:flex; align-items:baseline; justify-content:space-between; gap:6.4px; }
 .upg-plan__title{ font-weight:800; }
-.upg-plan__price{ color: var(--primary-700); display:flex; align-items:baseline; gap:6px; }
+.upg-plan__price{ color: var(--primary-700); display:flex; align-items:baseline; gap:4.8px; }
 .upg-plan__amount{ font-size:1.28rem; font-weight:800; }
 .upg-plan__meta{ color:var(--muted); font-weight:600; }
-.upg-plan__features{ list-style:none; margin:8px 0 0; padding:0; display:grid; gap:6px; }
-.upg-plan__features i{ color: var(--ok); margin-inline-start:4px; }
+.upg-plan__features{ list-style:none; margin:6.4px 0 0; padding:0; display:grid; gap:4.8px; }
+.upg-plan__features i{ color: var(--ok); margin-inline-start:3.2px; }
 
 /* شريط الأزرار — لاصق بعد الاختيار */
 .upg-actions{
-  margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;
-  position: sticky; bottom: 8px; /* يلتصق بأسفل البطاقة */
-  background: linear-gradient(180deg, transparent, var(--surface) 38%);
-  padding-top: 10px;
+  margin-top:9.6px; display:flex; gap:8px; flex-wrap:wrap;
+  position: sticky; bottom: 6.4px; /* يلتصق بأسفل البطاقة */
+  background: var(--surface);
+  padding-top: 8px;
 }
 
 /* أزرار */
 .btn{
   --_bg: #fff; --_bg-h: #f3f7ff; --_ink: var(--text);
-  background: var(--_bg); color: var(--_ink); border:1px solid var(--border);
-  padding:10px 14px; border-radius:12px; cursor:pointer;
-  transition: background var(--transition), transform var(--transition), opacity var(--transition);
+  background: var(--_bg); color: var(--_ink); border:0.8px solid var(--border);
+  padding:8px 11.2px; border-radius:9.6px; cursor:pointer;
+  transition: background var(--transition), border-color var(--transition), opacity var(--transition);
 }
-.btn:hover{ background: var(--_bg-h); transform: translateY(-1px); }
+.btn:hover{ background: var(--_bg-h); border-color: var(--primary-400); }
 .btn:disabled{ opacity:.6; cursor:not-allowed; transform:none; }
 .btn-primary{ --_bg: var(--primary-600); --_bg-h: var(--primary-700); --_ink:#fff; border-color: transparent; color:#fff; }
 
 /* تنبيهات */
 .upg-alert{
-  display:grid; grid-template-columns:auto 1fr; gap:12px;
-  padding:14px; border-radius:12px; border:1px solid var(--warn-br); background: var(--warn-bg);
-  box-shadow: var(--shadow-sm);
+  display:grid; grid-template-columns:auto 1fr; gap:9.6px;
+  padding:11.2px; border-radius:9.6px; border:0.8px solid var(--warn-br); background: var(--warn-bg);
+  box-shadow: none;
 }
-.upg-alert__title{ font-weight:800; margin-bottom:4px; }
+.upg-alert__title{ font-weight:800; margin-bottom:3.2px; }
 .upg-alert--warning .upg-alert__icon{ color: var(--warn-ink); }
 
 /* مودالات (نظّفنا التكرار وتركّزنا على نسخة واحدة فقط) */
 .upg-modal{
   position: fixed; inset: 0; display: none;
-  background: rgba(0,0,0,.5); backdrop-filter: blur(2px);
-  z-index: 9999; padding: 20px;
+  background: rgba(0,0,0,.5); backdrop-filter: blur(1.6px);
+  z-index: 9999; padding: 16px;
   place-items: center;
 }
 .upg-modal:not([hidden]){ display: grid; }
@@ -307,47 +307,47 @@
   display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important;
 }
 .upg-modal__dialog{
-  width: min(720px, 96vw); max-height: 92vh;
-  background: var(--surface); border:1px solid var(--border); border-radius:16px;
-  box-shadow: var(--shadow-lg);
+  width: min(576px, 96vw); max-height: 92vh;
+  background: var(--surface); border:0.8px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
   display:flex; flex-direction:column; overflow:auto; outline:none;
-  transform: scale(.985);
+  transform: none;
   transition: transform .18s ease, box-shadow .18s ease;
 }
-.upg-modal:not([hidden]) .upg-modal__dialog{ transform: scale(1); }
+.upg-modal:not([hidden]) .upg-modal__dialog{ transform: none; }
 .upg-modal__head, .upg-modal__foot{
   display:flex; align-items:center; justify-content:space-between;
-  padding:12px 14px; border-bottom:1px solid var(--border);
+  padding:9.6px 11.2px; border-bottom:0.8px solid var(--border);
 }
-.upg-modal__foot{ border-bottom:0; border-top:1px solid var(--border); }
-.upg-modal__head h4{ display:inline-flex; gap:8px; align-items:center; margin:0; }
+.upg-modal__foot{ border-bottom:0; border-top:0.8px solid var(--border); }
+.upg-modal__head h4{ display:inline-flex; gap:6.4px; align-items:center; margin:0; }
 .upg-modal__head i{ color: var(--primary-600); }
-.upg-modal__close{ background:#fff; border:1px solid var(--border); border-radius:10px; padding:6px 10px; cursor:pointer; color: var(--muted); }
+.upg-modal__close{ background:#fff; border:0.8px solid var(--border); border-radius:8px; padding:4.8px 8px; cursor:pointer; color: var(--muted); }
 .upg-modal__close:hover{ background:#f5f7fb; }
-.upg-modal__body{ padding:14px; display:grid; gap:12px; overflow:auto; }
+.upg-modal__body{ padding:11.2px; display:grid; gap:9.6px; overflow:auto; }
 
 /* حقول الإدخال */
 .upg-label{ font-weight:800; color: var(--text); }
-.upg-input-wrap{ display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:center; }
-.upg-input{ border:1px solid var(--border); background: #fff; color: var(--text); border-radius:10px; padding:10px 12px; }
-.upg-form-actions{ display:flex; gap:8px; }
+.upg-input-wrap{ display:grid; grid-template-columns: 1fr auto; gap:6.4px; align-items:center; }
+.upg-input{ border:0.8px solid var(--border); background: #fff; color: var(--text); border-radius:8px; padding:8px 9.6px; }
+.upg-form-actions{ display:flex; gap:6.4px; }
 
 /* التحقق والتأكيد */
-.upg-verify{ background: #eef7ff; border:1px solid #d5eaff; padding:10px; border-radius:10px; }
-.upg-ok{ display:grid; gap:6px; }
+.upg-verify{ background: #eef7ff; border:0.8px solid #d5eaff; padding:8px; border-radius:8px; }
+.upg-ok{ display:grid; gap:4.8px; }
 .upg-ok span{ color: var(--muted); }
-.upg-confirm{ display:flex; gap:8px; }
-.upg-msg{ padding:10px; border-radius:8px; border:1px solid var(--border); background: #f5f6fb; }
+.upg-confirm{ display:flex; gap:6.4px; }
+.upg-msg{ padding:8px; border-radius:6.4px; border:0.8px solid var(--border); background: #f5f6fb; }
 .upg-msg--warn{ background: var(--warn-bg); border-color: var(--warn-br); }
 .upg-msg--error{ background: #fee2e2; border-color: #fecaca; }
 
 /* قائمة أماكن البيع */
-.upg-sales-list{ display:grid; gap:8px; padding-inline-start:18px; }
-.upg-note{ color: var(--muted); display:inline-flex; gap:6px; align-items:center; }
+.upg-sales-list{ display:grid; gap:6.4px; padding-inline-start:14.4px; }
+.upg-note{ color: var(--muted); display:inline-flex; gap:4.8px; align-items:center; }
 
 /* مظاهر تكيّفية */
 @media (max-width:640px){
-  .upg-head{ flex-direction:column; align-items:flex-start; gap:10px; }
+  .upg-head{ flex-direction:column; align-items:flex-start; gap:8px; }
   .upg-title h2{ font-size:1.34rem; }
   .upg-actions{ width:100%; justify-content:space-between; }
 }
@@ -384,10 +384,11 @@
   --warn-ink:#d97706;
 }
 
-/* رأس الصفحة بنفس التدرّج السابق (primary-500 → primary-700) */
+/* رأس الصفحة — مسطّح بنفس الهوية */
 .upg-head{
-  background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
-  color:#fff;
+  background: var(--surface);
+  color: var(--text);
+  border: 0.8px solid var(--border);
 }
 
 /* أيقونات رؤوس البطاقات والأزرار الأساسية تُستخدم من الهوية */
@@ -402,15 +403,16 @@
 
 /* تمييز الخطة المختارة بنفس الطيف */
 .upg-plan.is-selected{
-  background: var(--primary-100, #d2ebf7);
-  border-color: var(--primary-500);
-  box-shadow: inset 0 0 0 1px var(--primary-400);
+  background: var(--primary-50);
+  border: 1.6px solid var(--primary-500);
+  box-shadow: none;
 }
 
 /* تأثير التحويم متناسق مع الـprimary القديم */
 .upg-card:hover,
 .upg-plan:hover{
   border-color: var(--primary-400);
+  box-shadow: var(--shadow-sm);
 }
 
 /* الوضع الليلي يعتمد أسطحك السابقة إن وُجدت */
@@ -428,18 +430,18 @@
 /* صفّ معلومات الخطة الحالية */
 .upg-current__row{
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
-  gap: 10px;
-  margin-bottom: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(192px,1fr));
+  gap: 8px;
+  margin-bottom: 8px;
 }
 .upg-current__item{
   display: flex;
-  gap: 6px;
+  gap: 4.8px;
   align-items: baseline;
   background: var(--surface-1, #f7f9fb);
-  border: 1px solid var(--border-color, #e6e6e6);
-  border-radius: 10px;
-  padding: 8px 10px;
+  border: 0.8px solid var(--border-color, #e6e6e6);
+  border-radius: 8px;
+  padding: 6.4px 8px;
 }
 .upg-current__label{
   color: var(--text-muted, #6b7280);
@@ -451,7 +453,7 @@
 
 /* عنوان المزايا */
 .upg-current__features-title{
-  margin: 0 0 8px;
+  margin: 0 0 6.4px;
   font-size: 1rem;
   font-weight: 800;
   color: var(--text-strong, #023047);
@@ -464,42 +466,42 @@
   --chip-ink: var(--text-strong, #023047);
 
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(176px,1fr));
+  gap: 6.4px;
   margin: 0; padding: 0; list-style: none;
 }
 .upg-features--empty{
-  margin: 6px 0 0;
+  margin: 4.8px 0 0;
 }
 
 /* عنصر الميزة */
 .upg-feature{
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
+  gap: 6.4px;
+  padding: 8px 9.6px;
   background: var(--chip-bg);
-  border: 1px solid var(--chip-br);
-  border-radius: 12px;
-  box-shadow: 0 1px 2px rgba(0,0,0,.05);
+  border: 0.8px solid var(--chip-br);
+  border-radius: 9.6px;
+  box-shadow: none;
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 .upg-feature:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(0,0,0,.10);
-  border-color: var(--primary-500, #219ebc);
+  transform: translateY(-1.6px);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--primary-400, #8ecae6);
 }
 
 /* أيقونة الصح */
 .upg-feature__icon{
   display: inline-grid;
   place-items: center;
-  width: 26px; height: 26px;
-  border-radius: 999px;
+  width: 20.8px; height: 20.8px;
+  border-radius: 799.2px;
   background: var(--primary-500, #219ebc);
   color: #fff;
-  flex: 0 0 26px;
-  box-shadow: 0 2px 6px rgba(33,158,188,.28);
+  flex: 0 0 20.8px;
+  box-shadow: none;
 }
 .upg-feature__icon i{
   font-size: .9rem;

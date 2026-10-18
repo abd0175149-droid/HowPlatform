@@ -5,104 +5,104 @@ $csrfTokenValue = function_exists('csrf_hash')  ? csrf_hash()  : '';
 ?>
 <style>
 /* ===== الحاوية العامة ===== */
-.eb-container{max-width:1400px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 5px 25px rgba(0,0,0,.08);overflow:hidden}
-.eb-header{background:linear-gradient(135deg,var(--primary-darker),var(--primary-dark));color:#fff;padding:25px 30px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
-.eb-header h1{font-size:1.8rem;display:flex;align-items:center;gap:12px}
-.eb-header .header-actions{display:flex;gap:10px;align-items:center}
-.eb-hint{color:#eaf6ff;font-size:.95rem;display:flex;gap:8px;align-items:center}
+.eb-container{max-width:1120px;margin:0 auto;background:var(--surface-0);border:0.8px solid var(--border-color);border-radius:var(--border-radius);box-shadow:var(--shadow-sm);overflow:hidden}
+.eb-header{background:var(--surface-1);color:var(--text-strong);padding:20px 24px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:0.8px solid var(--border-color)}
+.eb-header h1{font-size:1.8rem;display:flex;align-items:center;gap:9.6px}
+.eb-header .header-actions{display:flex;gap:8px;align-items:center}
+.eb-hint{color:var(--text-muted);font-size:.95rem;display:flex;gap:6.4px;align-items:center}
 
 /* ===== أدوات المساعدة ===== */
-.eb-tools{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px 30px;border-bottom:1px solid #eee;background:#f8fafc}
-.tokens-panel,.templates-panel{background:#fff;border:1px solid var(--border-color,#e5e7eb);border-radius:12px;padding:14px;box-shadow:var(--shadow-sm)}
-.eb-label{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--primary-darker);margin-bottom:10px}
-.eb-tokens{display:flex;flex-wrap:wrap;gap:8px}
-.eb-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;font-size:.92rem;border-radius:999px;background:var(--primary-light);color:var(--primary-darker);cursor:pointer;user-select:none;transition:var(--transition)}
-.eb-chip:hover{background:var(--primary);color:#fff}
-.tpl-row{display:flex;gap:8px;flex-wrap:wrap}
-.tpl-row .form-control{min-width:220px}
+.eb-tools{display:grid;grid-template-columns:1fr 1fr;gap:12.8px;padding:16px 24px;border-bottom:0.8px solid var(--border-color);background:var(--surface-1)}
+.tokens-panel,.templates-panel{background:var(--surface-0);border:0.8px solid var(--border-color);border-radius:var(--border-radius);padding:11.2px;box-shadow:var(--shadow-sm)}
+.eb-label{display:flex;align-items:center;gap:6.4px;font-weight:700;color:var(--primary-darker);margin-bottom:8px}
+.eb-tokens{display:flex;flex-wrap:wrap;gap:6.4px}
+.eb-chip{display:inline-flex;align-items:center;gap:4.8px;padding:6.4px 8px;font-size:.92rem;border-radius:799.2px;background:var(--primary-50);color:var(--primary-700);border:0.8px solid var(--primary-300);cursor:pointer;user-select:none;transition:var(--transition)}
+.eb-chip:hover{background:var(--primary);color:var(--text-inverse)}
+.tpl-row{display:flex;gap:6.4px;flex-wrap:wrap}
+.tpl-row .form-control{min-width:176px}
 
 /* ===== منطقة الكتابة ===== */
-.eb-write{display:grid;grid-template-columns:2fr 1fr;gap:16px;padding:20px 30px;border-bottom:1px solid #eee;background:#fff}
-.form-control,.filter-select{padding:12px 15px;border-radius:8px;border:1px solid #ddd;background:#fff;font-size:1rem;transition:var(--transition)}
-.form-control:focus,.filter-select:focus{border-color:var(--primary);outline:none;box-shadow:0 0 0 3px rgba(33,158,188,.2)}
-.links-panel{background:#fff;border:1px solid var(--border-color,#e5e7eb);border-radius:12px;padding:14px;box-shadow:var(--shadow-sm);height:100%;max-width:550px}
-.link-row{display:flex;gap:8px;margin-bottom:8px}
-.eb-hint.sm{font-size:.85rem;color:var(--text-light)}
-.eb-compose-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:0 30px 20px}
+.eb-write{display:grid;grid-template-columns:2fr 1fr;gap:12.8px;padding:16px 24px;border-bottom:0.8px solid var(--border-color);background:var(--surface-0)}
+.form-control,.filter-select{padding:9.6px 12px;border-radius:6.4px;border:0.8px solid var(--border-color);background:var(--surface-0);color:var(--text);font-size:1rem;transition:var(--transition)}
+.form-control:focus,.filter-select:focus{border-color:var(--primary);outline:none;box-shadow:var(--focus-ring)}
+.links-panel{background:var(--surface-0);border:0.8px solid var(--border-color);border-radius:var(--border-radius);padding:11.2px;box-shadow:var(--shadow-sm);height:100%;max-width:440px}
+.link-row{display:flex;gap:6.4px;margin-bottom:6.4px}
+.eb-hint.sm{font-size:.85rem;color:var(--text-muted)}
+.eb-compose-row{display:flex;gap:6.4px;align-items:center;flex-wrap:wrap;padding:0 24px 16px}
 
 /* ===== شريط المستهدفين ===== */
-.eb-list-header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 30px;background:#fff;border-bottom:1px solid #eee}
-.eb-badge{display:inline-flex;align-items:center;gap:6px;background:var(--primary-light);color:var(--primary-darker);padding:6px 12px;border-radius:999px;font-weight:700;font-size:.95rem;border:1px solid rgba(0,0,0,.05)}
+.eb-list-header{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12.8px 24px;background:var(--surface-0);border-bottom:0.8px solid var(--border-color)}
+.eb-badge{display:inline-flex;align-items:center;gap:4.8px;background:var(--primary-50);color:var(--primary-700);padding:4.8px 9.6px;border-radius:799.2px;font-weight:700;font-size:.95rem;border:0.8px solid var(--primary-300)}
 
 /* ===== المودال ===== */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:1002}
 .modal-overlay.active{display:flex}
-.modal-card{width:min(1200px,96%);max-height:90vh;overflow:auto;background:#fff;border-radius:16px;box-shadow:0 16px 40px rgba(0,0,0,.2)}
-.modal-head{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;background:linear-gradient(135deg,var(--primary-darker),var(--primary-dark));color:#fff}
-.modal-body{padding:18px 22px}
-.modal-actions{display:flex;gap:8px;align-items:center;margin-bottom:12px}
-.btn{padding:12px 20px;border:none;border-radius:8px;cursor:pointer;display:inline-flex;gap:8px;align-items:center;font-weight:600;transition:var(--transition)}
+.modal-card{width:min(960px,96%);max-height:90vh;overflow:auto;background:var(--surface-0);border:0.8px solid var(--border-color);border-radius:var(--border-radius);box-shadow:var(--shadow-lg)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:14.4px 17.6px;background:var(--surface-1);color:var(--text-strong);border-bottom:0.8px solid var(--border-color)}
+.modal-body{padding:14.4px 17.6px}
+.modal-actions{display:flex;gap:6.4px;align-items:center;margin-bottom:9.6px}
+.btn{padding:9.6px 16px;border:none;border-radius:6.4px;cursor:pointer;display:inline-flex;gap:6.4px;align-items:center;font-weight:600;transition:var(--transition)}
 .btn-primary{background:var(--accent);color:var(--primary-darker)}
-.btn-primary:hover{background:var(--accent-dark);transform:translateY(-2px)}
-.btn-secondary{background:var(--primary);color:#fff}
-.btn-secondary:hover{background:var(--primary-dark);transform:translateY(-2px)}
+.btn-primary:hover{background:var(--accent-dark);transform:translateY(-1.6px)}
+.btn-secondary{background:var(--primary);color:var(--text-inverse)}
+.btn-secondary:hover{background:var(--primary-dark);transform:translateY(-1.6px)}
 .btn-light{background:var(--btn-neutral-bg)}
 .btn-light:hover{background:var(--btn-neutral-hover)}
-.btn-xs{padding:6px 10px;font-size:.8rem}
+.btn-xs{padding:4.8px 8px;font-size:.8rem}
 
 /* فلاتر داخل المودال */
-.filter-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:12px}
-.filter-group{display:flex;flex-direction:column;gap:6px}
-.filter-group label{font-weight:600;color:var(--primary-darker);display:flex;gap:8px;align-items:center}
-.filter-select[multiple]{min-height:160px}
+.filter-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(208px,1fr));gap:11.2px;margin-bottom:9.6px}
+.filter-group{display:flex;flex-direction:column;gap:4.8px}
+.filter-group label{font-weight:600;color:var(--primary-darker);display:flex;gap:6.4px;align-items:center}
+.filter-select[multiple]{min-height:128px}
 
 /* جدول داخل المودال */
-.courses-table{width:100%;border-collapse:collapse;min-width:980px}
-.courses-table th{background:var(--primary);color:#fff;padding:8px 5px;text-align:center}
-.courses-table td{padding:12px;border-bottom:1px solid #eee;text-align:center}
-.courses-table tr:nth-child(even){background:#f8fafc}
-.courses-table tr:hover{background:#e3f4ff}
-.no-results{text-align:center;padding:30px;color:var(--text-light)}
-.no-results i{font-size:4rem;color:var(--primary-light);margin-bottom:10px}
+.courses-table{width:100%;border-collapse:collapse;min-width:784px}
+.courses-table th{background:var(--primary);color:var(--text-inverse);padding:6.4px 4px;text-align:center}
+.courses-table td{padding:9.6px;border-bottom:0.8px solid var(--border-color);text-align:center}
+.courses-table tr:nth-child(even){background:var(--surface-1)}
+.courses-table tr:hover{background:var(--primary-50)}
+.no-results{text-align:center;padding:24px;color:var(--text-muted)}
+.no-results i{font-size:4rem;color:var(--primary-300);margin-bottom:8px}
 
 /* تقدّم الإرسال */
-#sendProgress{margin:12px 30px 22px;background:#fff;border:1px dashed #ddd;border-radius:12px;padding:12px;display:none}
-#sendStatus{color:var(--text-light);margin-bottom:6px}
-#sendBar{height:8px;width:0;background:var(--accent);border-radius:999px;transition:width .3s}
+#sendProgress{margin:9.6px 24px 17.6px;background:var(--surface-0);border:0.8px dashed var(--border-color);border-radius:var(--border-radius);padding:9.6px;display:none}
+#sendStatus{color:var(--text-muted);margin-bottom:4.8px}
+#sendBar{height:6.4px;width:0;background:var(--accent);border-radius:799.2px;transition:width .3s}
 
 /* المعاينة المضمّنة */
-.preview-wrap{padding:12px 30px 24px;background:#fff}
-.preview-head{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-.preview-pane{border:1px solid #e5e7eb;border-radius:12px;overflow:hidden}
-.preview-pane iframe{width:100%;height:520px;border:0;display:block}
+.preview-wrap{padding:9.6px 24px 19.2px;background:var(--surface-0)}
+.preview-head{display:flex;gap:6.4px;align-items:center;margin-bottom:6.4px}
+.preview-pane{border:0.8px solid var(--border-color);border-radius:var(--border-radius);overflow:hidden}
+.preview-pane iframe{width:100%;height:416px;border:0;display:block}
 
 /* Pagination */
-.pagination{display:flex;justify-content:center;align-items:center;margin-top:30px;gap:8px}
-.pagination-btn{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;background-color:white;color:var(--primary);border:1px solid #ddd;cursor:pointer;transition:var(--transition);font-weight:600}
-.pagination-btn:hover:not(.disabled){background-color:var(--primary);color:white;border-color:var(--primary)}
-.pagination-btn.active{background-color:var(--primary);color:white;border-color:var(--primary)}
+.pagination{display:flex;justify-content:center;align-items:center;margin-top:24px;gap:6.4px}
+.pagination-btn{width:32px;height:32px;border-radius:6.4px;display:flex;align-items:center;justify-content:center;background-color:var(--surface-0);color:var(--primary);border:0.8px solid var(--border-color);cursor:pointer;transition:var(--transition);font-weight:600}
+.pagination-btn:hover:not(.disabled){background-color:var(--primary);color:var(--text-inverse);border-color:var(--primary)}
+.pagination-btn.active{background-color:var(--primary);color:var(--text-inverse);border-color:var(--primary)}
 .pagination-btn.disabled{opacity:0.5;cursor:not-allowed}
-.pagination-info{margin:0 15px;color:var(--text-light);font-weight:500}
+.pagination-info{margin:0 12px;color:var(--text-muted);font-weight:500}
 
 /* ===== Outbox Modal ===== */
 .eb-ox-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:1100}
 .eb-ox-overlay.active{display:block}
-.eb-ox-modal{width:1000px;max-width:95vw;height:85vh;max-height:90vh;margin:40px auto;background:#fff;border-radius:14px;overflow:hidden;box-shadow:var(--shadow-lg);display:flex;flex-direction:column}
-.eb-ox-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;background:linear-gradient(135deg,var(--primary-darker),var(--primary-dark));color:#fff}
-.eb-ox-actions{display:flex;align-items:center;gap:8px}
+.eb-ox-modal{width:800px;max-width:95vw;height:85vh;max-height:90vh;margin:32px auto;background:var(--surface-0);border:0.8px solid var(--border-color);border-radius:var(--border-radius);overflow:hidden;box-shadow:var(--shadow-lg);display:flex;flex-direction:column}
+.eb-ox-header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9.6px 12.8px;background:var(--surface-1);color:var(--text-strong);border-bottom:0.8px solid var(--border-color)}
+.eb-ox-actions{display:flex;align-items:center;gap:6.4px}
 .eb-ox-body{flex:1;display:flex;min-height:0}
-.eb-ox-sidebar{width:320px;min-width:260px;border-left:1px solid #eee;background:#fafafa;overflow-y:auto}
+.eb-ox-sidebar{width:256px;min-width:208px;border-left:0.8px solid var(--border-color);background:var(--surface-1);overflow-y:auto}
 .eb-ox-list{list-style:none;margin:0;padding:0}
-.eb-ox-content{flex:1;overflow-y:auto;padding:16px}
-.eb-ox-empty{text-align:center;color:var(--text-light);padding:40px 10px}
-.eb-ox-empty i{font-size:56px;color:var(--primary-light);display:block;margin-bottom:8px}
+.eb-ox-content{flex:1;overflow-y:auto;padding:12.8px}
+.eb-ox-empty{text-align:center;color:var(--text-muted);padding:32px 8px}
+.eb-ox-empty i{font-size:44.8px;color:var(--primary-300);display:block;margin-bottom:6.4px}
 
 /* Files upload styles */
-#eb-dropzone{border:2px dashed #cbd5e1;border-radius:10px;padding:14px;text-align:center;background:#f8fafc;cursor:pointer;transition:all 0.3s}
-#eb-dropzone:hover{border-color:#94a3b8;background:#f1f5f9}
-#eb-upload-progress{background:#e5e7eb;height:8px;border-radius:6px;overflow:hidden}
+#eb-dropzone{border:1.6px dashed var(--border-color);border-radius:var(--border-radius);padding:11.2px;text-align:center;background:var(--surface-1);cursor:pointer;transition:all 0.3s}
+#eb-dropzone:hover{border-color:var(--primary-300);background:var(--surface-2)}
+#eb-upload-progress{background:var(--surface-2);height:6.4px;border-radius:4.8px;overflow:hidden}
 #eb-upload-bar{height:100%;background:#22c55e;transition:width 0.3s}
-.chip{background:#eef2ff;color:#1e40af;padding:6px 10px;border-radius:999px;display:inline-flex;gap:8px;align-items:center;margin:2px}
+.chip{background:var(--primary-50);color:var(--primary-700);border:0.8px solid var(--primary-300);padding:4.8px 8px;border-radius:799.2px;display:inline-flex;gap:6.4px;align-items:center;margin:1.6px}
 
 /* Responsive */
 @media (max-width:900px){
@@ -111,7 +111,7 @@ $csrfTokenValue = function_exists('csrf_hash')  ? csrf_hash()  : '';
 }
 
 /* Email body fixed dimensions */
-#mail-body{width:800px;height:400px;max-width:100%;box-sizing:border-box}
+#mail-body{width:640px;height:320px;max-width:100%;box-sizing:border-box}
 </style>
 
 <div id="emailBroadcastPage" class="eb-container" dir="rtl">
@@ -161,7 +161,7 @@ $csrfTokenValue = function_exists('csrf_hash')  ? csrf_hash()  : '';
   </section>
 
   <!-- عنوان الرسالة -->
-  <section style="padding:16px 30px;background:#fff;border-bottom:1px solid #eee">
+  <section style="padding:16px 30px;background:var(--surface-0);border-bottom:1px solid var(--border-color)">
     <input type="text" id="mail-subject" class="form-control" placeholder="الموضوع" style="margin-bottom:10px">
     <input type="text" id="mail-preheader" class="form-control" placeholder="سطر المعاينة (اختياري: يظهر بجانب العنوان في صناديق البريد)" style="margin-bottom:6px">
     <small class="small">يفضّل 35–90 حرفًا. يُستخدم كسطر المعاينة في تطبيقات البريد.</small>
@@ -216,7 +216,7 @@ $csrfTokenValue = function_exists('csrf_hash')  ? csrf_hash()  : '';
         <div style="pointer-events:none">
           <i class="fas fa-cloud-upload-alt" style="font-size:22px"></i>
           <div style="margin-top:6px">اسحب الملف هنا أو <u>انقر للاختيار</u></div>
-          <div class="sm" style="color:#64748b;margin-top:4px">الحد الأقصى ~ 12MB</div>
+          <div class="sm" style="color:var(--text-muted);margin-top:4px">الحد الأقصى ~ 12MB</div>
         </div>
         <input id="eb-file-input" type="file" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.zip,.txt" style="display:none">
       </div>
@@ -240,10 +240,10 @@ $csrfTokenValue = function_exists('csrf_hash')  ? csrf_hash()  : '';
       <div style="margin-top:14px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
           <strong><i class="far fa-folder-open"></i> ملفاتي الأخيرة</strong>
-          <span class="sm" style="color:#64748b">(اضغط لإدراج صورة أو إضافتها كمرفق)</span>
+          <span class="sm" style="color:var(--text-muted)">(اضغط لإدراج صورة أو إضافتها كمرفق)</span>
         </div>
-        <ul id="eb-files-list" style="list-style:none;margin:0;padding:0;max-height:220px;overflow:auto;border:1px solid #eee;border-radius:8px">
-          <li id="eb-files-empty" style="padding:10px;color:#64748b;text-align:center">لا توجد ملفات بعد.</li>
+        <ul id="eb-files-list" style="list-style:none;margin:0;padding:0;max-height:220px;overflow:auto;border:1px solid var(--border-color);border-radius:8px">
+          <li id="eb-files-empty" style="padding:10px;color:var(--text-muted);text-align:center">لا توجد ملفات بعد.</li>
         </ul>
       </div>
 
@@ -251,10 +251,10 @@ $csrfTokenValue = function_exists('csrf_hash')  ? csrf_hash()  : '';
       <div style="margin-top:12px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
           <strong><i class="fas fa-paperclip"></i> المرفقات المختارة للإرسال</strong>
-          <span class="sm" style="color:#64748b">(ستُرسل كمرفقات بالفعل)</span>
+          <span class="sm" style="color:var(--text-muted)">(ستُرسل كمرفقات بالفعل)</span>
         </div>
         <div id="eb-attachments-chips" style="display:flex;flex-wrap:wrap;gap:6px">
-          <span id="eb-no-attachments" class="sm" style="color:#94a3b8">لا يوجد مرفقات محددة.</span>
+          <span id="eb-no-attachments" class="sm" style="color:var(--text-muted)">لا يوجد مرفقات محددة.</span>
         </div>
       </div>
     </div>
@@ -286,7 +286,7 @@ $csrfTokenValue = function_exists('csrf_hash')  ? csrf_hash()  : '';
   <!-- شريط التقدم -->
   <div id="sendProgress">
     <div id="sendStatus"></div>
-    <div style="height:8px;background:#eee;border-radius:999px;overflow:hidden">
+    <div style="height:8px;background:var(--surface-2);border-radius:999px;overflow:hidden">
       <div id="sendBar"></div>
     </div>
   </div>

@@ -17,13 +17,13 @@ class PagesController extends Controller
         'manage_users',
         'account',
         'pending_requests',
-        'service_requests',
         'service_chat',
+        'notifications',
         'email_broadcast',
         'library_upload',
         'plans',
         'ocr_upload',
-        'service_requests_new',
+        'ai_tools',
 
     ];
 

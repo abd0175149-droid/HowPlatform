@@ -6,7 +6,7 @@
 /* ========================================================================== *
  *  Version (cache-busting) — عدّل الرقم عند كل نشر
  * ========================================================================== */
-const VERSION = 'v=2.0.0'; // ← تم رفع الإصدار لتفعيل المهام החדشة
+const VERSION = 'v=2.1.3'; // ← طلبات الخدمة: أول رسالة الطالب + معاينة القائمة + زر الحذف النهائي
 
 /* ========================================================================== *
  *  Section Modules (ESM) — خريطة الأقسام
@@ -22,14 +22,14 @@ const SECTION_MODULES = {
   manage_users: () => import(`./sections/manage_users.js?${VERSION}`),
   account: () => import(`./sections/account.js?${VERSION}`),
   pending_requests: () => import(`./sections/pending_requests.js?${VERSION}`),
-  service_requests: () => import(`./sections/service_requests_table.js?${VERSION}`),
   service_chat: () => import(`./sections/service_requests_chat.js?${VERSION}`),
   email_broadcast: () => import(`./sections/email_broadcast.js?${VERSION}`),
   library_upload: () => import(`./sections/library_upload.js?${VERSION}`),
   plans: () => import(`./sections/plans.js?${VERSION}`),
 
   ai_lesson_plan: () => import(`./ai_lesson_plan.js?${VERSION}`),
-  service_requests_new: () => import(`./sections/service_requests_new.js?${VERSION}`),
+  ai_tools: () => import(`./sections/ai_tools.js?${VERSION}`),
+  notifications: () => import(`./sections/notifications.js?${VERSION}`),
 
 
 };

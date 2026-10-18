@@ -5,6 +5,85 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/tokens.css') }}">
 <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+<style>
+  /* أقسام النقاط/المحفظة/الاشتراكات/الخطط داخل الواجهة الموحّدة */
+  .pl-hero{display:flex;align-items:center;gap:1rem;padding:1.15rem 1.25rem;border-radius:16px;}
+  .pl-hero .ic{width:52px;height:52px;border-radius:14px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+  .pl-hero .v{font-size:2rem;font-weight:800;color:var(--text-strong);line-height:1;}
+  .pl-hero .l{color:var(--text-muted);font-size:.82rem;font-weight:700;}
+  .pl-hero.points{background:linear-gradient(135deg,var(--accent-50),#fff);border:1.5px solid var(--accent-200);}
+  .pl-hero.points .ic{background:linear-gradient(135deg,var(--accent-400),var(--accent-600));}
+  .pl-hero.plan{background:linear-gradient(135deg,var(--primary-50),#fff);border:1.5px solid var(--primary-200);}
+  .pl-hero.plan .ic{background:linear-gradient(135deg,var(--primary-500),var(--primary-700));}
+
+  /* ودجت سلسلة الدخول: 5 أيام → +50 نقطة */
+  .pl-streak{padding:1.15rem 1.25rem;border-radius:16px;background:linear-gradient(135deg,var(--primary-50),#fff);border:1.5px solid var(--primary-200);}
+  .pl-streak .head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin-bottom:.85rem;}
+  .pl-streak .ttl{display:flex;align-items:center;gap:.6rem;font-weight:800;color:var(--text-strong);}
+  .pl-streak .ttl .ic{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.05rem;}
+  .pl-streak .prize{display:inline-flex;align-items:center;gap:.4rem;background:var(--accent-50);border:1.5px solid var(--accent-200);color:var(--accent-700);font-weight:800;font-size:.8rem;padding:.3rem .8rem;border-radius:999px;white-space:nowrap;}
+  .pl-days{display:flex;align-items:center;gap:.35rem;}
+  .pl-day{flex:1;display:flex;flex-direction:column;align-items:center;gap:.35rem;min-width:0;}
+  .pl-day .dot{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;background:var(--neutral-100);border:2px solid var(--neutral-200);color:var(--text-muted);transition:all .2s;}
+  .pl-day.done .dot{background:linear-gradient(135deg,#fbbf24,#f59e0b);border-color:#f59e0b;color:#fff;box-shadow:0 4px 10px rgba(245,158,11,.35);}
+  .pl-day.today .dot{border-color:#f59e0b;border-style:dashed;color:#b45309;}
+  .pl-day.prize-day .dot{width:44px;height:44px;font-size:1rem;}
+  .pl-day.prize-day.done .dot{background:linear-gradient(135deg,var(--accent-400),var(--accent-600));}
+  .pl-day .lbl{font-size:.68rem;font-weight:700;color:var(--text-muted);white-space:nowrap;}
+  .pl-connector{height:3px;flex:0 0 12px;border-radius:2px;background:var(--neutral-200);margin-bottom:1.2rem;}
+  .pl-connector.done{background:#f59e0b;}
+  .pl-streak .note{margin-top:.85rem;color:var(--text-muted);font-size:.82rem;font-weight:600;line-height:1.7;}
+  .pl-streak .note strong{color:var(--accent-700);}
+
+  /* سقف مكافآت الدعوة */
+  .pl-ref-cap{margin-top:.9rem;padding:.85rem 1rem;border-radius:12px;background:var(--neutral-50);border:1.5px solid var(--neutral-200);}
+  .pl-ref-cap .row1{display:flex;justify-content:space-between;align-items:center;gap:.75rem;flex-wrap:wrap;margin-bottom:.5rem;}
+  .pl-ref-cap .t{font-weight:800;color:var(--text-strong);font-size:.85rem;}
+  .pl-ref-cap .c{font-weight:800;color:var(--accent-700);font-size:.85rem;}
+  .pl-ref-bar{height:8px;border-radius:999px;background:var(--neutral-200);overflow:hidden;}
+  .pl-ref-bar > span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent-400),var(--accent-600));transition:width .3s;}
+
+  .pl-table{width:100%;border-collapse:collapse;}
+  .pl-table thead th{color:var(--text-muted);font-weight:700;font-size:.8rem;text-align:start;padding:.55rem .5rem;border-bottom:1.5px solid var(--neutral-200);}
+  .pl-table tbody td{padding:.6rem .5rem;border-bottom:1px solid var(--neutral-100);font-size:.88rem;}
+  .pl-pill{display:inline-flex;align-items:center;gap:.3rem;padding:.15rem .6rem;border-radius:999px;font-size:.72rem;font-weight:800;}
+  .pl-pill.ok{background:var(--success-100);color:var(--success-600);}
+  .pl-pill.muted{background:var(--neutral-100);color:var(--text-muted);}
+  .pl-pill.warn{background:var(--warning-100);color:var(--warning-600);}
+
+  .pl-sub-current{background:linear-gradient(135deg,var(--primary-500),var(--primary-800));color:#fff;border-radius:16px;padding:1.5rem;}
+  .pl-sub-current .p{font-size:1.5rem;font-weight:800;}
+
+  .pl-plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;}
+  .pl-plan{position:relative;background:#fff;border:1.5px solid var(--neutral-200);border-radius:16px;padding:1.25rem;display:flex;flex-direction:column;gap:.7rem;transition:all .2s ease;}
+  .pl-plan:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:var(--primary-200);}
+  .pl-plan.cur{border-color:var(--accent-500);box-shadow:0 8px 22px rgba(253,158,2,.16);}
+  .pl-plan .lvl{align-self:flex-start;font-size:.7rem;font-weight:800;padding:.2rem .65rem;border-radius:999px;background:var(--primary-50);color:var(--primary-700);}
+  .pl-plan .nm{font-size:1.2rem;font-weight:800;color:var(--text-strong);}
+  .pl-plan .pr{font-size:1.7rem;font-weight:800;color:var(--primary-700);line-height:1;}
+  .pl-plan .pr small{font-size:.8rem;font-weight:600;color:var(--text-muted);}
+  .pl-plan .dur{color:var(--text-muted);font-size:.8rem;}
+  .pl-plan ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.45rem;}
+  .pl-plan li{display:flex;gap:.5rem;align-items:flex-start;font-size:.85rem;color:var(--text);font-weight:600;}
+  .pl-plan li i{color:var(--success-500);margin-top:.2rem;}
+  .pl-plan .cur-badge{position:absolute;top:-10px;inset-inline-start:1.1rem;background:var(--accent-500);color:#fff;font-size:.7rem;font-weight:800;padding:.15rem .7rem;border-radius:999px;}
+  .pl-grant{font-size:.8rem;color:var(--accent-600);font-weight:700;}
+
+  .pl-pkg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.8rem;}
+  .pl-pkg{background:linear-gradient(135deg,var(--primary-800),var(--primary-900));color:#fff;border-radius:14px;padding:1.1rem;text-align:center;}
+  .pl-pkg .pts{font-size:1.5rem;font-weight:800;}
+  .pl-pkg .pts small{font-size:.75rem;opacity:.85;}
+  .pl-pkg .prc{margin-top:.3rem;font-weight:700;color:var(--accent-300);}
+
+  /* شبكة المنصّات */
+  .pl-apps{margin-inline-start:auto;}
+  .pl-apps .app-launcher-menu{min-width:280px;padding:.75rem;border:none;border-radius:16px;box-shadow:var(--shadow-lg);}
+  .pl-apps .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;}
+  .pl-apps .tile{display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:.8rem .4rem;border-radius:12px;color:var(--text-strong);text-align:center;border:1.5px solid transparent;transition:all .18s ease;}
+  .pl-apps .tile:hover{background:var(--primary-50);border-color:var(--primary-100);color:var(--primary-700);transform:translateY(-2px);}
+  .pl-apps .tile .ic{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;background:linear-gradient(135deg,var(--primary-500),var(--primary-700));}
+  .pl-apps .tile .lbl{font-size:.72rem;font-weight:700;line-height:1.2;}
+</style>
 @endpush
 
 @section('content')
@@ -54,6 +133,13 @@
       <div class="profile-alert profile-alert-success auto-dismiss">
         <i class="fa fa-check-circle profile-alert-icon"></i>
         <div>{{ session('ok') }}</div>
+      </div>
+    @endif
+
+    @if (session('err'))
+      <div class="profile-alert profile-alert-danger auto-dismiss">
+        <i class="fa fa-exclamation-circle profile-alert-icon"></i>
+        <div>{{ session('err') }}</div>
       </div>
     @endif
 
@@ -110,12 +196,24 @@
       </div>
     @endif
 
+    @php $P = is_array($plans ?? null) ? $plans : ['available'=>false]; @endphp
+
     {{-- Sections Navigation Chips --}}
     <div class="profile-sections-nav">
       <a href="#" class="section-chip active" data-section="auth">
         <span class="chip-icon"><i class="fa fa-user-circle"></i></span>
         <span class="chip-text">معلومات الحساب</span>
       </a>
+      @if(!empty($P['available']))
+      <a href="#" class="section-chip" data-section="points">
+        <span class="chip-icon"><i class="fa fa-coins"></i></span>
+        <span class="chip-text">النقاط والمحفظة</span>
+      </a>
+      <a href="#" class="section-chip" data-section="plans">
+        <span class="chip-icon"><i class="fa fa-crown"></i></span>
+        <span class="chip-text">الاشتراكات والخطط</span>
+      </a>
+      @endif
       <a href="#" class="section-chip" data-section="diploma">
         <span class="chip-icon"><i class="fa fa-graduation-cap"></i></span>
         <span class="chip-text">بيانات الدبلوم</span>
@@ -179,6 +277,223 @@
             </form>
           </div>
         </section>
+
+        {{-- Points & Wallet Section (موحّد من منصّة النقاط) --}}
+        @if(!empty($P['available']))
+        <section class="profile-section-card" id="section-points">
+          <div class="section-card-header">
+            <h3 class="section-card-title"><span class="section-card-title-icon"><i class="fa fa-coins"></i></span><span>النقاط والمحفظة</span></h3>
+            <div class="section-card-actions">
+              <button type="button" class="profile-btn profile-btn-primary profile-btn-sm" data-section="plans"><i class="fa fa-arrow-up-right-dots"></i> ترقية الحساب</button>
+            </div>
+          </div>
+          <div class="section-card-body">
+            <div class="profile-form-grid">
+              <div class="pl-hero points">
+                <div class="ic"><i class="fa fa-coins"></i></div>
+                <div><div class="v">{{ number_format($P['points']) }}</div><div class="l">رصيد النقاط</div></div>
+              </div>
+
+              {{-- سلسلة الدخول: 5 أيام متتالية → +50 نقطة --}}
+              @php $streak = max(0, min(5, (int) $P['streak'])); @endphp
+              <div class="pl-streak">
+                <div class="head">
+                  <div class="ttl"><span class="ic"><i class="fa fa-fire"></i></span> سلسلة الدخول اليومي</div>
+                  <span class="prize"><i class="fa fa-gift"></i> أكمل 5 أيام = +50 نقطة</span>
+                </div>
+                <div class="pl-days">
+                  @for($d = 1; $d <= 5; $d++)
+                    @if($d > 1)<span class="pl-connector {{ $streak >= $d ? 'done' : '' }}"></span>@endif
+                    <div class="pl-day {{ $streak >= $d ? 'done' : '' }} {{ $streak + 1 === $d ? 'today' : '' }} {{ $d === 5 ? 'prize-day' : '' }}">
+                      <span class="dot">@if($d === 5)<i class="fa fa-gift"></i>@elseif($streak >= $d)<i class="fa fa-check"></i>@else{{ $d }}@endif</span>
+                      <span class="lbl">{{ $d === 5 ? '+50 نقطة' : 'يوم ' . $d }}</span>
+                    </div>
+                  @endfor
+                </div>
+                <div class="note">
+                  سجّل دخولك <strong>5 أيام متتالية</strong> لتحصل على <strong>50 نقطة</strong> تلقائيًا، ثم تبدأ سلسلة جديدة.
+                  @if($streak > 0) أنت الآن في اليوم <strong>{{ $streak }}</strong> — واصل! @endif
+                  الانقطاع يومًا واحدًا يُعيد السلسلة من البداية.
+                </div>
+              </div>
+            </div>
+
+            @if(!empty($P['referral']['code']))
+            @php
+              $refRewarded = (int) ($P['referral']['rewarded'] ?? 0);
+              $refMax      = max(1, (int) ($P['referral']['max'] ?? 5));
+              $refPct      = min(100, (int) round($refRewarded * 100 / $refMax));
+            @endphp
+            <div style="margin-top:1.5rem;">
+              <h4 style="font-size:1rem;font-weight:800;color:var(--text-strong);margin-bottom:.75rem;"><i class="fa fa-user-plus" style="color:var(--primary-500);"></i> ادعُ صديقًا</h4>
+              <div class="profile-form-grid">
+                <div class="profile-form-group">
+                  <label class="profile-form-label">كود الإحالة</label>
+                  <input type="text" class="profile-form-input" value="{{ $P['referral']['code'] }}" readonly onclick="this.select()">
+                </div>
+                <div class="profile-form-group">
+                  <label class="profile-form-label">رابط الدعوة</label>
+                  <input type="text" class="profile-form-input" value="{{ $P['referral']['link'] }}" readonly onclick="this.select()">
+                </div>
+              </div>
+              <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.75rem;">
+                <button type="button" class="profile-btn profile-btn-secondary profile-btn-sm" onclick="plCopy('{{ $P['referral']['link'] }}', this)"><i class="fa fa-copy"></i> نسخ الرابط</button>
+                <a class="profile-btn profile-btn-primary profile-btn-sm" style="background:linear-gradient(135deg,#25d366,#128c7e);border-color:#128c7e;" href="https://wa.me/?text={{ rawurlencode('انضم إلى منصّة HOW عبر رابط دعوتي: '.$P['referral']['link']) }}" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i> مشاركة عبر واتساب</a>
+              </div>
+
+              {{-- سقف مكافآت الدعوة: 100 نقطة × 5 أصدقاء كحد أقصى --}}
+              <div class="pl-ref-cap">
+                <div class="row1">
+                  <span class="t"><i class="fa fa-coins" style="color:var(--accent-500);"></i> مكافآت الدعوة المُحصَّلة</span>
+                  <span class="c">{{ $refRewarded }} من {{ $refMax }}</span>
+                </div>
+                <div class="pl-ref-bar"><span style="width:{{ $refPct }}%;"></span></div>
+                <div style="margin-top:.5rem;color:var(--text-muted);font-size:.8rem;font-weight:600;line-height:1.7;">
+                  تحصل على <strong style="color:var(--accent-700);">100 نقطة</strong> عن كل صديق يسجّل عبر رابطك ويُكمل ملفّه —
+                  بحدّ أقصى <strong style="color:var(--accent-700);">{{ $refMax }} أصدقاء</strong>.
+                  @if($refRewarded >= $refMax) وصلتَ للحدّ الأقصى، شكرًا لنشرك المنصّة! 🎉 @endif
+                </div>
+              </div>
+
+              <div style="margin-top:.75rem;display:flex;gap:1.5rem;flex-wrap:wrap;color:var(--text-muted);font-size:.85rem;font-weight:700;">
+                <span>دعوات: <strong style="color:var(--text-strong);">{{ number_format($P['referral']['total']) }}</strong></span>
+                <span>مكتملة: <strong style="color:var(--text-strong);">{{ number_format($P['referral']['completed']) }}</strong></span>
+                <span>قيد الانتظار: <strong style="color:var(--text-strong);">{{ number_format($P['referral']['pending']) }}</strong></span>
+              </div>
+            </div>
+            @endif
+
+            <div style="margin-top:1.5rem;">
+              <h4 style="font-size:1rem;font-weight:800;color:var(--text-strong);margin-bottom:.75rem;"><i class="fa fa-ticket" style="color:var(--accent-500);"></i> استبدال بطاقة/كود</h4>
+              <form method="post" action="{{ route('profile.redeem') }}" style="display:flex;gap:.6rem;flex-wrap:wrap;">
+                @csrf
+                <input type="text" name="code" class="profile-form-input" style="flex:1;min-width:220px;" placeholder="أدخل كود البطاقة" maxlength="60" required>
+                <button class="profile-btn profile-btn-primary"><i class="fa fa-check"></i> تفعيل</button>
+              </form>
+              <div style="color:var(--text-muted);font-size:.8rem;margin-top:.5rem;">بطاقة الاشتراك تُفعّل خطّة، وبطاقة النقاط تضيف رصيدًا إلى محفظتك.</div>
+            </div>
+
+            <div style="margin-top:1.5rem;">
+              <h4 style="font-size:1rem;font-weight:800;color:var(--text-strong);margin-bottom:.5rem;"><i class="fa fa-clock-rotate-left" style="color:var(--text-muted);"></i> آخر حركات المحفظة</h4>
+              <div style="overflow-x:auto;">
+                <table class="pl-table">
+                  <thead><tr><th>الوصف</th><th>النوع</th><th>النقاط</th><th>الرصيد</th><th>التاريخ</th></tr></thead>
+                  <tbody>
+                    @forelse($P['transactions'] as $t)
+                      <tr>
+                        <td>{{ $t['description'] ?? '—' }}</td>
+                        <td><span class="pl-pill muted">{{ $t['kind'] ?? '' }}</span></td>
+                        <td style="font-weight:800;color:{{ (int)($t['points'] ?? 0) >= 0 ? 'var(--success-600)' : 'var(--error-600)' }};">{{ (int)($t['points'] ?? 0) >= 0 ? '+' : '' }}{{ number_format((int)($t['points'] ?? 0)) }}</td>
+                        <td>{{ number_format((int)($t['balance_after'] ?? 0)) }}</td>
+                        <td style="color:var(--text-muted);font-size:.8rem;">{{ !empty($t['created_at']) ? \Illuminate\Support\Carbon::parse($t['created_at'])->format('Y-m-d H:i') : '—' }}</td>
+                      </tr>
+                    @empty
+                      <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:1rem;">لا توجد حركات بعد.</td></tr>
+                    @endforelse
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {{-- Subscriptions & Plans Section --}}
+        @php $curPlanId = (!empty($P['has_plan']) && isset($P['plan']['id'])) ? (int)$P['plan']['id'] : null; @endphp
+        <section class="profile-section-card" id="section-plans">
+          <div class="section-card-header">
+            <h3 class="section-card-title"><span class="section-card-title-icon"><i class="fa fa-crown"></i></span><span>الاشتراكات والخطط</span></h3>
+          </div>
+          <div class="section-card-body">
+            @if(!empty($P['current_sub']))
+              <div class="pl-sub-current">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
+                  <div>
+                    <div style="opacity:.8;font-size:.82rem;font-weight:700;">اشتراكك الحالي</div>
+                    <div class="p">{{ $P['current_sub']['name'] ?? '—' }}</div>
+                    <div style="opacity:.9;font-weight:600;">المستوى {{ $P['current_sub']['level'] ?? 0 }}</div>
+                  </div>
+                  @if(!empty($P['current_sub']['end_at']))
+                  <div style="text-align:start;">
+                    <div style="opacity:.8;font-size:.8rem;">ينتهي في</div>
+                    <div style="font-weight:800;font-size:1.1rem;">{{ \Illuminate\Support\Carbon::parse($P['current_sub']['end_at'])->translatedFormat('Y-m-d') }}</div>
+                  </div>
+                  @endif
+                </div>
+              </div>
+            @else
+              <div style="text-align:center;padding:1.25rem;border:1.5px dashed var(--neutral-300);border-radius:14px;color:var(--text-muted);">
+                <i class="fa fa-id-card" style="font-size:1.5rem;color:var(--primary-400);"></i>
+                <div style="margin-top:.5rem;font-weight:700;">لا يوجد اشتراك فعّال — اختر خطة بالأسفل وفعّلها عبر كود.</div>
+              </div>
+            @endif
+
+            @if(!empty($P['plans']))
+            <h4 style="font-size:1rem;font-weight:800;color:var(--text-strong);margin:1.5rem 0 .75rem;"><i class="fa fa-layer-group" style="color:var(--primary-500);"></i> الخطط المتاحة</h4>
+            <div class="pl-plan-grid">
+              @foreach($P['plans'] as $pl)
+                @php $isCur = $curPlanId && (int)($pl['id'] ?? 0) === $curPlanId; @endphp
+                <div class="pl-plan {{ $isCur ? 'cur' : '' }}">
+                  @if($isCur)<span class="cur-badge"><i class="fa fa-check"></i> خطتك</span>@endif
+                  <span class="lvl">المستوى {{ $pl['level'] ?? 0 }}</span>
+                  <div class="nm">{{ $pl['name'] ?? '' }}</div>
+                  <div class="pr">{{ rtrim(rtrim(number_format((float)($pl['price'] ?? 0), 2), '0'), '.') }} <small>{{ $pl['currency'] ?? 'JOD' }}</small></div>
+                  <div class="dur"><i class="fa fa-calendar-days"></i> لمدة {{ $pl['duration_days'] ?? 0 }} يوم</div>
+                  @if(!empty($pl['grant_points']))<div class="pl-grant"><i class="fa fa-coins"></i> +{{ number_format($pl['grant_points']) }} نقطة عند الاشتراك</div>@endif
+                  @php $feats = collect($pl['features'] ?? [])->filter(fn($f)=> trim((string)($f['feature_text'] ?? ($f['feature_key'] ?? ''))) !== ''); @endphp
+                  @if($feats->count())
+                    <ul>
+                      @foreach($feats as $f)
+                        <li><i class="fa fa-circle-check"></i><span>{{ $f['feature_text'] ?: $f['feature_key'] }}@if(!empty($f['value'])) <strong>: {{ $f['value'] }}</strong>@endif</span></li>
+                      @endforeach
+                    </ul>
+                  @endif
+                  @if(!$isCur)<button type="button" class="profile-btn profile-btn-primary profile-btn-sm" data-section="points" style="margin-top:auto;"><i class="fa fa-ticket"></i> فعّل عبر كود</button>@endif
+                </div>
+              @endforeach
+            </div>
+            @endif
+
+            @if(!empty($P['packages']))
+            <h4 style="font-size:1rem;font-weight:800;color:var(--text-strong);margin:1.5rem 0 .75rem;"><i class="fa fa-coins" style="color:var(--accent-500);"></i> أسعار حزم النقاط</h4>
+            <div class="pl-pkg-grid">
+              @foreach($P['packages'] as $pkg)
+                <div class="pl-pkg">
+                  <div class="pts">{{ number_format($pkg['points'] ?? 0) }} <small>نقطة</small></div>
+                  <div class="prc">{{ rtrim(rtrim(number_format((float)($pkg['price_amount'] ?? 0), 2), '0'), '.') }} {{ $pkg['price_currency'] ?? 'JOD' }}</div>
+                  @if(!empty($pkg['label']))<div style="font-size:.75rem;opacity:.85;margin-top:.25rem;">{{ $pkg['label'] }}</div>@endif
+                </div>
+              @endforeach
+            </div>
+            @endif
+
+            @if(!empty($P['subscriptions']))
+            <h4 style="font-size:1rem;font-weight:800;color:var(--text-strong);margin:1.5rem 0 .5rem;"><i class="fa fa-clock-rotate-left" style="color:var(--text-muted);"></i> سجلّ الاشتراكات</h4>
+            <div style="overflow-x:auto;">
+              <table class="pl-table">
+                <thead><tr><th>الخطة</th><th>الحالة</th><th>البداية</th><th>الانتهاء</th></tr></thead>
+                <tbody>
+                  @foreach($P['subscriptions'] as $s)
+                    @php
+                      $end = !empty($s['end_at']) ? \Illuminate\Support\Carbon::parse($s['end_at']) : null;
+                      $activeNow = ($s['status'] ?? '') === 'active' && ($end === null || $end->isFuture());
+                      $label = ['active'=>'نشط','scheduled'=>'مجدول','canceled'=>'ملغى','cancelled'=>'ملغى','expired'=>'منتهٍ'][$s['status'] ?? ''] ?? ($s['status'] ?? '—');
+                      $cls = $activeNow ? 'ok' : ((($s['status'] ?? '')==='scheduled') ? 'warn' : 'muted');
+                      if(($s['status'] ?? '')==='active' && !$activeNow){ $label='منتهٍ'; $cls='muted'; }
+                    @endphp
+                    <tr>
+                      <td style="font-weight:700;">{{ $s['name'] ?? '—' }}</td>
+                      <td><span class="pl-pill {{ $cls }}">{{ $label }}</span></td>
+                      <td style="color:var(--text-muted);font-size:.8rem;">{{ !empty($s['start_at']) ? \Illuminate\Support\Carbon::parse($s['start_at'])->format('Y-m-d') : '—' }}</td>
+                      <td style="color:var(--text-muted);font-size:.8rem;">{{ $end ? $end->format('Y-m-d') : '—' }}</td>
+                    </tr>
+                  @endforeach
+                </tbody>
+              </table>
+            </div>
+            @endif
+          </div>
+        </section>
+        @endif
 
         {{-- Diploma Section --}}
         <section class="profile-section-card" id="section-diploma">
@@ -444,6 +759,19 @@
 @endsection
 
 @push('scripts')
+<script>
+  // نسخ إلى الحافظة (رابط الدعوة) مع تأكيد بصري
+  function plCopy(text, btn){
+    var done = function(){ if(!btn) return; var o=btn.innerHTML; btn.innerHTML='<i class="fa fa-check"></i> تم النسخ'; setTimeout(function(){btn.innerHTML=o;},1500); };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(function(){ plCopyFb(text); done(); });
+    } else { plCopyFb(text); done(); }
+  }
+  function plCopyFb(text){
+    var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(e){} document.body.removeChild(ta);
+  }
+</script>
 <script>
   const $ = s => document.querySelector(s);
   const $$ = s => document.querySelectorAll(s);

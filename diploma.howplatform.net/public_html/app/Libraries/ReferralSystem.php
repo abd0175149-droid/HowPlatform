@@ -56,7 +56,19 @@ class ReferralSystem
             return null;
         }
 
-        return $this->referralModel->registerReferral($referrerUserId, $referredUserId, $code);
+        $id = $this->referralModel->registerReferral($referrerUserId, $referredUserId, $code);
+
+        // وضع api: سجّل الدعوة في Plans أيضًا (مصدر الكسب الجديد).
+        try {
+            $client = new \App\Libraries\PlansClient();
+            if ($client->earningEnabled()) {
+                $client->recordReferral($referrerUserId, $referredUserId);
+            }
+        } catch (\Throwable $e) {
+            log_message('warning', 'ReferralSystem: Plans recordReferral failed: ' . $e->getMessage());
+        }
+
+        return $id;
     }
 
     /**
@@ -118,6 +130,24 @@ class ReferralSystem
      */
     public function getUserReferralStats(int $userId): array
     {
+        // وضع api: عدّادات الإحالات من Plans مع fail-open للحساب المحلّي.
+        try {
+            $client = new \App\Libraries\PlansClient();
+            if ($client->statsEnabled()) {
+                $res = $client->stats($userId);
+                if (is_array($res) && ($res['ok'] ?? false)) {
+                    return [
+                        'total'     => (int) ($res['total_referrals'] ?? 0),
+                        'pending'   => (int) ($res['pending_referrals'] ?? 0),
+                        'completed' => (int) ($res['completed_referrals'] ?? 0),
+                        'rewarded'  => (int) ($res['completed_referrals'] ?? 0),
+                    ];
+                }
+            }
+        } catch (\Throwable $e) {
+            log_message('warning', 'ReferralSystem::getUserReferralStats Plans failed: ' . $e->getMessage());
+        }
+
         $referrals = $this->referralModel->getUserReferrals($userId);
         
         $stats = [

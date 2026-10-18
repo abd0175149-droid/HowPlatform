@@ -11,7 +11,11 @@
       "Bash(timeout 15 cloudflared access ssh --hostname ssh.grade.sbs)",
       "Bash(echo \"--- exit:$? ---\")",
       "Bash(chmod +x /tmp/akp.sh)",
-      "Bash(SSH_ASKPASS=/tmp/akp.sh SSH_ASKPASS_REQUIRE=force ssh -o StrictHostKeyChecking=accept-new -o PreferredAuthentications=password -o PubkeyAuthentication=no -o NumberOfPasswordPrompts=1 -o ConnectTimeout=30 -o 'ProxyCommand=cloudflared access ssh --hostname %h' sysadmin@ssh.grade.sbs ' *)"
+      "Bash(SSH_ASKPASS=/tmp/akp.sh SSH_ASKPASS_REQUIRE=force ssh -o StrictHostKeyChecking=accept-new -o PreferredAuthentications=password -o PubkeyAuthentication=no -o NumberOfPasswordPrompts=1 -o ConnectTimeout=30 -o 'ProxyCommand=cloudflared access ssh --hostname %h' sysadmin@ssh.grade.sbs ' *)",
+      "Bash(curl -sS -o /dev/null -w \"ocr_upload.js?cb=NOW -> %{http_code}\\\\n\" --max-time 30 \"https://diploma.howplatform.net/assets/js/admin/sections/ocr_upload.js?cb=$\\(date +%s || echo 99\\)\")",
+      "Bash(curl -sS -o /dev/null -w \"taskdetails2.js?cb=NOW -> %{http_code}\\\\n\" --max-time 30 \"https://diploma.howplatform.net/assets/js/students/sections/taskdetails2.js?cb=99887766\")",
+      "Bash(curl -sS -o /dev/null -w \"ocr_upload.js -> %{http_code}\\\\n\" --max-time 30 \"https://diploma.howplatform.net/assets/js/admin/sections/ocr_upload.js\")",
+      "Bash(curl -sS -I --max-time 30 \"https://diploma.howplatform.net/assets/js/admin/sections/ocr_upload.js\")"
     ]
   }
 }

@@ -1,11 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\DB;
-
-Route::get('/db-info-test', function () {
-    return response()->json(DB::select('DESCRIBE spinner_sessions'));
-});
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Artisan;
@@ -22,12 +17,20 @@ use App\Http\Controllers\ScheduleToolController;
 use App\Http\Controllers\SpinnerController;
 use App\Http\Controllers\AssignmentFormController;
 use App\Http\Controllers\AssignmentFormV2Controller;
+use App\Http\Controllers\Admin\ToolsAdminController;
 /*
 |==============================================================
 | Tools Home
 |==============================================================
 */
 Route::get('/', [ToolsController::class, 'index'])->name('tools.index');
+
+// صفحة تفاصيل الأداة (هبوط لمحركات البحث) + رابط انتقال متتبَّع (يزيد عدّاد الاستخدام ثم يحوّل)
+Route::get('/t/{slug}',  [ToolsController::class, 'show'])->name('tools.show');
+Route::get('/go/{slug}', [ToolsController::class, 'go'])->name('tools.go');
+
+// API عام (JSON): قائمة الأدوات المفعّلة — تستهلكها منصّات أخرى (داشبورد طلاب الدبلوم)
+Route::get('/api/tools', [ToolsController::class, 'api'])->name('tools.api');
 
 /*
 |==============================================================
@@ -141,6 +144,22 @@ Route::prefix('tools/schedule')->name('tools.schedule.')->group(function () {
 
 /*
 |==============================================================
+| Admin: إدارة الأدوات (مشرفون فقط)
+|==============================================================
+*/
+Route::middleware(['web', 'auth.sso', 'auth.admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', fn () => redirect()->route('admin.tools.index'))->name('home');
+    Route::get('/tools',               [ToolsAdminController::class, 'index'])->name('tools.index');
+    Route::get('/tools/create',        [ToolsAdminController::class, 'create'])->name('tools.create');
+    Route::post('/tools',              [ToolsAdminController::class, 'store'])->name('tools.store');
+    Route::get('/tools/{tool}/edit',   [ToolsAdminController::class, 'edit'])->name('tools.edit');
+    Route::put('/tools/{tool}',        [ToolsAdminController::class, 'update'])->name('tools.update');
+    Route::delete('/tools/{tool}',     [ToolsAdminController::class, 'destroy'])->name('tools.destroy');
+    Route::post('/tools/{tool}/toggle',[ToolsAdminController::class, 'toggle'])->name('tools.toggle');
+});
+
+/*
+|==============================================================
 | SSO Login / Logout
 |==============================================================
 */
@@ -176,7 +195,9 @@ Route::get('/robots.txt', function () {
 | Utilities (Cache)
 |==============================================================
 */
-Route::get('/clear-all-cache', function () {
+Route::middleware(['web', 'auth.sso'])->get('/clear-all-cache', function () {
+    // مقصور على الأدمن فقط — كان مكشوفًا للعامة (تنفيذ أوامر Artisan)
+    abort_unless((int) (session('auth_user')['is_admin'] ?? 0) === 1, 403);
     Artisan::call('config:clear');
     Artisan::call('config:cache');
     Artisan::call('route:clear');

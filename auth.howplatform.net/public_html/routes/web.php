@@ -39,6 +39,9 @@ Route::middleware('auth')->group(function () {
     
     Route::post('/profile/avatar', [ProfileController::class, 'uploadAvatar'])->name('profile.avatar.upload');
 
+    // استبدال بطاقة (نقاط/اشتراك) عبر منصّة النقاط
+    Route::post('/profile/redeem', [ProfileController::class, 'redeemCard'])->name('profile.redeem');
+
     // تحديث كلمة المرور
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 

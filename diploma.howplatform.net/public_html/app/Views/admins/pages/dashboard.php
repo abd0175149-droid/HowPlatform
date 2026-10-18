@@ -18,17 +18,11 @@
 
   <!-- Tabs -->
   <div class="db-tabs" role="tablist" aria-label="أقسام الإحصاءات">
-    <button type="button" class="db-tab" data-db="accounts" aria-selected="false">
-      <i class="fas fa-id-badge"></i> الحسابات
-    </button>
     <button type="button" class="db-tab active" data-db="diploma" aria-selected="true">
       <i class="fas fa-user-graduate"></i> الدبلوم
     </button>
     <button type="button" class="db-tab" data-db="library" aria-selected="false">
       <i class="fas fa-book"></i> المكتبة
-    </button>
-    <button type="button" class="db-tab" data-db="pos" aria-selected="false">
-      <i class="fas fa-store"></i> نقاط البيع <span class="beta-chip">BETA</span>
     </button>
     <button type="button" class="db-tab" data-db="tools" aria-selected="false">
       <i class="fas fa-tools"></i> الأدوات <span class="beta-chip">BETA</span>
@@ -40,19 +34,6 @@
 
   <!-- Sections -->
   <div class="sections-stack">
-
-    <!-- Accounts (remote) -->
-    <section class="stats-section" data-db-section="accounts" aria-label="إحصائيات الحسابات" hidden>
-      <div class="stat-card">
-        <div class="stat-header">
-          <h3 class="stat-title">إحصائيات الحسابات</h3>
-          <div class="stat-icon"><i class="fas fa-users"></i></div>
-        </div>
-        <div class="placeholder">
-          سيتم إضافة الإحصائيات لاحقًا بعد تحليل قاعدة <strong>remote</strong> وربط المنصات المرتبطة بالحسابات.
-        </div>
-      </div>
-    </section>
 
     <!-- Section: Diploma (DEFAULT ACTIVE) -->
     <section class="stats-section is-active" data-db-section="diploma" aria-label="إحصائيات الدبلوم">
@@ -310,19 +291,6 @@
       </div>
     </section>
 
-    <!-- POS -->
-    <section class="stats-section" data-db-section="pos" aria-label="إحصائيات نقاط البيع" hidden>
-      <div class="stat-card">
-        <div class="stat-header">
-          <h3 class="stat-title">إحصائيات نقاط البيع</h3>
-          <div class="stat-icon"><i class="fas fa-store"></i></div>
-        </div>
-        <div class="placeholder">
-          سيتم بناء هذا القسم لاحقًا (مبيعات، فواتير، قسائم، الأداء الشهري)، مع بنية خاصة كما اتفقنا.
-        </div>
-      </div>
-    </section>
-
     <!-- Section: Student View -->
     <section class="stats-section" data-db-section="student-view" aria-label="استعراض واجهة الطالب" hidden>
       <?= view('admins/pages/student_view_settings') ?>
@@ -375,17 +343,16 @@
 /* ===== رأس الصفحة ===== */
 .admin-dashboard .header{
   display:flex; justify-content:space-between; align-items:center;
-  margin-bottom:30px; padding:0 15px;
+  margin-bottom:24px; padding:0 12px;
 }
 .admin-dashboard .header h1{
-  font-size:2.0rem; font-weight:800;
-  background:linear-gradient(135deg, var(--primary-darker), var(--primary));
-  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  font-size:1.8rem; font-weight:800;
+  color:var(--text-strong);
 }
 .admin-dashboard .date-info{
-  background:var(--surface-0); padding:10px 18px; border-radius:50px;
+  background:var(--surface-0); padding:8px 14.4px; border-radius:40px;
   box-shadow:var(--shadow-sm); color:var(--text-muted);
-  display:flex; gap:8px; align-items:center;
+  display:flex; gap:6.4px; align-items:center;
 }
 
 /* إصلاح تباين header و date-info في الوضع الداكن */
@@ -395,21 +362,26 @@ html[data-theme="dark"] .admin-dashboard .date-info {
 }
 
 /* ===== التبويبات ===== */
-.db-tabs{ display:flex; gap:10px; margin:8px 0 20px; flex-wrap:wrap; }
+.db-tabs{ display:flex; gap:8px; margin:6.4px 0 16px; flex-wrap:wrap; }
 .db-tab{
   background:var(--surface-0);
-  border:1px solid var(--border-color);
-  padding:8px 14px; border-radius:999px; cursor:pointer; font-weight:600;
-  display:flex; align-items:center; gap:8px;
+  border:0.8px solid var(--border-color);
+  padding:6.4px 11.2px; border-radius:799.2px; cursor:pointer; font-weight:600;
+  display:flex; align-items:center; gap:6.4px;
   transition:background .2s, border-color .2s, transform .15s, color .2s;
   color:var(--text);
 }
-.db-tab:hover{ transform:translateY(-1px); border-color:var(--primary-300); }
+.db-tab:hover{ transform:translateY(-0.8px); border-color:var(--primary-300); }
 .db-tab.active{ background:var(--primary-50); border-color:var(--primary-300); color:var(--primary-800); }
 .db-tab:focus-visible{ outline:none; box-shadow:var(--focus-ring); }
 .beta-chip{
-  margin-inline-start:6px; font-size:11px; padding:2px 6px; border-radius:999px;
-  background:var(--accent); color:var(--text-inverse);
+  margin-inline-start:4.8px; font-size:8.8px; padding:1.6px 6.4px; border-radius:799.2px;
+  background:var(--primary-50); color:var(--primary-700);
+  border:0.8px solid var(--primary-300); font-weight:700;
+}
+html[data-theme="dark"] .beta-chip{
+  background:var(--primary-50) !important; color:var(--primary-500) !important;
+  border-color:var(--primary-300) !important;
 }
 
 /* إصلاح تباين التبويبات في الوضع الداكن */
@@ -429,22 +401,21 @@ html[data-theme="dark"] .db-tab.active {
 .sections-stack{ position:relative; }
 .stats-section{
   display:none;
-  grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
-  gap:25px; margin-bottom:32px;
-  align-items: stretch;
+  grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+  gap:16px; margin-bottom:25.6px;
+  align-items: start; /* البطاقات بارتفاعها الطبيعي → لا فراغ ميّت أسفل الرسوم */
 }
 .stats-section.is-active{ display:grid; }
 
 /* ===== بطاقات الإحصائيات ===== */
 .stat-card{
   background:var(--surface-0);
-  border:1px solid var(--border-color);
+  border:0.8px solid var(--border-color);
   border-radius:var(--border-radius);
-  padding:24px; box-shadow:var(--shadow-sm);
+  padding:19.2px; box-shadow:var(--shadow-sm);
   display:flex; flex-direction:column;
   /* فلات: بدون تحوّل عند hover */
-  height: 100%;
-  min-height: 280px;
+  min-height: 0; /* لا ارتفاع إجباري → البطاقة بحجم محتواها */
   box-sizing: border-box;
 }
 /* ❌ إلغاء hover transform على البطاقات (تصميم فلات) */
@@ -454,9 +425,9 @@ html[data-theme="dark"] .db-tab.active {
 .drag-handle {
   cursor: grab;
   color: var(--text-muted);
-  padding: 4px 6px;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 3.2px 4.8px;
+  border-radius: 4.8px;
+  font-size: 11.2px;
   opacity: 0.45;
   transition: opacity .15s, background .15s;
   line-height: 1;
@@ -481,11 +452,11 @@ html[data-theme="dark"] .db-tab.active {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   color: var(--text-muted);
   opacity: 0.45;
-  font-size: 14px;
+  font-size: 11.2px;
   cursor: grab;
   flex-shrink: 0;
   transition: opacity .15s;
@@ -502,10 +473,10 @@ html[data-theme="dark"] .db-tab.active {
   pointer-events: none;
   opacity: 0.88;
   transform: rotate(1.5deg) scale(1.03);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.22);
+  box-shadow: 0 12.8px 32px rgba(0,0,0,0.22);
   border-radius: var(--border-radius);
   background: var(--surface-0);
-  border: 1.5px solid var(--primary-300);
+  border: 1.2px solid var(--primary-300);
   transition: none;
   will-change: top, left;
 }
@@ -513,7 +484,7 @@ html[data-theme="dark"] .db-tab.active {
 /* ✔️ Placeholder: مساحة فارغة مكان البطاقة المسحوبة */
 .dnd-placeholder {
   background: transparent;
-  border: 2px dashed var(--primary-300);
+  border: 1.6px dashed var(--primary-300);
   border-radius: var(--border-radius);
   opacity: 0.5;
   transition: none;
@@ -521,10 +492,10 @@ html[data-theme="dark"] .db-tab.active {
 
 /* ✔️ Drop Indicator: خط أزرق بين البطاقات يوضح مكان الإدراج */
 .dnd-indicator {
-  height: 4px;
+  height: 3.2px;
   background: var(--primary-500);
-  border-radius: 4px;
-  margin: -2px 0;
+  border-radius: 3.2px;
+  margin: -1.6px 0;
   pointer-events: none;
   z-index: 100;
   grid-column: 1 / -1;   /* يمتد عبر كل الأعمدة */
@@ -540,14 +511,14 @@ html[data-theme="dark"] .db-tab.active {
 html[data-theme="dark"] .dnd-ghost {
   background: var(--surface-1) !important;
   border-color: var(--primary-400) !important;
-  box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+  box-shadow: 0 12.8px 32px rgba(0,0,0,0.45);
 }
 
 /* حاوية الرسم البياني — ارتفاع موحّد */
 .chart-container {
   position: relative;
   width: 100%;
-  height: 220px;       /* ← ارتفاع موحّد لكل Bar/Line charts */
+  height: 176px;       /* ← ارتفاع موحّد لكل Bar/Line charts */
   flex: 1 1 auto;
   min-height: 0;       /* أداة سحرية لمنع Flexbox من تمديد العنصر بشكل لا نهائي */
 }
@@ -557,15 +528,10 @@ html[data-theme="dark"] .dnd-ghost {
   display: block;
 }
 .stat-header{
-  display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;
+  display:flex; justify-content:space-between; align-items:center; margin-bottom:11.2px;
 }
 .stat-title{
-  font-size:1.1rem; font-weight:700; color:var(--text-strong);
-  position:relative; padding-right:12px;
-}
-.stat-title::after{
-  content:""; position:absolute; right:0; bottom:-7px; width:48%; height:4px;
-  background:var(--accent); border-radius:3px;
+  font-size:1.05rem; font-weight:700; color:var(--text-strong);
 }
 
 /* إصلاح تباين العنوان في الوضع الداكن والفاتح */
@@ -579,7 +545,7 @@ html:not([data-theme]) .stat-title {
 }
 
 .stat-icon{
-  width:46px; height:46px; border-radius:14px;
+  width:36.8px; height:36.8px; border-radius:11.2px;
   background:var(--primary-50);
   display:flex; align-items:center; justify-content:center;
   color:var(--primary); font-size:1.3rem;
@@ -606,28 +572,37 @@ html[data-theme="dark"] .stat-card .stat-header {
   position: absolute;
   inset: 0;
   background: var(--surface-0);
-  opacity: 0.7;
+  opacity: 0.55;
   border-radius: var(--border-radius);
   z-index: 10;
 }
+/* تأثير شمر (skeleton) لطيف يمرّ فوق البطاقة بدل السبنر الصاخب */
 .stat-card[aria-busy="true"]::before {
-  content: "\f110"; /* FontAwesome fa-circle-notch */
-  font-family: "Font Awesome 6 Free", "Font Awesome 5 Free";
-  font-weight: 900;
+  content: "";
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 2rem;
-  color: var(--primary-500);
+  inset: 0;
+  border-radius: var(--border-radius);
   z-index: 11;
-  animation: fa-spin 1s linear infinite;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    color-mix(in oklab, var(--primary-300) 22%, transparent) 50%,
+    transparent 80%
+  );
+  background-size: 200% 100%;
+  animation: skeletonSweep 1.2s ease-in-out infinite;
+  pointer-events: none;
 }
+@keyframes skeletonSweep {
+  from { background-position: 180% 0; }
+  to   { background-position: -80% 0; }
+}
+html[data-theme="dark"] .stat-card[aria-busy="true"]::after { opacity: 0.45; }
 
 /* Placeholder */
 .placeholder{
-  padding:16px; border:1px dashed var(--primary-200);
-  border-radius:12px; background:var(--surface-1);
+  padding:12.8px; border:0.8px dashed var(--primary-200);
+  border-radius:9.6px; background:var(--surface-1);
   color:var(--text-muted); line-height:1.8;
 }
 .placeholder strong{ color:var(--primary-darker); }
@@ -643,15 +618,15 @@ html[data-theme="dark"] .placeholder strong {
 }
 
 /* KPIs */
-.kpis{ display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; margin:8px 0 14px; }
+.kpis{ display:grid; grid-template-columns:repeat(3, 1fr); gap:11.2px; margin:6.4px 0 11.2px; }
 .kpi{
-  background:var(--surface-0); border:1px solid var(--border-color);
-  border-radius:12px; padding:12px; box-shadow:var(--shadow-sm);
+  background:var(--surface-0); border:0.8px solid var(--border-color);
+  border-radius:9.6px; padding:9.6px; box-shadow:var(--shadow-sm);
 }
 .kpi-label{ 
   color:var(--text-muted); 
-  font-size:13px; 
-  margin-bottom:6px; 
+  font-size:10.4px; 
+  margin-bottom:4.8px; 
 }
 .kpi-value{ 
   font-size:1.3rem; 
@@ -682,11 +657,11 @@ html:not([data-theme]) .kpi-value {
 
 /* Segmented control */
 .segmented-control{
-  display:inline-flex; gap:8px; margin:8px 12px 0; flex-wrap:wrap;
+  display:flex; gap:6.4px; margin:9.6px 0 0; flex-wrap:wrap;
 }
 .segmented-control .seg-btn{
-  border:1px solid var(--border-color); background:var(--surface-0); color:var(--text);
-  padding:6px 12px; border-radius:999px; font-size:13px; cursor:pointer;
+  border:0.8px solid var(--border-color); background:var(--surface-0); color:var(--text);
+  padding:4.8px 9.6px; border-radius:799.2px; font-size:10.4px; cursor:pointer;
   transition:background .2s, border-color .2s, color .2s, transform .15s;
 }
 .segmented-control .seg-btn:hover{ border-color:var(--primary-300); }
@@ -709,7 +684,7 @@ html[data-theme="dark"] .segmented-control .seg-btn.active {
 }
 
 /* حجم موحّد للرسوم الدائرية */
-:root{ --chart-pie-size:240px; }
+:root{ --chart-pie-size:192px; }
 .chart-container.is-pie{
   height:var(--chart-pie-size); display:flex; align-items:center; justify-content:center;
 }
@@ -732,28 +707,39 @@ html[data-theme="dark"] .segmented-control .seg-btn.active {
   .stats-section[data-db-section="tools"]{ grid-template-columns:1fr; }
 }
 
-/* مركز النسبة داخل الدونات (الأدوات) */
-.stats-section[data-db-section="tools"] .donut-center{
-  position:absolute; inset:0; display:grid; place-items:center;
-  font-weight:800; font-size:14px; color:var(--text-strong); pointer-events:none;
-}
+/* ===== بطاقة أداة (تصميم مدمج فلات) ===== */
+.tool-card{ min-height:auto; gap:11.2px; }
 
-/* إصلاح تباين donut-center في الوضع الداكن */
-html[data-theme="dark"] .stats-section[data-db-section="tools"] .donut-center {
-  color: var(--text-strong) !important;
+.tool-kpis{ display:grid; grid-template-columns:repeat(3, 1fr); gap:6.4px; margin-top:3.2px; }
+.tool-kpi{
+  background:var(--surface-1); border:0.8px solid var(--border-color);
+  border-radius:8px; padding:8px 4.8px; text-align:center;
+  display:flex; flex-direction:column; gap:2.4px; min-width:0;
 }
+.tool-kpi .tk-val{
+  font-size:1.15rem; font-weight:800; color:var(--text-strong); line-height:1;
+  display:inline-flex; align-items:center; justify-content:center; gap:2.4px;
+}
+.tool-kpi .tk-val i{ font-size:.7em; color:var(--accent); }
+.tool-kpi .tk-lbl{ font-size:8.8px; color:var(--text-muted); white-space:nowrap; }
 
-/* Mini donut */
-.mini-pie{ --chart-pie-size:96px; }
-.mini-pie > canvas{
-  width:var(--chart-pie-size) !important; height:var(--chart-pie-size) !important;
-  max-width:var(--chart-pie-size); max-height:var(--chart-pie-size);
+.tool-share{ margin-top:auto; }
+.tool-share-head{
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:9.6px; color:var(--text-muted); margin-bottom:4.8px;
 }
-.tool-top{ flex-direction:row-reverse; }
+.tool-share-head b{ color:var(--primary-700); font-size:10.4px; }
+.tool-share-bar{ height:6.4px; border-radius:799.2px; background:var(--surface-2); overflow:hidden; }
+.tool-share-bar > span{ display:block; height:100%; border-radius:799.2px; background:var(--primary-500); transition:width .45s ease; }
+
+.tool-foot{ font-size:9.6px; color:var(--text-muted); display:flex; align-items:center; gap:4.8px; }
+
+html[data-theme="dark"] .tool-kpi{ background:var(--surface-1) !important; border-color:var(--border-color) !important; }
+html[data-theme="dark"] .tool-kpi .tk-val{ color:var(--text-strong) !important; }
 
 /* جدول المستخدمين النشطين */
 .user-table th, .user-table td{
-  text-align:start; padding:10px 12px; border-bottom:1px solid var(--border-color); font-size:14px;
+  text-align:start; padding:8px 9.6px; border-bottom:0.8px solid var(--border-color); font-size:11.2px;
 }
 .user-table thead th{ background:var(--surface-1); color:var(--text-strong); font-weight:700; }
 .user-table tbody tr:hover{ background:var(--primary-50); }
@@ -776,39 +762,39 @@ html[data-theme="dark"] .user-table thead th {
 
 /* ===== Pagination (Active Users) ===== */
 #dipActiveUsersCard .pagination{
-  display:flex; gap:10px; align-items:center; justify-content:flex-start;
-  margin-top:10px;
+  display:flex; gap:8px; align-items:center; justify-content:flex-start;
+  margin-top:8px;
 }
 
 /* أزرار السابق/التالي — نمط كبسولة أنيق */
 #dipActiveUsersCard .pagination .seg-btn{
-  display:inline-flex; align-items:center; gap:8px;
-  padding:8px 14px; border-radius:999px;
-  border:1px solid var(--border-color);
+  display:inline-flex; align-items:center; gap:6.4px;
+  padding:6.4px 11.2px; border-radius:799.2px;
+  border:0.8px solid var(--border-color);
   background:var(--surface-0); color:var(--text);
-  font-weight:600; font-size:13px;
-  box-shadow: var(--shadow-xs, 0 1px 2px rgba(0,0,0,.04));
+  font-weight:600; font-size:10.4px;
+  box-shadow: var(--shadow-xs, 0 0.8px 1.6px rgba(0,0,0,.04));
   transition: transform .12s ease, background .2s, border-color .2s, color .2s, box-shadow .2s;
 }
 
 /* أيقونات داخل الزر (اختياري إن أضفت <i> بفونت أويسم) */
 #dipActiveUsersCard .pagination .seg-btn i{
-  font-size: 12px; opacity: .8;
+  font-size: 9.6px; opacity: .8;
 }
 
 /* Hover */
 #dipActiveUsersCard .pagination .seg-btn:hover{
-  transform: translateY(-1px);
+  transform: translateY(-0.8px);
   border-color: var(--primary-300);
   background: var(--primary-50);
   color: var(--primary-900);
-  box-shadow: var(--shadow-sm, 0 2px 6px rgba(0,0,0,.06));
+  box-shadow: var(--shadow-sm, 0 1.6px 4.8px rgba(0,0,0,.06));
 }
 
 /* Focus */
 #dipActiveUsersCard .pagination .seg-btn:focus-visible{
   outline: none;
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 20%, transparent);
+  box-shadow: 0 0 0 2.4px color-mix(in oklab, var(--primary) 20%, transparent);
   border-color: var(--primary-400);
 }
 
@@ -842,12 +828,12 @@ html[data-theme="dark"] #dipActiveUsersCard .pagination .seg-btn:hover:not(:disa
 
 /* شارة معلومات الصفحات */
 #dipAUPaginationInfo{
-  display:inline-flex; align-items:center; gap:6px;
-  font-size:12px; color:var(--text-muted);
+  display:inline-flex; align-items:center; gap:4.8px;
+  font-size:9.6px; color:var(--text-muted);
   background: var(--surface-1);
-  border:1px dashed var(--border-color);
-  border-radius: 999px;
-  padding:6px 10px;
+  border:0.8px dashed var(--border-color);
+  border-radius: 799.2px;
+  padding:4.8px 8px;
 }
 
 /* إصلاح تباين معلومات الصفحات في الوضع الداكن */
@@ -860,48 +846,48 @@ html[data-theme="dark"] #dipAUPaginationInfo {
 /* مظهر مدمج (اختياري) */
 @media (max-width: 640px){
   #dipActiveUsersCard .pagination{
-    gap:8px; flex-wrap:wrap;
+    gap:6.4px; flex-wrap:wrap;
   }
   #dipActiveUsersCard .pagination .seg-btn{
-    padding:7px 12px; font-size:12px;
+    padding:5.6px 9.6px; font-size:9.6px;
   }
   #dipAUPaginationInfo{
-    margin-top:6px;
+    margin-top:4.8px;
   }
 }
 
 /* ===== بطاقة AI Jobs KPI (فلات احترافية) ===== */
 .ai-jobs-kpi-card .stat-icon--ai {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  color: #fff;
-  border-radius: 14px;
+  background: var(--primary-50);
+  color: var(--primary);
+  border-radius: 11.2px;
 }
 
 /* شبكة KPI الرئيسية: 2×2 */
 .ai-kpi-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin: 12px 0;
+  gap: 8px;
+  margin: 9.6px 0;
 }
 
 /* بند KPI واحد */
 .ai-kpi-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  border: 1px solid var(--border-color);
+  gap: 8px;
+  padding: 9.6px 11.2px;
+  border-radius: 8px;
+  border: 0.8px solid var(--border-color);
   background: var(--surface-1);
   min-width: 0;
 }
 
 /* أيقونة البند */
 .ai-kpi-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 28.8px;
+  height: 28.8px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -910,13 +896,13 @@ html[data-theme="dark"] #dipAUPaginationInfo {
 }
 
 /* تخصيص اللون لكل نوع */
-.ai-kpi-primary .ai-kpi-icon  { background: rgba(99,102,241,.12); color: #6366f1; }
-.ai-kpi-secondary .ai-kpi-icon{ background: rgba(14,165,233,.12);  color: #0ea5e9; }
+.ai-kpi-primary .ai-kpi-icon  { background: var(--primary-50); color: var(--primary); }
+.ai-kpi-secondary .ai-kpi-icon{ background: var(--accent-50, rgba(253,158,2,.12)); color: var(--accent); }
 .ai-kpi-success .ai-kpi-icon  { background: rgba(34,197,94,.12);   color: #22c55e; }
 .ai-kpi-danger .ai-kpi-icon   { background: rgba(239,68,68,.12);   color: #ef4444; }
 
 .ai-kpi-body  { min-width: 0; }
-.ai-kpi-label { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ai-kpi-label { font-size: 8.8px; color: var(--text-muted); margin-bottom: 1.6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ai-kpi-value { font-size: 1.35rem; font-weight: 800; color: var(--text-strong); line-height: 1; }
 
 /* وضع داكن */
@@ -926,23 +912,23 @@ html[data-theme="dark"] .ai-kpi-value { color: var(--text-strong) !important; }
 
 /* قائمة التوزيع حسب النوع */
 .ai-jobs-type-list {
-  margin-top: 8px;
-  border-top: 1px solid var(--border-color);
-  padding-top: 10px;
+  margin-top: 6.4px;
+  border-top: 0.8px solid var(--border-color);
+  padding-top: 8px;
 }
 .ai-job-type-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 7px 0;
-  border-bottom: 1px dashed var(--border-color);
-  font-size: 13px;
-  gap: 8px;
+  padding: 5.6px 0;
+  border-bottom: 0.8px dashed var(--border-color);
+  font-size: 10.4px;
+  gap: 6.4px;
 }
 .ai-job-type-row:last-child { border-bottom: none; }
 .ai-job-type-name { color: var(--text); font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ai-job-type-uses { color: var(--primary); font-weight: 800; font-size: 13px; white-space: nowrap; }
-.ai-job-type-uniq { color: var(--text-muted); font-size: 11px; white-space: nowrap; }
+.ai-job-type-uses { color: var(--primary); font-weight: 800; font-size: 10.4px; white-space: nowrap; }
+.ai-job-type-uniq { color: var(--text-muted); font-size: 8.8px; white-space: nowrap; }
 
 html[data-theme="dark"] .ai-job-type-name  { color: var(--text) !important; }
 html[data-theme="dark"] .ai-job-type-uses  { color: var(--primary-500) !important; }

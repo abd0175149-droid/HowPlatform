@@ -1517,7 +1517,7 @@ async function mountAiModalForTask(taskMeta) {
       return;
     }
 
-    const mod = await import('/assets/js/students/sections/ai_tool_factory.js?v=1.0.1');
+    const mod = await import('/assets/js/students/sections/ai_tool_factory.js?v=1.0.2');
     await mod?.default?.mount({
       taskId,
       taskTypeId,

@@ -43,6 +43,26 @@ class RewardsProcessor extends BaseController
             ], 401);
         }
 
+        // ⛔ في وضع plans.earning.mode=api هذا الكرون خطر: يسجّل "دخولًا يوميًا" في Plans
+        // لكل مستخدم في الجدول القديم حتى لو لم يدخل فعلًا → يضخّ مكافآت تتابع وهمية.
+        // إشارة الدخول الحقيقية = RewardsFilter عند تصفّح فعلي. لذا نعطّله نهائيًا هنا.
+        try {
+            $plansClient = new \App\Libraries\PlansClient();
+            if ($plansClient->earningMode() === 'api') {
+                log_message('info', 'RewardsProcessor skipped: earning is handled by Plans (api mode).');
+                return $this->out([
+                    'success'   => true,
+                    'processed' => 0,
+                    'errors'    => 0,
+                    'total'     => 0,
+                    'skipped'   => 'earning_mode_api',
+                ]);
+            }
+        } catch (\Throwable $e) {
+            // تعذّر فحص الوضع → تصرّف بحذر ولا تعالج
+            return $this->out(['success' => false, 'message' => 'plans mode check failed'], 500);
+        }
+
         $db = db_connect();
         
         // جلب جميع المستخدمين الذين لديهم سجلات في rewards_consecutive_days

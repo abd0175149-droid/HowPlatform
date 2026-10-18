@@ -46,6 +46,9 @@ class Filters extends BaseFilters
         'authGuard'       => \App\Filters\AuthGuard::class,
         'auth'            => \App\Filters\AuthFilter::class,
 
+        // ✅ حارس منطقة الإدارة: مصادقة + فرض الدور ∈ [1=admin, 2=teacher]
+        'admin'           => \App\Filters\AdminFilter::class,
+
         // ✅ فلتر حلّ هوية المستخدم من التوكن (JWT → session.user_id)
         'authFromToken'   => \App\Filters\AuthFromToken::class,
 

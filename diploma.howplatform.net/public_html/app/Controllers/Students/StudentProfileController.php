@@ -41,8 +41,37 @@ class StudentProfileController extends ResourceController
         ->get()
         ->getRow();
 
+    // مستخدمو SSO الجدد (user_id عالمي بلا صفّ في users المحلّي): اقرأ من diploma_users + auth_user.
     if (! $user) {
-        return $this->failNotFound('لم يتم العثور على المستخدم.');
+        $du = $db->table('diploma_users du')
+            ->select("du.phone_number, du.gender, du.birth_date, du.is_premium, du.premium_until,
+                      un.name AS university, sp.name AS specialty, ay.label AS academic_year")
+            ->join('universities un', 'un.id = du.university_id', 'left')
+            ->join('specialties sp', 'sp.id = du.specialty_id', 'left')
+            ->join('academic_years ay', 'ay.id = du.academic_year_id', 'left')
+            ->where('du.user_id', $uid)
+            ->get()
+            ->getRow();
+
+        if (! $du) {
+            return $this->failNotFound('لم يتم العثور على المستخدم.');
+        }
+
+        $au = session('auth_user') ?? [];
+        return $this->respond([
+            'id'                => (int) $uid,
+            'full_name'         => $au['name'] ?? '',
+            'email'             => $au['email'] ?? '',
+            'phone_number'      => $du->phone_number,
+            'gender'            => $du->gender,
+            'birth_date'        => $du->birth_date,
+            'profile_image_url' => null,
+            'is_premium'        => (bool) $du->is_premium,
+            'premium_until'     => $du->premium_until,
+            'university'        => $du->university,
+            'specialty'         => $du->specialty,
+            'academic_year'     => $du->academic_year,
+        ]);
     }
 
     return $this->respond([

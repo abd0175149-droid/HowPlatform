@@ -22,13 +22,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // aliases للميدلويرات
         $middleware->alias([
             'auth.token' => \App\Http\Middleware\AuthenticateWithToken::class,
-            'pos.access' => \App\Http\Middleware\EnsurePosAccess::class, // ← جديد: فحص صلاحيات POS
         ]);
 
         // ضم ميدلوير التوكن إلى مجموعة web لضبط auth()->user()
         $middleware->web(\App\Http\Middleware\AuthenticateWithToken::class);
-
-        // ملاحظة: لا نضم EnsurePosAccess عالميًا، نستخدمه فقط على مسارات /pos/* عبر الراوتات.
     })
     // ← سجّل فقط المزودات الموجودة فعلاً
     ->withProviders([

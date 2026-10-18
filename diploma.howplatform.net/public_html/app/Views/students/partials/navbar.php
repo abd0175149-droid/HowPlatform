@@ -11,6 +11,26 @@
 
     <!-- الأزرار الجانبية -->
     <div class="user-actions">
+        <!-- الإشعارات -->
+        <div class="nav-notif" id="navNotif" style="position:relative;">
+            <button class="action-btn-nav" id="notifBellBtn" title="الإشعارات" aria-label="الإشعارات" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" id="notifBadge" style="display:none;">0</span>
+            </button>
+            <div class="notifications-dropdown" id="notifDropdown">
+                <div class="notifications-header">
+                    <span class="notifications-title">الإشعارات</span>
+                    <button type="button" class="mark-all-read" id="notifMarkAll">تعليم الكل كمقروء</button>
+                </div>
+                <div class="notifications-list" id="notifList">
+                    <div class="notif-state" style="padding:26px 18px;text-align:center;color:var(--text-muted);">جارٍ التحميل…</div>
+                </div>
+                <div class="notifications-footer" style="padding:10px 16px;border-top:1px solid var(--border-color);text-align:center;">
+                    <a href="#/notifications" id="notifViewAll" style="color:var(--primary-600);font-weight:700;font-size:.88rem;text-decoration:none;">عرض كل الإشعارات</a>
+                </div>
+            </div>
+        </div>
+
          <button class="action-btn-nav theme-toggle-btn" title="تبديل الوضع">
             <i class="fas fa-moon"></i>
         </button>

@@ -1,22 +1,22 @@
 <style>
     .rag-debug-container {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        max-width: 1200px;
-        margin: 20px auto;
-        padding: 20px;
+        max-width: 960px;
+        margin: 16px auto;
+        padding: 16px;
     }
     .rag-debug-container h1 {
         color: #333;
-        border-bottom: 2px solid #4CAF50;
-        padding-bottom: 10px;
-        margin-bottom: 20px;
+        border-bottom: 1.6px solid #4CAF50;
+        padding-bottom: 8px;
+        margin-bottom: 16px;
     }
     .form-group {
-        margin-bottom: 15px;
+        margin-bottom: 12px;
     }
     .form-group label {
         display: block;
-        margin-bottom: 5px;
+        margin-bottom: 4px;
         font-weight: bold;
         color: #555;
     }
@@ -24,25 +24,25 @@
     .form-group textarea,
     .form-group select {
         width: 100%;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
+        padding: 6.4px;
+        border: 0.8px solid #ddd;
+        border-radius: 3.2px;
+        font-size: 11.2px;
         box-sizing: border-box;
     }
     .form-group textarea {
-        min-height: 100px;
+        min-height: 80px;
         resize: vertical;
     }
     .rag-debug-container button {
         background: #4CAF50;
         color: white;
-        padding: 10px 20px;
+        padding: 8px 16px;
         border: none;
-        border-radius: 4px;
+        border-radius: 3.2px;
         cursor: pointer;
-        font-size: 16px;
-        margin-left: 10px;
+        font-size: 12.8px;
+        margin-left: 8px;
     }
     .rag-debug-container button:hover {
         background: #45a049;
@@ -52,11 +52,11 @@
         cursor: not-allowed;
     }
     .result {
-        margin-top: 20px;
-        padding: 15px;
+        margin-top: 16px;
+        padding: 12px;
         background: #f9f9f9;
-        border-radius: 4px;
-        border-left: 4px solid #4CAF50;
+        border-radius: 3.2px;
+        border-left: 3.2px solid #4CAF50;
     }
     .result.error {
         border-left-color: #f44336;
@@ -64,23 +64,23 @@
     }
     .loading {
         text-align: center;
-        padding: 20px;
+        padding: 16px;
         color: #666;
     }
     .result pre {
         background: #f4f4f4;
-        padding: 10px;
-        border-radius: 4px;
+        padding: 8px;
+        border-radius: 3.2px;
         overflow-x: auto;
-        max-height: 500px;
+        max-height: 400px;
         overflow-y: auto;
     }
     .section {
-        margin-top: 20px;
-        padding: 15px;
+        margin-top: 16px;
+        padding: 12px;
         background: #fff;
-        border: 1px solid #ddd;
-        border-radius: 4px;
+        border: 0.8px solid #ddd;
+        border-radius: 3.2px;
     }
     .section h3 {
         margin-top: 0;
@@ -88,9 +88,9 @@
     }
     .badge {
         display: inline-block;
-        padding: 3px 8px;
-        border-radius: 3px;
-        font-size: 12px;
+        padding: 2.4px 6.4px;
+        border-radius: 2.4px;
+        font-size: 9.6px;
         font-weight: bold;
     }
     .badge.success {

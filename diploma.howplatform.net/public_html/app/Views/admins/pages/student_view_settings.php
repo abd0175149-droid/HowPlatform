@@ -220,38 +220,39 @@ window.STUDENT_VIEW_SERVER_SETTINGS = <?= json_encode($currentSettings, JSON_UNE
 
 <style>
 .student-view-settings {
-  padding: 24px;
+  padding: 19.2px;
   background: var(--surface-0);
-  border-radius: 12px;
-  box-shadow: var(--shadow-md);
+  border-radius: var(--border-radius);
+  border: 0.8px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
 }
 
 .settings-header {
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 2px solid var(--border-strong);
+  margin-bottom: 19.2px;
+  padding-bottom: 12.8px;
+  border-bottom: 1.6px solid var(--border-strong);
 }
 
 .settings-header h2 {
-  margin: 0 0 8px 0;
-  font-size: 24px;
+  margin: 0 0 6.4px 0;
+  font-size: 19.2px;
   color: var(--text-strong);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 9.6px;
 }
 
 .settings-description {
   margin: 0;
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: 11.2px;
 }
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 19.2px;
 }
 
 .form-group {
@@ -260,20 +261,20 @@ window.STUDENT_VIEW_SERVER_SETTINGS = <?= json_encode($currentSettings, JSON_UNE
 }
 
 .form-label {
-  margin-bottom: 8px;
+  margin-bottom: 6.4px;
   font-weight: 600;
   color: var(--text-strong);
-  font-size: 14px;
+  font-size: 11.2px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6.4px;
 }
 
 .form-select {
-  padding: 10px 12px;
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  font-size: 14px;
+  padding: 8px 9.6px;
+  border: 0.8px solid var(--border-strong);
+  border-radius: 6.4px;
+  font-size: 11.2px;
   background: var(--surface-0);
   color: var(--text-strong); /* أضفنا هذا */
   transition: border-color 0.2s;
@@ -291,29 +292,29 @@ window.STUDENT_VIEW_SERVER_SETTINGS = <?= json_encode($currentSettings, JSON_UNE
 }
 
 .form-hint {
-  margin-top: 4px;
-  font-size: 12px;
+  margin-top: 3.2px;
+  font-size: 9.6px;
   color: var(--text-muted);
 }
 
 .form-actions {
   display: flex;
-  gap: 12px;
+  gap: 9.6px;
   justify-content: flex-end;
-  padding-top: 16px;
-  border-top: 1px solid var(--border-strong);
+  padding-top: 12.8px;
+  border-top: 0.8px solid var(--border-strong);
 }
 
 .btn {
-  padding: 10px 20px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 6.4px;
+  font-size: 11.2px;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6.4px;
   transition: all 0.2s;
 }
 
@@ -336,53 +337,53 @@ window.STUDENT_VIEW_SERVER_SETTINGS = <?= json_encode($currentSettings, JSON_UNE
 }
 
 .message-box {
-  margin-top: 16px;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 14px;
+  margin-top: 12.8px;
+  padding: 9.6px 12.8px;
+  border-radius: 6.4px;
+  font-size: 11.2px;
 }
 
 .message-box.success {
   background: var(--success-soft);
   color: var(--success-600);
-  border: 1px solid var(--success-border);
+  border: 0.8px solid var(--success-border);
 }
 
 .message-box.error {
   background: var(--error-soft);
   color: var(--error-600);
-  border: 1px solid var(--error-border);
+  border: 0.8px solid var(--error-border);
 }
 
 .current-status {
-  margin-top: 24px;
-  padding: 20px;
+  margin-top: 19.2px;
+  padding: 16px;
   background: var(--surface-1);
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
+  border-radius: 6.4px;
+  border: 0.8px solid var(--border-color);
 }
 
 .status-header h3 {
-  margin: 0 0 16px 0;
-  font-size: 18px;
+  margin: 0 0 12.8px 0;
+  font-size: 14.4px;
   color: var(--text-strong);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6.4px;
 }
 
 .status-content {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 9.6px;
 }
 
 .status-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border-color);
+  padding: 6.4px 0;
+  border-bottom: 0.8px solid var(--border-color);
 }
 
 .status-item:last-child {
@@ -400,9 +401,9 @@ window.STUDENT_VIEW_SERVER_SETTINGS = <?= json_encode($currentSettings, JSON_UNE
 }
 
 .status-actions {
-  margin-top: 16px;
+  margin-top: 12.8px;
   display: flex;
-  gap: 12px;
+  gap: 9.6px;
   justify-content: flex-end;
 }
 </style>

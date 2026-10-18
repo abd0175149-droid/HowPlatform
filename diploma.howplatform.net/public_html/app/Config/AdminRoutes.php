@@ -35,14 +35,6 @@ $routes->group('admins', ['namespace' => 'App\Controllers\Admins', 'filter' => '
     $routes->delete('api/plan-features/(:num)',  'PlansMeta::deleteFeature/$1');
 });
 
-/*────────────── طلبات الخدمة (جدول) ───────────*/
-$routes->get ('admins/service-requests-table',               'adminsServiceRequestsTableController::index',            ['filter' => 'auth']);
-$routes->get ('admins/service-requests-table/list',          'adminsServiceRequestsTableController::getRequestsList',  ['filter' => 'auth']);
-$routes->get ('admins/service-requests-table/adminss',       'adminsServiceRequestsTableController::getadminssList',   ['filter' => 'auth']); // intentional "adminss"
-$routes->get ('admins/service-requests-table/stats',         'adminsServiceRequestsTableController::getStats',         ['filter' => 'auth']);
-$routes->post('admins/service-requests-table/status/(:num)', 'adminsServiceRequestsTableController::updateStatus/$1',  ['filter' => 'auth']);
-$routes->post('admins/service-requests-table/assign/(:num)', 'adminsServiceRequestsTableController::assignRequest/$1', ['filter' => 'auth']);
-
 /*────────────── شات طلبات الخدمة ───────────*/
 $routes->group('admins/service-requests-chat', ['filter' => 'auth'], static function (RouteCollection $routes) {
     $routes->get ('/',                     'adminsServiceRequestsChatController::index');

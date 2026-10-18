@@ -248,16 +248,30 @@ class AiToolAccessService
         // خصم النقاط مع Transaction و row-level locking
         $pointsCost = $accessCheck['points_cost'];
         $db = Database::connect();
-        
+
+        // وضع api: قرار الصرف من Plans (المحفظة المركزية هي الحَكَم، fail-closed).
+        // في off/shadow يبقى السلوك المحلي كما هو حرفيًا.
+        $plansClient = null;
+        $plansApi    = false;
+        try {
+            $plansClient = new \App\Libraries\PlansClient();
+            $plansApi    = ($plansClient->mode() === 'api');
+        } catch (\Throwable $e) {
+            $plansApi = false; // تعذّر تهيئة العميل → عامل المسار كمحلي
+        }
+
+        $plansCharged = false;
+        $plansKey     = '';
+
         try {
             $db->transException(true)->transStart();
-            
+
             // 🔒 قفل صف النقاط للمستخدم لمنع Race Conditions
             $userPointsRow = $db->query(
                 'SELECT total_points FROM rewards_users WHERE user_id = ? FOR UPDATE',
                 [$userId]
             )->getRowArray();
-            
+
             // إنشاء السجل إذا لم يكن موجوداً
             if (!$userPointsRow) {
                 $db->table('rewards_users')->insert([
@@ -266,11 +280,11 @@ class AiToolAccessService
                 ]);
                 $userPointsRow = ['total_points' => 0];
             }
-            
+
             $currentPoints = (int)($userPointsRow['total_points'] ?? 0);
-            
-            // التحقق مرة أخرى من النقاط بعد القفل
-            if ($currentPoints < $pointsCost) {
+
+            // التحقق المحلي من الكفاية — في وضع api القرار لـ Plans (الرصيد المحلي مجرد كاش قد يتأخر)
+            if (! $plansApi && $currentPoints < $pointsCost) {
                 $db->transRollback();
                 return [
                     'success' => false,
@@ -281,13 +295,13 @@ class AiToolAccessService
                     'is_test_account' => false,
                 ];
             }
-            
+
             // خصم النقاط مباشرة في نفس Transaction
             $newTotal = $currentPoints - $pointsCost;
             $db->table('rewards_users')
                 ->where('user_id', $userId)
                 ->update(['total_points' => $newTotal]);
-            
+
             // تسجيل المعاملة في نفس Transaction
             $db->table('rewards_transactions')->insert([
                 'user_id'       => $userId,
@@ -297,10 +311,61 @@ class AiToolAccessService
                 'description'   => "استخدام أداة الذكاء الاصطناعي: {$typeKey}",
                 'created_at'    => date('Y-m-d H:i:s'),
             ]);
-            
+
+            $txnId = (int) $db->insertID(); // معرف معاملة الخصم = مفتاح idempotency لـ Plans
+
+            // وضع api: اصرف من Plans قبل الالتزام المحلي — رفضُ Plans يلغي كل شيء.
+            if ($plansApi) {
+                $plansKey = 'diploma:spend:txn:' . $txnId;
+                $res = $plansClient->spend($userId, $pointsCost, $plansKey, [
+                    'event_type'     => 'diploma.aitool.spend',
+                    'event_ref_type' => 'rewards_txn',
+                    'event_ref_id'   => (string) $txnId,
+                    'description'    => 'استخدام أداة: ' . $typeKey . ' (مهمة ' . $taskId . ')',
+                ]);
+
+                if (! ($res['ok'] ?? false)) {
+                    $db->transRollback();
+                    $plansBal = (int) ($res['balance'] ?? ($res['body']['balance'] ?? 0));
+                    if ((int) ($res['status'] ?? 0) === 402) {
+                        return [
+                            'success' => false,
+                            'points_deducted' => 0,
+                            'points_cost' => $pointsCost,
+                            'remaining_points' => $plansBal,
+                            'message' => "نقاطك غير كافية. تحتاج {$pointsCost} نقطة ولكن لديك {$plansBal} فقط",
+                            'is_test_account' => false,
+                        ];
+                    }
+                    log_message('error', '[PlansSpend] user=' . $userId . ' cost=' . $pointsCost . ' key=' . $plansKey . ' failed: ' . json_encode($res));
+                    return [
+                        'success' => false,
+                        'points_deducted' => 0,
+                        'points_cost' => $pointsCost,
+                        'remaining_points' => $accessCheck['user_points'],
+                        'message' => 'خدمة النقاط غير متاحة مؤقتًا، حاول بعد قليل',
+                        'is_test_account' => false,
+                    ];
+                }
+
+                $plansCharged = true;
+
+                // زامِن الكاش المحلي مع رصيد Plans بعد الخصم (يعالج أي انحراف ذاتيًا)
+                if (isset($res['balance']) && $res['balance'] !== null) {
+                    $newTotal = (int) $res['balance'];
+                    $db->table('rewards_users')
+                        ->where('user_id', $userId)
+                        ->update(['total_points' => $newTotal]);
+                }
+            }
+
             $db->transComplete();
-            
+
             if ($db->transStatus()) {
+                if (! $plansApi) {
+                    // ظل المحفظة المركزية (لا يؤثر على النتيجة المحلّية إطلاقًا)
+                    $this->mirrorSpendShadow($userId, $pointsCost, $txnId, $typeKey, $taskId, $newTotal);
+                }
                 return [
                     'success' => true,
                     'points_deducted' => $pointsCost,
@@ -310,6 +375,8 @@ class AiToolAccessService
                     'is_test_account' => false,
                 ];
             } else {
+                // نجح خصم Plans لكن فشل الالتزام المحلي → أعد النقاط مركزيًا (تعويض)
+                $this->compensatePlansSpend($plansCharged, $plansKey, $userId, $pointsCost);
                 return [
                     'success' => false,
                     'points_deducted' => 0,
@@ -323,6 +390,7 @@ class AiToolAccessService
             if ($db->transStatus() !== false) {
                 $db->transRollback();
             }
+            $this->compensatePlansSpend($plansCharged, $plansKey, $userId, $pointsCost);
             log_message('error', 'AiToolAccessService::deductPointsIfNeeded error: ' . $e->getMessage());
             return [
                 'success' => false,
@@ -332,6 +400,59 @@ class AiToolAccessService
                 'message' => 'فشل خصم النقاط - خطأ في النظام',
                 'is_test_account' => false,
             ];
+        }
+    }
+
+    /**
+     * تعويض مركزي: خُصم من Plans لكن فشل الالتزام المحلي بعده → أعد النقاط.
+     * idempotent (مفتاح مشتق من مفتاح الخصم) وآمن تمامًا للاستدعاء غير الضروري.
+     */
+    private function compensatePlansSpend(bool $plansCharged, string $plansKey, int $userId, int $pointsCost): void
+    {
+        if (! $plansCharged || $plansKey === '') {
+            return;
+        }
+        try {
+            $client = new \App\Libraries\PlansClient();
+            $res = $client->refund($userId, $pointsCost, $plansKey . ':compensate', [
+                'event_type'     => 'diploma.aitool.spend.compensate',
+                'event_ref_type' => 'plans_key',
+                'event_ref_id'   => $plansKey,
+                'description'    => 'تعويض: فشل الالتزام المحلي بعد خصم مركزي ناجح',
+            ]);
+            log_message('error', '[PlansSpend][compensate] user=' . $userId . ' key=' . $plansKey . ' ok=' . (($res['ok'] ?? false) ? '1' : '0'));
+        } catch (\Throwable $e) {
+            log_message('critical', '[PlansSpend][compensate] FAILED user=' . $userId . ' key=' . $plansKey . ' err=' . $e->getMessage());
+        }
+    }
+
+    /**
+     * ظل المحفظة المركزية لعملية صرف ناجحة محليًا.
+     * في وضع shadow: يستدعي Plans ويسجّل المقارنة فقط، ويعمل دائمًا على النتيجة المحلّية.
+     * مغلَّف بالكامل: أي خطأ هنا لا يؤثر على مسار الصرف الحيّ.
+     */
+    private function mirrorSpendShadow(int $userId, int $pointsCost, int $txnId, string $typeKey, int $taskId, int $localRemaining): void
+    {
+        try {
+            $client = new \App\Libraries\PlansClient();
+            if (! $client->enabled() || $txnId <= 0) {
+                return;
+            }
+            $key = 'diploma:spend:txn:' . $txnId;
+            $res = $client->spend($userId, $pointsCost, $key, [
+                'event_type'     => 'diploma.aitool.spend',
+                'event_ref_type' => 'rewards_txn',
+                'event_ref_id'   => (string) $txnId,
+                'description'    => 'shadow: ' . $typeKey . ' task ' . $taskId,
+            ]);
+            log_message('info', sprintf(
+                '[PlansShadow][spend] user=%d cost=%d local_remaining=%d plans_ok=%s status=%s plans_balance=%s key=%s',
+                $userId, $pointsCost, $localRemaining,
+                ($res['ok'] ?? false) ? '1' : '0',
+                (string) ($res['status'] ?? ''), (string) ($res['balance'] ?? ''), $key
+            ));
+        } catch (\Throwable $e) {
+            log_message('warning', 'PlansShadow spend hook error: ' . $e->getMessage());
         }
     }
 

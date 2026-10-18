@@ -17,12 +17,33 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && a2enmod rewrite headers expires \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# رفع حدود رفع الملفات (مخططات البحث/المقالات قد تتجاوز 2M الافتراضية)
+RUN { \
+        echo 'upload_max_filesize=64M'; \
+        echo 'post_max_size=72M'; \
+        echo 'memory_limit=256M'; \
+        echo 'max_execution_time=180'; \
+    } > /usr/local/etc/php/conf.d/zz-uploads.ini
+
+# LibreOffice headless + Arabic fonts — DOCX→PDF conversion (formative essay evaluator)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libreoffice-writer libreoffice-core \
+        fonts-noto-core fonts-hosny-amiri fonts-freefont-ttf \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /var/www/.config && chown -R www-data:www-data /var/www/.config
+
+# خطوط Office/عربية حقيقية (Sakkal Majalla / Traditional Arabic / Calibri / Times ...) لمطابقة عرض Word في الـ PDF.
+# المجلّد docker/fonts/ مُستثنى من Git (خطوط مرخّصة) ويوجد على مضيف البناء فقط.
+COPY docker/fonts/ /usr/share/fonts/truetype/office/
+RUN chmod 644 /usr/share/fonts/truetype/office/* && fc-cache -f >/dev/null 2>&1 || true
+
 # DocumentRoot -> CI4 public/
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
     && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
     && printf '<Directory /var/www/html/public>\n\tAllowOverride All\n\tRequire all granted\n</Directory>\n' >> /etc/apache2/apache2.conf \
-    && printf 'ServerName localhost\n' >> /etc/apache2/apache2.conf
+    && printf 'ServerName localhost\n' >> /etc/apache2/apache2.conf \
+    && printf 'LimitRequestFieldSize 65536\nLimitRequestLine 65536\n' >> /etc/apache2/apache2.conf
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
@@ -42,6 +63,6 @@ RUN mkdir -p writable/cache writable/logs writable/session writable/uploads \
 # .htaccess HTTPS-force (%{HTTPS} !=on) to check X-Forwarded-Proto so it never 301-loops.
 RUN printf '\nSetEnvIf X-Forwarded-Proto "https" HTTPS=on\n' >> /etc/apache2/apache2.conf \
  && find /var/www/html -name .htaccess -exec sed -i 's/%{HTTPS} !=on/%{HTTP:X-Forwarded-Proto} !=https/g' {} \; \
- && find /var/www/html -name .htaccess -exec sed -i '/RewriteEngine On/a RewriteRule ^public/(.*)$ /$1 [L]' {} \;
+ && find /var/www/html -name .htaccess -exec sed -i '/RewriteEngine On/a RewriteRule ^public/(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]' {} \;
 
 EXPOSE 80

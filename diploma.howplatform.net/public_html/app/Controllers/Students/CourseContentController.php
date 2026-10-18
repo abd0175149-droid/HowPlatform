@@ -47,6 +47,17 @@ class CourseContentController extends Controller
         return ($h === '1' || $h === 'true');
     }
 
+    /**
+     * شرط إخفاء المهام الخاصّة بالأدمن — يُطبَّق على الطلاب فقط.
+     * الطاقم (1=أدمن، 2=معلّم) يرى ويفتح المهام الخاصّة بالأدمن (هي لهم لاستخدام أدواتها).
+     * يُدمَج داخل SQL؛ يُعيد سلسلة ثابتة (لا مدخلات مستخدم) فلا خطر حقن.
+     */
+    private function adminOnlyClause(): string
+    {
+        $role = (int) (session('role') ?? 3);
+        return in_array($role, [1, 2], true) ? '' : 'AND t.is_admin_only = 0';
+    }
+
     /** تعقيم مفاتيح الكاش لمنع محارف محجوزة */
     private function sanitizeKey(string $key): string
     {
@@ -119,7 +130,7 @@ class CourseContentController extends Controller
         JOIN course_offerings co ON co.semester_id = s.id AND co.university_id = st.university_id
         JOIN courses c           ON c.id = co.course_id
         LEFT JOIN weekly_contents wc ON wc.course_offering_id = co.id
-        LEFT JOIN tasks t            ON t.weekly_content_id = wc.id
+        LEFT JOIN tasks t            ON t.weekly_content_id = wc.id {$this->adminOnlyClause()}
         GROUP BY co.id, c.id, c.name, c.code, c.description, s.id, s.name
         ORDER BY s.id, c.name
         ";
@@ -299,6 +310,7 @@ class CourseContentController extends Controller
 
         LEFT JOIN tasks t
           ON t.weekly_content_id = vw.weekly_content_id
+         {$this->adminOnlyClause()}
          AND (t.visible_from_date IS NULL OR t.visible_from_date <= ?)
          AND (
                 COALESCE(t.is_for_all_specialties, 0) = 1
@@ -556,6 +568,7 @@ class CourseContentController extends Controller
         JOIN tasks t             ON t.weekly_content_id = wc.id
         WHERE s.academic_year_id = ?
           AND t.id = ?
+          {$this->adminOnlyClause()}
           AND (t.visible_from_date IS NULL OR t.visible_from_date <= ?)
           AND (
                 COALESCE(t.is_for_all_specialties,0) = 1
@@ -689,7 +702,7 @@ class CourseContentController extends Controller
         JOIN semesters s         ON s.academic_year_id = st.academic_year_id
         JOIN course_offerings co ON co.semester_id = s.id AND co.university_id = st.university_id
         LEFT JOIN weekly_contents wc ON wc.course_offering_id = co.id
-        LEFT JOIN tasks t            ON t.weekly_content_id = wc.id
+        LEFT JOIN tasks t            ON t.weekly_content_id = wc.id {$this->adminOnlyClause()}
         LEFT JOIN task_files tf      ON tf.task_id = t.id
         LEFT JOIN files f            ON f.id = tf.file_id
         WHERE co.id = ?
@@ -767,6 +780,7 @@ class CourseContentController extends Controller
             JOIN st ON 1
             WHERE wc.course_offering_id = ?
               AND (t.title LIKE ? OR t.description LIKE ?)
+              {$this->adminOnlyClause()}
               AND (t.visible_from_date IS NULL OR t.visible_from_date <= ?)
               AND (
                     COALESCE(t.is_for_all_specialties,0) = 1
@@ -888,6 +902,7 @@ class CourseContentController extends Controller
         JOIN courses c           ON c.id = co.course_id
         WHERE s.academic_year_id = ?
           AND t.id = ?
+          {$this->adminOnlyClause()}
           AND (t.visible_from_date IS NULL OR t.visible_from_date <= ?)
           AND (
                 COALESCE(t.is_for_all_specialties,0) = 1
@@ -914,6 +929,7 @@ class CourseContentController extends Controller
         FROM tasks t
         LEFT JOIN task_types tt ON tt.id = t.task_type_id
         WHERE t.weekly_content_id = ?
+          {$this->adminOnlyClause()}
           AND (t.visible_from_date IS NULL OR t.visible_from_date <= ?)
           AND (
                 COALESCE(t.is_for_all_specialties,0) = 1

@@ -56,7 +56,9 @@
             box-sizing: border-box;
         }
 
+        /* تصغير شامل للواجهة 20% عبر تصغير جذر rem (بديل zoom:80%) — مطابق لإعادة تصميم الطلاب/الأدمن */
         html {
+            font-size: 80%;
             scroll-behavior: smooth;
         }
 
