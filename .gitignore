@@ -95,3 +95,6 @@ Thumbs.db
 .nova/
 .zed/
 *.log
+
+# ---- Claude Code local settings/workflows (may contain credentials; never commit) ----
+.claude/

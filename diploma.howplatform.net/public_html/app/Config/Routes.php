@@ -16,8 +16,7 @@ $routes->get('run-inquiry-tools-seeder-v2', function() {
     $seeder->call('InquiryToolsSeeder');
     return 'تم تحديث أدوات البحث الاستقصائي (لتحميل كملفات وورد) بنجاح! يمكنك إزالة الرابط الآن.';
 });
-$routes->get('setup-tool', 'Test\ToolSetup::run');// صفحة بحث بسيطة لتمكين Sitelinks Search Box
-$routes->get('setup-stakeholder-tool', 'Test\ToolSetupStakeholder::run');
+// setup-tool / setup-stakeholder-tool (Test\ToolSetup*) أُزيلا: كانا بلا تحقّق ويُعيدان كتابة ai_job_types.
 $routes->get('search', 'Search::index');
 // راوتر لفَطين
 $routes->group('FateenAi', ['namespace' => 'App\Controllers'], function($routes) {
@@ -670,11 +669,8 @@ $routes->group('api', ['filter' => 'auth'], static function ($routes) {
 });
 
 $routes->get('api/v2/plans', 'Api\Plans::index');
-$routes->group('api/v2', ['namespace' => 'App\Controllers\Api'], static function($routes) {
-    $routes->get   ('vouchers',    'VoucherStore::index'); // سيرجع 405
-    $routes->post  ('vouchers',    'VoucherStore::index'); // إنشاء
-    $routes->delete('vouchers',    'VoucherStore::index'); // حذف
-});
+// api/v2/vouchers (VoucherStore: إنشاء/حذف قسائم) أُزيل: كان بلا أي تحقّق هوية ولا يستدعيه شيء
+// (نقطة البيع القديمة في www حُذفت؛ البطاقات تُصدر الآن من Plans).
 
 // صفحة هبوط للتحقق من الفاوتشر
 $routes->get('voucher/verify', '\App\Controllers\VoucherLanding::verify');
